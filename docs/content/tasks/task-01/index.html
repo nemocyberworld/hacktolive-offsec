@@ -1,0 +1,68 @@
+<!-- Breadcrumb -->
+<nav class="text-xs text-gray-400 mb-3">
+  Lab / Setup / Metasploitable3 / Nmap
+</nav>
+
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">TASK-01 [31/8/25] — Metasploitable3 + Nmap</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Lab</strong> • Focus: <strong>Nmap Advanced</strong> • Last Updated: <strong>2025-08-31</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    First lab task: set up <strong>Metasploitable3 (Ubuntu 14.04 OVA)</strong> in VirtualBox, configure network (Bridge mode), 
+    and practice <strong>advanced Nmap scans</strong>. Everyone should share notes and build their own resources — no repetition later.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Download OVA: 
+      <a href="https://sourceforge.net/projects/metasploitable3-ub1404upgraded/files/Metasploitable3-ub1404.ova/download" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Metasploitable3-ub1404
+      </a>
+    </li>
+    <li>Import into VirtualBox.</li>
+    <li>Set Network: Adapter-1 Bridge, Adapter-2 Bridge.</li>
+    <li>Start VM, confirm connectivity.</li>
+    <li>Run Nmap scans (ports, services, versions, vuln scripts).</li>
+    <li>Share notes/resources in Telegram channel.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+# Basic
+nmap -sS -p- 192.168.1.100
+
+# Service detection
+nmap -sV -sC 192.168.1.100
+
+# Aggressive scan
+nmap -A 192.168.1.100
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://www.youtube.com/watch?v=f6gwr333RZM" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Nmap Full Course (YouTube)
+      </a>
+    </li>
+    <li>Telegram channel — dump raw notes/resources</li>
+  </ul>
+</section>
