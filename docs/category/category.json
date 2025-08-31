@@ -1,0 +1,378 @@
+{
+  "name": "root",
+  "children": [
+     {
+      "name": "Labs",
+      "children": [
+        { "name": "Linux", "content": true }
+      ]
+    }
+    ,
+    {
+      "name": "Web",
+      "children": [
+        { "name": "Recon", "content": true },
+        {
+          "name": "Authentication",
+          "children": [
+            { "name": "IDOR", "content": true },
+            { "name": "CSRF", "content": true }
+          ]
+        },
+        {
+          "name": "Exploitation",
+          "children": [
+            {
+              "name": "SQL Injection",
+              "children": [
+                { "name": "Union-Based", "content": true },
+                { "name": "Boolean-Based", "content": true },
+                { "name": "Time-Based (Blind)", "content": true }
+              ]
+            },
+            {
+              "name": "XSS",
+              "children": [
+                { "name": "Reflected", "content": true },
+                { "name": "Stored", "content": true },
+                { "name": "DOM", "content": true }
+              ]
+            },
+            { "name": "SSTI", "content": true },
+            { "name": "SSRF", "content": true },
+            { "name": "File Upload", "content": true },
+            {
+              "name": "Deserialization",
+              "children": [
+                { "name": "Java", "content": true },
+                { "name": ".NET", "content": true }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+{
+  "name": "Network",
+  "children": [
+    {
+      "name": "Recon & Scanning",
+      "children": [
+        { "name": "Host Discovery (ARP/ICMP)", "content": true },
+        { "name": "Nmap", "content": true },
+        { "name": "Service Fingerprinting", "content": true },
+        { "name": "Banner Grabbing (netcat/socat)", "content": true },
+        { "name": "UDP Scanning", "content": true },
+        { "name": "Version & Script Scans (NSE)", "content": true },
+        { "name": "Masscan", "content": true },
+        { "name": "Naabu", "content": true },
+        { "name": "Network Topology Mapping", "content": true },
+        { "name": "SNMP Sweep", "content": true },
+        { "name": "DNS Recon (zone xfer, subenum)", "content": true },
+        { "name": "MDNS/LLMNR/NBNS Discovery", "content": true }
+      ]
+    },
+    {
+      "name": "Enumeration",
+      "children": [
+        { "name": "SMB (smbclient/enum4linux)", "content": true },
+        { "name": "RDP", "content": true },
+        { "name": "SNMP (snmpwalk/snmpbulkwalk)", "content": true },
+        { "name": "LDAP & Active Directory", "content": true },
+        { "name": "Kerberos (AS-REP/kerberoasting)", "content": true },
+        { "name": "DNS (records, TSIG, AXFR)", "content": true },
+        { "name": "DHCP", "content": true },
+        { "name": "FTP/TFTP", "content": true },
+        { "name": "SSH", "content": true },
+        { "name": "Telnet", "content": true },
+        { "name": "WinRM", "content": true },
+        { "name": "VNC", "content": true },
+        { "name": "MSSQL", "content": true },
+        { "name": "MySQL", "content": true },
+        { "name": "PostgreSQL", "content": true },
+        { "name": "Oracle DB", "content": true },
+        { "name": "MongoDB", "content": true },
+        { "name": "Redis", "content": true },
+        { "name": "Memcached", "content": true },
+        { "name": "NFS", "content": true },
+        { "name": "RPC & MSRPC", "content": true },
+        { "name": "RMI & JMX", "content": true },
+        { "name": "SMTP/IMAP/POP3", "content": true },
+        { "name": "SIP/VoIP", "content": true },
+        { "name": "RTSP", "content": true },
+        { "name": "UPnP/SSDP", "content": true }
+      ]
+    },
+    {
+      "name": "Credential Access & Attacks",
+      "children": [
+        { "name": "Password Spraying", "content": true },
+        { "name": "Brute Force (Hydra/Medusa)", "content": true },
+        { "name": "Credential Stuffing", "content": true },
+        { "name": "NTLM Relay", "content": true },
+        { "name": "SMB Relay", "content": true },
+        { "name": "LLMNR/NBNS Poison + SMB Capture", "content": true },
+        { "name": "Kerberoasting", "content": true },
+        { "name": "AS-REP Roasting", "content": true },
+        { "name": "Cracking (John/hashcat)", "content": true }
+      ]
+    },
+    {
+      "name": "Man-in-the-Middle & Poisoning",
+      "children": [
+        { "name": "ARP Spoofing", "content": true },
+        { "name": "DHCP Spoofing", "content": true },
+        { "name": "DNS Spoofing", "content": true },
+        { "name": "LLMNR/NBNS Poisoning", "content": true },
+        { "name": "SSL/TLS Interception", "content": true },
+        { "name": "Proxy & WPAD Abuse", "content": true }
+      ]
+    },
+    {
+      "name": "Exploitation",
+      "children": [
+        { "name": "SMB (EternalBlue/SMBGhost/etc.)", "content": true },
+        { "name": "RDP (BlueKeep/etc.)", "content": true },
+        { "name": "SNMP (RW string abuse)", "content": true },
+        { "name": "FTP (anon write, misconfig)", "content": true },
+        { "name": "SSH (key reuse, weak ciphers)", "content": true },
+        { "name": "VNC (no auth/weak auth)", "content": true },
+        { "name": "WinRM (weak creds)", "content": true },
+        { "name": "Databases (auth bypass, RCE via UDF/xp_cmdshell)", "content": true },
+        { "name": "Printer/Spooler (PrintNightmare)", "content": true },
+        { "name": "RPC/DCOM Abuse", "content": true },
+        { "name": "IPv6 Attacks (MITM6)", "content": true }
+      ]
+    },
+    {
+      "name": "Post-Exploitation",
+      "children": [
+        { "name": "Lateral Movement", "content": true },
+        { "name": "Pivoting", "content": true },
+        { "name": "Tunneling & Port Forwarding", "content": true },
+        { "name": "Credential Dumping & Reuse", "content": true },
+        { "name": "Token Impersonation", "content": true },
+        { "name": "Pass-the-Hash / Pass-the-Ticket", "content": true },
+        { "name": "Domain Privilege Escalation Paths", "content": true },
+        { "name": "Persistence (Services/Scheduled Tasks)", "content": true },
+        { "name": "Data Staging & Exfiltration", "content": true }
+      ]
+    },
+    {
+      "name": "Tunneling & Evasion",
+      "children": [
+        { "name": "SSH Local/Remote/SOCKS", "content": true },
+        { "name": "Chisel/SOCKS5", "content": true },
+        { "name": "SSHuttle", "content": true },
+        { "name": "DNS Tunneling", "content": true },
+        { "name": "ICMP Tunneling", "content": true },
+        { "name": "HTTP(S) Tunneling", "content": true },
+        { "name": "Port Knocking", "content": true },
+        { "name": "IDS/IPS Evasion Tips", "content": true }
+      ]
+    },
+    {
+      "name": "Wireless",
+      "children": [
+        { "name": "Wi-Fi Recon (airodump-ng)", "content": true },
+        { "name": "WEP/WPA/WPA2/WPA3 Attacks", "content": true },
+        { "name": "WPS Attacks", "content": true },
+        { "name": "Evil Twin & Captive Portal", "content": true },
+        { "name": "Deauth/PMKID Capture", "content": true },
+        { "name": "Bluetooth/BLE Basics", "content": true }
+      ]
+    },
+    {
+      "name": "ICS/SCADA & OT",
+      "children": [
+        { "name": "Modbus/TCP", "content": true },
+        { "name": "DNP3", "content": true },
+        { "name": "S7comm", "content": true },
+        { "name": "BACnet", "content": true }
+      ]
+    },
+    {
+      "name": "Traffic Analysis & Monitoring",
+      "children": [
+        { "name": "Wireshark/PCAP Workflow", "content": true },
+        { "name": "Zeek/Bro Basics", "content": true },
+        { "name": "Netflow/sFlow", "content": true },
+        { "name": "Protocol Anomalies", "content": true }
+      ]
+    },
+    {
+      "name": "Vulnerability Scanning",
+      "children": [
+        { "name": "Nessus/Greenbone(OpenVAS)", "content": true },
+        { "name": "Nuclei", "content": true },
+        { "name": "Vulners/Exploit Mapping", "content": true }
+      ]
+    },
+    {
+      "name": "Checklists & Methodology",
+      "children": [
+        { "name": "Pre-Engagement & Rules of Engagement", "content": true },
+        { "name": "Network PT Playbook", "content": true },
+        { "name": "Reporting & Evidence", "content": true },
+        { "name": "Cleanup & Restitution", "content": true }
+      ]
+    }
+  ]
+},
+
+    {
+      "name": "Cloud",
+      "children": [
+        {
+          "name": "AWS",
+          "children": [
+            { "name": "Recon", "content": true },
+            { "name": "Privilege Escalation", "content": true },
+            { "name": "Exploitation", "content": true }
+          ]
+        },
+        {
+          "name": "Azure",
+          "children": [
+            { "name": "Recon", "content": true },
+            { "name": "Privilege Escalation", "content": true }
+          ]
+        },
+        {
+          "name": "GCP",
+          "children": [
+            { "name": "Recon", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Active Directory",
+      "children": [
+        { "name": "Recon", "content": true },
+        {
+          "name": "Attacks",
+          "children": [
+            { "name": "Kerberoasting", "content": true },
+            { "name": "AS-REP Roasting", "content": true },
+            { "name": "Pass-the-Hash", "content": true },
+            { "name": "DCSync", "content": true }
+          ]
+        },
+        {
+          "name": "Privilege Escalation",
+          "children": [
+            { "name": "ACL Abuse", "content": true },
+            { "name": "GPO Abuse", "content": true }
+          ]
+        },
+        {
+          "name": "Persistence",
+          "children": [
+            { "name": "Skeleton Key (overview)", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mobile",
+      "children": [
+        {
+          "name": "Android",
+          "children": [
+            { "name": "Static Analysis", "content": true },
+            { "name": "Dynamic Analysis", "content": true }
+          ]
+        },
+        {
+          "name": "iOS",
+          "children": [
+            { "name": "Static Analysis", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "IoT",
+      "children": [
+        {
+          "name": "Hardware",
+          "children": [
+            { "name": "UART/JTAG", "content": true },
+            { "name": "Firmware Extraction", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "BLE", "content": true },
+            { "name": "Zigbee", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reverse Engineering",
+      "children": [
+        { "name": "Basics", "content": true },
+        { "name": "Static Analysis", "content": true },
+        { "name": "Dynamic Analysis", "content": true }
+      ]
+    },
+    {
+      "name": "Binary Exploitation",
+      "children": [
+        {
+          "name": "Stack Overflows",
+          "children": [
+            { "name": "x86 Linux", "content": true },
+            { "name": "x64 Linux", "content": true }
+          ]
+        },
+        { "name": "Format Strings", "content": true },
+        {
+          "name": "Heap Exploitation",
+          "children": [
+            { "name": "ptmalloc", "content": true }
+          ]
+        },
+        { "name": "ROP", "content": true }
+      ]
+    },
+    {
+      "name": "Exploit Development",
+      "children": [
+        {
+          "name": "Fuzzing",
+          "children": [
+            { "name": "AFL++", "content": true },
+            { "name": "libFuzzer", "content": true }
+          ]
+        },
+        { "name": "Patch Diffing", "content": true }
+      ]
+    },
+    {
+      "name": "Malware Development",
+      "children": [
+        { "name": "Lab Setup (Defensive/Research)", "content": true },
+        { "name": "Evasion Techniques (Research)", "content": true }
+      ]
+    },
+    {
+      "name": "Red Team",
+      "children": [
+        { "name": "Initial Access", "content": true },
+        { "name": "C2 (Overview)", "content": true },
+        { "name": "OPSEC", "content": true }
+      ]
+    },
+    {
+      "name": "Reporting & Methodology",
+      "children": [
+        { "name": "Methodology", "content": true },
+        { "name": "Report Template", "content": true }
+      ]
+    }
+  ]
+}

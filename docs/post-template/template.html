@@ -1,0 +1,86 @@
+<!-- Breadcrumb (optional) -->
+<nav class="text-xs text-gray-400 mb-3">
+  Web / Exploitation / SQL Injection / Union-Based
+</nav>
+
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">[Post Title]</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Web</strong> • Difficulty: <strong>Intermediate</strong> • Last Updated: <strong>2025-08-30</strong>
+</p>
+
+<!-- Short Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">One-paragraph overview of the issue, impact, and what this post covers.</p>
+</section>
+
+<!-- Scope / Target (edit as needed) -->
+<section class="grid md:grid-cols-2 gap-4 mb-6">
+  <div class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+    <h3 class="font-semibold mb-2">Scope</h3>
+    <ul class="list-disc ml-5 text-gray-200 text-sm">
+      <li>In-Scope: <code>app.example.com</code></li>
+      <li>Out-of-Scope: <code>payments.example.com</code></li>
+    </ul>
+  </div>
+  <div class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+    <h3 class="font-semibold mb-2">Tools</h3>
+    <ul class="list-disc ml-5 text-gray-200 text-sm">
+      <li>Burp Suite, ffuf, curl</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Recon: identify parameters/endpoints.</li>
+    <li>Test: try safe payloads to confirm behavior.</li>
+    <li>PoC: minimal demonstration within rules of engagement.</li>
+  </ol>
+</section>
+
+<!-- Commands / Payloads -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands & Payloads</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+# replace host/paths as needed
+ffuf -u https://app.example.com/FUZZ -w /usr/share/seclists/Discovery/Web-Content/common.txt -mc 200
+
+# boolean probe
+?q=test' AND 1=1-- -
+?q=test' AND 1=2-- -
+
+# union probe
+' UNION SELECT NULL,NULL-- -
+  </pre>
+</section>
+
+<!-- Evidence -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Evidence</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>Response size/time difference between true/false queries.</li>
+    <li>Server banner/DB version shown in response (if applicable).</li>
+  </ul>
+</section>
+
+<!-- Remediation -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Remediation</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>Use parameterized queries.</li>
+    <li>Input allow-listing and centralized error handling.</li>
+  </ul>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>OWASP Testing Guide — Injection</li>
+    <li>MITRE ATT&CK T1190</li>
+  </ul>
+</section>
