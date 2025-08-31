@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nemo's — Offensive Security Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans flex flex-col min-h-screen">
+
+<!-- Header -->
+<header class="relative bg-gray-800 p-6 shadow-md flex flex-col items-center gap-3">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold glitch">🛡️ Nemo's — Offensive Security Lab</h1>
+    <p class="text-gray-300 mt-1">
+      Offensive Security • Penetration Testing • Exploit Development • Vulnerability Research
+    </p>
+    <p class="text-gray-400">
+      by <a href="https://github.com/nemocyberworld" target="_blank">Captain Nemo</a> |
+      <a href="https://hacktolive.net/" target="_blank">HackToLive Academy</a>
+    </p>
+  </div>
+
+  <!-- domain chip bar -->
+  <nav class="w-full max-w-5xl">
+    <div class="flex items-center justify-center gap-2 text-xs text-gray-300 mb-2">
+      <span class="badge">focus</span>
+      <span class="live-dot"></span>
+      <span class="opacity-80">offensive wire live</span>
+    </div>
+    <div class="flex flex-wrap md:flex-nowrap gap-2 overflow-x-auto no-scrollbar justify-center">
+      <button class="chip chip-ok domain-chip" data-filter="web">Web</button>
+      <button class="chip chip-warn domain-chip" data-filter="network">Network</button>
+      <button class="chip chip-beta domain-chip" data-filter="cloud">Cloud</button>
+      <button class="chip chip-ioc domain-chip" data-filter="active directory">Active Directory</button>
+      <button class="chip chip-beta domain-chip" data-filter="iot">IoT</button>
+      <button class="chip chip-ok domain-chip" data-filter="mobile">Mobile</button>
+      <button class="chip chip-osint domain-chip" data-filter="reverse">Reverse Engineering</button>
+      <button class="chip chip-alert domain-chip" data-filter="pwn">Pwn</button>
+      <button class="chip chip-warn domain-chip" data-filter="binary exploitation">Binary Exploitation</button>
+      <button class="chip chip-alert domain-chip" data-filter="exploit development">Exploit Dev</button>
+      <button class="chip chip-beta domain-chip" data-filter="malware">Malware Dev</button>
+      <button class="chip badge domain-chip" data-filter="red team">Red Team</button>
+    </div>
+  </nav>
+</header>
+
+<!-- Layout -->
+<div class="flex flex-1 overflow-hidden flex-col md:flex-row min-h-0">
+  <!-- Sidebar -->
+  <aside class="w-full md:w-64 bg-gray-800 p-4 overflow-y-auto border-b md:border-b-0 md:border-r border-gray-700">
+    <h2 class="text-lg font-semibold mb-4">Categories</h2>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search category..."
+      class="w-full mb-4 px-3 py-2 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+    />
+    <ul id="categoryList" class="space-y-2 text-sm"></ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main id="mainArea" class="flex-1 p-4 md:p-6 overflow-y-auto min-h-0">
+    <!-- ===== Dashboard ===== -->
+    <div id="dashboard" class="flex flex-col lg:flex-row gap-6 items-stretch w-full">
+      <!-- Left: Walkthrough -->
+      <div class="bg-gray-800 p-6 rounded-xl shadow-md lg:w-1/2 w-full order-1 h-full cyber-card scanline">
+        <h2 class="text-2xl font-bold mb-2">🧠 Offensive Security Arsenal</h2>
+        <p class="text-gray-300 mb-4">
+          Web • Network • Cloud • AD • IoT • Mobile • Reverse • Pwn • BinExp • Exploit Dev • Malware
+        </p>
+        <h3 class="text-xl font-semibold mt-6 mb-2">📂 Main Categories</h3>
+        <ul id="categoryOverview" class="list-disc ml-6 text-gray-400 space-y-1"></ul>
+      </div>
+
+      <!-- Right Column: Team + Offensive Wire -->
+      <div class="lg:w-1/2 w-full order-2 flex flex-col gap-6 h-full">
+      <!-- Team -->
+<div id="teamSection" class="bg-gray-800/60 backdrop-blur p-6 rounded-xl shadow-md h-full border border-gray-700 cyber-card">
+  <h2 class="text-2xl font-bold mb-6">👥 Nemo's Team (Hire an Ethical Hacker)</h2>
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <!-- Saide Hossain -->
+    <div class="p-4 rounded-lg border border-gray-700 hover:border-purple-500 transition group">
+      <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-purple-400">Saide Hossain</h3>
+      <p class="text-xs text-gray-400 mb-3">Lead Offensive Security | Red Team & Web</p>
+
+      <!-- Specializations -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="chip chip-alert">Web</span>
+        <span class="chip chip-ok">API</span>
+        <span class="chip chip-warn">Cloud (AWS)</span>
+        <span class="chip chip-ioc">Active Directory</span>
+        <span class="chip chip-beta">Red Team</span>
+      </div>
+
+      <!-- Contacts -->
+      <ul class="space-y-1 text-sm text-gray-300">
+        <li>📧 <a href="mailto:nemo14398@gmail.com" class="hover:text-purple-400">nemo14398@gmail.com</a></li>
+        <li>🔗 <a href="https://www.linkedin.com/in/saide-hossain-856b20363/" target="_blank" class="hover:text-blue-400">LinkedIn</a></li>
+        <li>📘 <a href="https://www.facebook.com/nemocyberworld/" target="_blank" class="hover:text-blue-400">Facebook</a></li>
+        <li>💬 <a href="https://wa.me/8801742271463" target="_blank" class="hover:text-green-400">WhatsApp: +8801742271463</a></li>
+      </ul>
+    </div>
+
+    <!-- Sajeeb Sarker -->
+    <div class="p-4 rounded-lg border border-gray-700 hover:border-purple-500 transition group">
+      <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-purple-400">Sajeeb Sarker</h3>
+      <p class="text-xs text-gray-400 mb-3">Mobile & IoT Security</p>
+
+      <!-- Specializations -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="chip chip-ok">Mobile (Android/iOS)</span>
+        <span class="chip chip-beta">IoT</span>
+        <span class="chip chip-ioc">Wireless/BLE</span>
+        <span class="chip chip-warn">Cloud APIs</span>
+        <span class="chip chip-alert">Network</span>
+      </div>
+
+      <!-- Contacts -->
+      <ul class="space-y-1 text-sm text-gray-300">
+        <li>📧 <a href="mailto:sarkersajeeb444@gmail.com" class="hover:text-purple-400">sarkersajeeb444@gmail.com</a></li>
+        <li>💬 <a href="https://wa.me/8801752543351" target="_blank" class="hover:text-green-400">WhatsApp: +8801752543351</a></li>
+        <li>🔗 <a href="https://linkedin.com/in/sajsec" target="_blank" class="hover:text-blue-400">LinkedIn</a></li>
+      </ul>
+    </div>
+
+    <!-- Md Junayedul Islam Zarif -->
+    <div class="p-4 rounded-lg border border-gray-700 hover:border-purple-500 transition group">
+      <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-purple-400">Md Junayedul Islam Zarif</h3>
+      <p class="text-xs text-gray-400 mb-3">Binary Exploitation & Exploit Development</p>
+
+      <!-- Specializations -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="chip chip-alert">Pwn</span>
+        <span class="chip chip-warn">Binary Exploitation</span>
+        <span class="chip chip-ok">Exploit Dev</span>
+        <span class="chip chip-osint">Reverse Engineering</span>
+        <span class="chip chip-beta">Malware Research</span>
+      </div>
+
+      <!-- Contacts -->
+      <ul class="space-y-1 text-sm text-gray-300">
+        <li>📧 <a href="mailto:bennstock2@gmail.com" class="hover:text-purple-400">bennstock2@gmail.com</a></li>
+        <li>🔗 <a href="https://linkedin.com/in/pentesterjunayed" target="_blank" class="hover:text-blue-400">LinkedIn</a></li>
+        <li>📘 <a href="https://www.facebook.com/md.junayedul.islamzarif" target="_blank" class="hover:text-blue-400">Facebook</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+        <!-- Offensive Wire -->
+        <section id="offensiveWire" class="bg-gray-800/60 backdrop-blur p-6 rounded-xl shadow-md h-full border border-gray-700 scanline cyber-card">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <h2 class="text-2xl font-bold glitch">⚔️ Offensive Wire</h2>
+            <div class="flex flex-wrap items-center gap-2 text-xs text-gray-300">
+              <span class="badge">sources</span>
+              <label class="flex items-center gap-1"><input id="srcHN" type="checkbox" class="accent-purple-500" checked> HN</label>
+              <label class="flex items-center gap-1"><input id="srcGH" type="checkbox" class="accent-purple-500" checked> GitHub</label>
+              <label class="flex items-center gap-1"><input id="srcNVD" type="checkbox" class="accent-purple-500" checked> NVD</label>
+              <label class="flex items-center gap-1"><input id="srcEDB" type="checkbox" class="accent-purple-500"> Exploit-DB*</label>
+            </div>
+          </div>
+          <div class="text-xs text-gray-400 mb-3">Offensive-focused: exploits, PoCs, RCE, LPE, 0-day chatter.</div>
+          <ul id="newsList" class="space-y-2"></ul>
+        </section>
+      </div>
+    </div>
+
+    <!-- ===== Category View ===== -->
+    <div id="categoryView" class="hidden w-full">
+      <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-md">
+        <div class="flex items-center justify-between mb-4">
+          <h2 id="categoryTitle" class="text-xl md:text-2xl font-bold">Loading…</h2>
+          <button id="backBtn" class="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 rounded-md border border-gray-600">← Back to Dashboard</button>
+        </div>
+        <div id="categoryContent" class="prose prose-invert max-w-none"></div>
+      </div>
+    </div>
+    <!-- ===== /Category View ===== -->
+  </main>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-center text-gray-400 text-sm py-3 px-4 mt-auto border-t border-gray-700 select-none">
+  <p>© 2025 Captain Nemo | Visit <a href="https://hacktolive.net/" class="text-purple-400 underline" target="_blank">HackToLive</a></p>
+</footer>
+
+<!-- ========= CATEGORY FALLBACK (optional; remove when JSON loads fine) ========= -->
+<!-- <script id="category-data-fallback" type="application/json">
+{
+  "name": "root",
+  "children": [
+    { "name": "Web", "children": [ { "name": "Recon", "content": true }, { "name": "Exploitation", "content": true } ] },
+    { "name": "Network", "children": [ { "name": "Lateral Movement", "content": true } ] },
+    { "name": "Cloud", "children": [ { "name": "AWS", "content": true }, { "name": "Azure", "content": true } ] }
+  ]
+}
+</script> -->
+
+<script>
+  const BASE_DIR = "content";                  // where leaf pages live
+  const CATEGORY_JSON = "category/category.json"; // external category tree
+
+  // DOM refs
+  const categoryList = document.getElementById("categoryList");
+  const dashboard = document.getElementById("dashboard");
+  const categoryView = document.getElementById("categoryView");
+  const categoryTitle = document.getElementById("categoryTitle");
+  const categoryContent = document.getElementById("categoryContent");
+  const backBtn = document.getElementById("backBtn");
+  const categoryOverview = document.getElementById("categoryOverview");
+  const searchInput = document.getElementById("searchInput");
+
+  // State
+  let walkthroughs = null;
+
+  function slug(s) {
+    return (s || "")
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[^a-z0-9\s_-]/g, "")
+      .replace(/[\s_]+/g, "-");
+  }
+
+  function pathToUrl(pathArr){
+    const parts = pathArr.map(slug);
+    return `${BASE_DIR}/${parts.join("/")}/index.html`;
+  }
+
+  function renderTree(node, parentPath = [], container, query = "") {
+    const children = node.children || [];
+    const isRoot = parentPath.length === 0 && node.name === "root";
+
+    if (isRoot) { children.forEach(child => renderTree(child, [], container, query)); return; }
+
+    function nodeMatches(n){ return (n.name || "").toLowerCase().includes(query); }
+    function deepMatches(n){ if (nodeMatches(n)) return true; if (n.children) return n.children.some(deepMatches); return false; }
+    if (query && !deepMatches(node)) return;
+
+    const hasKids = children.length > 0;
+    const li = document.createElement("li");
+
+    if (hasKids) {
+      const det = document.createElement("details");
+      det.className = "group";
+      if (query) det.open = true;
+      const sum = document.createElement("summary");
+      sum.className = "cursor-pointer px-3 py-2 rounded-md hover:bg-gray-700 font-semibold";
+      sum.textContent = node.name;
+      det.appendChild(sum);
+
+      const ul = document.createElement("ul");
+      ul.className = "pl-4 mt-2 space-y-1 text-sm";
+      children.forEach(ch => renderTree(ch, [...parentPath, node.name], ul, query));
+      det.appendChild(ul);
+      li.appendChild(det);
+    } else {
+      const btn = document.createElement("button");
+      btn.className = "text-left w-full px-2 py-1 hover:bg-gray-700 rounded";
+      btn.textContent = node.name;
+      btn.addEventListener("click", () => loadByPath([...parentPath, node.name]));
+      li.appendChild(btn);
+    }
+
+    container.appendChild(li);
+  }
+
+  function collectLeavesPerTop(node){
+    const result = {};
+    (node.children||[]).forEach(top=>{
+      const key = top.name; let count = 0;
+      (function walk(n){ if (!n.children || n.children.length === 0){ count++; return; } n.children.forEach(walk); })(top);
+      result[key] = count;
+    });
+    return result;
+  }
+
+  async function loadByPath(pathArr) {
+    const resolved = pathToUrl(pathArr);
+    try {
+      const res = await fetch(resolved, { cache: "no-store" });
+      if (!res.ok) throw new Error("File not found");
+      const html = await res.text();
+      categoryTitle.textContent = pathArr.join(" / ");
+      categoryContent.innerHTML = html;
+      dashboard.classList.add("hidden");
+      categoryView.classList.remove("hidden");
+    } catch (err) {
+      categoryTitle.textContent = pathArr.join(" / ");
+      categoryContent.innerHTML =
+        `<p class="text-red-400">⚠️ Error loading content: ${err.message}<br/>
+         <span class='text-gray-400 text-xs'>Tried: ${resolved}</span></p>`;
+      dashboard.classList.add("hidden");
+      categoryView.classList.remove("hidden");
+    }
+  }
+
+  function showDashboard() {
+    categoryView.classList.add("hidden");
+    categoryContent.innerHTML = "";
+    dashboard.classList.remove("hidden");
+  }
+  backBtn.addEventListener("click", showDashboard);
+
+  function buildCategoryList() {
+    categoryList.innerHTML = "";
+    if (!walkthroughs) {
+      const li = document.createElement("li");
+      li.className = "text-sm text-gray-400";
+      li.textContent = "Loading categories…";
+      categoryList.appendChild(li);
+      return;
+    }
+    const query = searchInput.value.toLowerCase().trim();
+    renderTree(walkthroughs, [], categoryList, query);
+    updateCategoryOverview();
+  }
+
+  function updateCategoryOverview() {
+    categoryOverview.innerHTML = "";
+    if (!walkthroughs) return;
+    const counts = collectLeavesPerTop(walkthroughs);
+    Object.keys(counts).forEach(mainCat => {
+      const li = document.createElement("li");
+      li.textContent = `${mainCat} (${counts[mainCat]})`;
+      categoryOverview.appendChild(li);
+    });
+  }
+
+  async function loadCategories(){
+    const bust = Date.now().toString();
+    const url = new URL(CATEGORY_JSON, window.location.href);
+    url.searchParams.set("t", bust);
+
+    try{
+      const res = await fetch(url.toString(), { cache: "no-store" });
+      if(!res.ok) throw new Error(`HTTP ${res.status} for ${url.pathname}`);
+      const json = await res.json();
+      if(!json || !json.children) throw new Error("Invalid schema (missing children)");
+      walkthroughs = json;
+      console.log("[categories] loaded from", url.toString());
+    }catch(e){
+      console.warn("[categories] fetch failed:", e.message);
+      const fallbackTag = document.getElementById("category-data-fallback");
+      if (fallbackTag && fallbackTag.textContent.trim()) {
+        try {
+          walkthroughs = JSON.parse(fallbackTag.textContent);
+          console.log("[categories] using inline fallback");
+        } catch(parseErr) {
+          console.error("[categories] fallback parse error:", parseErr);
+          walkthroughs = { name:"root", children: [] };
+        }
+      } else {
+        walkthroughs = { name:"root", children: [] };
+      }
+    }finally{
+      buildCategoryList();
+    }
+  }
+
+  // init
+  loadCategories();
+
+  // Chip → Search wiring
+  document.querySelectorAll('.domain-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = btn.dataset.filter || '';
+      const input = document.getElementById('searchInput');
+      if (!input) return;
+      input.value = q;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  });
+
+  searchInput.addEventListener("input", buildCategoryList);
+</script>
+
+<!-- Cyber Animations + styles -->
+<style>
+/* Subtle neon breathing for cards */
+.cyber-card { position:relative; }
+.cyber-card::after{
+  content:""; position:absolute; inset:-1px; border-radius:0.75rem; pointer-events:none;
+  box-shadow: 0 0 0 rgba(147,51,234,0); transition: box-shadow .25s ease;
+}
+.cyber-card:hover::after{ box-shadow: 0 0 18px rgba(147,51,234,.35), 0 0 42px rgba(59,130,246,.25); }
+
+/* Matrix scanline overlay */
+.scanline{ position:relative; overflow:hidden; }
+.scanline::before{
+  content:""; position:absolute; left:0; right:0; top:-120%; height:120%; pointer-events:none;
+  background:linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,.05) 50%, rgba(255,255,255,0) 100%);
+  animation:scan 6s linear infinite;
+}
+@keyframes scan { from{ transform:translateY(0);} to{ transform:translateY(200%);} }
+
+/* Glitchy header shimmer */
+.glitch{ position:relative; display:inline-block; animation:glow 3.2s ease-in-out infinite; }
+@keyframes glow{ 0%,100%{ text-shadow:0 0 0px rgba(147,51,234,0.0)} 50%{ text-shadow:0 0 16px rgba(147,51,234,.35)} }
+
+/* Chips / badges */
+.chip{font-size:.7rem;padding:.15rem .5rem;border-radius:.5rem;line-height:1rem}
+.chip-ok{background:#16a34a;color:#fff;animation:flip 4s ease-in-out infinite}
+.chip-warn{background:#ca8a04;color:#111;animation:flip 4.5s ease-in-out infinite}
+.chip-alert{background:#dc2626;color:#fff;animation:flip 5s ease-in-out infinite}
+.chip-beta{background:#2563eb;color:#fff;animation:flip 5.5s ease-in-out infinite}
+.chip-ioc{background:#0ea5e9;color:#111}
+.chip-osint{background:#7c3aed;color:#fff} /* kept for styling reuse */
+.badge{font-size:.7rem;padding:.1rem .45rem;border-radius:.375rem;background:#9333ea;color:#fff}
+@keyframes flip{0%,100%{transform:rotateX(0)}50%{transform:rotateX(360deg)}}
+
+/* Live dot */
+.live-dot{ width:.6rem;height:.6rem;border-radius:9999px; background:#22c55e; box-shadow:0 0 0 0 rgba(34,197,94,.7); animation:pulse 1.6s infinite; display:inline-block}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.7)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+
+/* Entry motions */
+.entry{will-change: transform,opacity}
+.fade-up{animation:fadeUp .9s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* News item reveal */
+.news-item{opacity:0; transform:translateY(8px); animation:newsReveal .45s ease forwards}
+@keyframes newsReveal{to{opacity:1; transform:translateY(0)}}
+
+/* Optional: hide scrollbar for chip bar on small screens */
+.no-scrollbar::-webkit-scrollbar{ display:none; }
+.no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+
+
+
+
+header nav .domain-chip { 
+  animation: none !important;
+}
+
+/* In case any color-variant class sets its own animation */
+header nav .domain-chip.chip-ok,
+header nav .domain-chip.chip-warn,
+header nav .domain-chip.chip-alert,
+header nav .domain-chip.chip-beta,
+header nav .domain-chip.chip-ioc,
+header nav .domain-chip.chip-osint {
+  animation: none !important;
+}
+
+
+#teamSection .chip,
+#teamSection .chip.chip-ok,
+#teamSection .chip.chip-warn,
+#teamSection .chip.chip-alert,
+#teamSection .chip.chip-beta,
+#teamSection .chip.chip-ioc,
+#teamSection .chip.chip-osint {
+  animation: none !important;
+}
+
+</style>
+
+<!-- Offensive Wire script -->
+<script>
+(function offensiveWire(){
+  const list = document.getElementById('newsList');
+  if(!list) return;
+
+  const srcHN  = document.getElementById('srcHN');
+  const srcGH  = document.getElementById('srcGH');
+  const srcNVD = document.getElementById('srcNVD');
+  const srcEDB = document.getElementById('srcEDB');
+
+  function render(items){
+    list.innerHTML = "";
+    items.slice(0,20).forEach((it,i)=>{
+      const li = document.createElement('li');
+      li.className = 'news-item';
+      li.style.animationDelay = (i*60)+'ms';
+      const tag = it.tag ? `<span class="chip ${chipColor(it.tag)} mr-2">${it.tag}</span>` : "";
+      li.innerHTML = `
+        <div class="border border-gray-700 rounded-lg p-3 bg-gray-900/70 hover:border-purple-500 transition entry fade-up">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-sm font-medium truncate">
+              ${tag}
+              <a class="underline hover:text-purple-300" href="${it.url}" target="_blank" rel="noopener">${escapeHTML(it.title)}</a>
+            </div>
+            <span class="text-[11px] text-gray-400">${timeAgo(it.time)}</span>
+          </div>
+          ${it.extra ? `<div class="text-xs text-gray-400 mt-1 truncate">${escapeHTML(it.extra)}</div>` : ""}
+        </div>`;
+      list.appendChild(li);
+    });
+  }
+
+  function chipColor(tag){
+    switch(tag){
+      case "CVE": return "chip-warn";
+      case "RCE": return "chip-alert";
+      case "PoC": return "chip-ok";
+      case "EDB": return "chip-beta";
+      case "GH":  return "chip-ioc";
+      case "HN":  return "chip-osint";
+      default: return "badge";
+    }
+  }
+  function escapeHTML(s){ return (s||"").replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function timeAgo(tms){
+    const d = new Date(tms); const diff = (Date.now()-d.getTime())/1000;
+    if(diff<60) return `${Math.max(1,Math.floor(diff))}s`;
+    if(diff<3600) return `${Math.floor(diff/60)}m`;
+    if(diff<86400) return `${Math.floor(diff/3600)}h`;
+    return `${Math.floor(diff/86400)}d`;
+  }
+  function dedup(items){
+    const seen = new Set(); const out = [];
+    for(const it of items){
+      const k = (it.title||"").slice(0,140).toLowerCase();
+      if(seen.has(k)) continue;
+      seen.add(k); out.push(it);
+      if(out.length>=40) break;
+    }
+    return out;
+  }
+
+  async function fromHN(){
+    if(!srcHN.checked) return [];
+    const q = encodeURIComponent('CVE OR RCE OR exploit OR "proof of concept" OR 0day OR "privilege escalation"');
+    const url = `https://hn.algolia.com/api/v1/search_by_date?query=${q}&tags=story&hitsPerPage=12`;
+    try{
+      const r = await fetch(url);
+      const j = await r.json();
+      return (j.hits||[]).map(h=>({
+        tag:"HN",
+        title: h.title || "(no title)",
+        url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
+        time: (h.created_at_i||0)*1000,
+        extra: h._highlightResult?.title?.value?.replace(/<em>/g,'').replace(/<\/em>/g,'')
+      }));
+    }catch{ return []; }
+  }
+
+  async function fromGitHub(){
+    if(!srcGH.checked) return [];
+    const q = encodeURIComponent('exploit OR "proof of concept" OR PoC OR CVE');
+    const url = `https://api.github.com/search/issues?q=${q}+created:%3E=2025-01-01&sort=updated&order=desc&per_page=12`;
+    try{
+      const r = await fetch(url, {headers:{'Accept':'application/vnd.github+json'}});
+      const j = await r.json();
+      return (j.items||[]).map(it=>({
+        tag:"PoC",
+        title: it.title || "GitHub item",
+        url: it.html_url,
+        time: Date.parse(it.updated_at||it.created_at||Date.now()),
+        extra: (it.repository_url||"").split("/").slice(-1)[0] || "GitHub"
+      }));
+    }catch{ return []; }
+  }
+
+  async function fromNVD(){
+    if(!srcNVD.checked) return [];
+    const to   = new Date();
+    const from = new Date(Date.now() - 1000*60*60*24*7);
+    const iso  = d=> d.toISOString().split('.')[0] + ".000";
+    const url  = `https://services.nvd.nist.gov/rest/json/cves/2.0?pubStartDate=${iso(from)}Z&pubEndDate=${iso(to)}Z&cvssV3Severity=CRITICAL,HIGH`;
+    try{
+      const r = await fetch(url);
+      const j = await r.json();
+      const cves = (j.vulnerabilities||[]).map(v=>v.cve).filter(Boolean);
+      return cves.map(c=>({
+        tag:"CVE",
+        title: `${c.id} — ${c.descriptions?.[0]?.value?.slice(0,140) || "CVE"}`,
+        url: `https://nvd.nist.gov/vuln/detail/${c.id}`,
+        time: Date.parse(c.published || c.lastModified || Date.now()),
+        extra: c.metrics?.cvssMetricV31?.[0]?.cvssData?.baseSeverity || c.metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore || ""
+      }));
+    }catch{ return []; }
+  }
+
+  async function fromEDB(){
+    if(!srcEDB.checked) return [];
+    const url = `https://r.jina.ai/http://www.exploit-db.com/rss.xml`;
+    try{
+      const r = await fetch(url);
+      const text = await r.text();
+      const items = [...text.matchAll(/<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>([\s\S]*?)<\/link>[\s\S]*?<pubDate>([\s\S]*?)<\/pubDate>[\s\S]*?<\/item>/g)];
+      return items.slice(0,10).map(m=>({
+        tag:"EDB",
+        title: m[1].replace(/<!\[CDATA\[|\]\]>/g,"").trim(),
+        url: m[2].trim(),
+        time: Date.parse(m[3]),
+        extra: "Exploit-DB"
+      }));
+    }catch{ return []; }
+  }
+
+  async function refresh(){
+    let items = [];
+    const res = await Promise.allSettled([fromHN(), fromGitHub(), fromNVD(), fromEDB()]);
+    for(const r of res){ if(r.status==="fulfilled") items = items.concat(r.value); }
+    items.sort((a,b)=> (b.time||0)-(a.time||0));
+    render(dedup(items));
+  }
+
+  function rotate(){
+    const first = list.querySelector('li');
+    if(!first) return;
+    first.style.transition = 'opacity .35s ease, transform .35s ease';
+    first.style.opacity = '0';
+    first.style.transform = 'translateY(-8px)';
+    setTimeout(()=>{
+      first.style.transition = '';
+      first.style.opacity = '';
+      first.style.transform = '';
+      list.appendChild(first);
+      void first.offsetWidth;
+      first.classList.remove('news-item');
+      void first.offsetWidth;
+      first.classList.add('news-item');
+    }, 350);
+  }
+
+  refresh();
+  setInterval(rotate, 3200);
+  setInterval(refresh, 60000);
+  [srcHN, srcGH, srcNVD, srcEDB].forEach(el => el && el.addEventListener('change', refresh));
+})();
+</script>
+
+</body>
+</html>
