@@ -2,6 +2,12 @@
   "name": "root",
   "children": [
      {
+      "name": "Tasks",
+      "children": [
+        { "name": "Task  01", "content": true }
+      ]
+    }, 
+    {
       "name": "Labs",
       "children": [
         { "name": "Linux", "content": true }
