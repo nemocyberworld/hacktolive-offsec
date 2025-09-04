@@ -1,0 +1,39 @@
+Core Port & Network Mappers
+Nmap – The classic network mapper & port scanner
+Masscan – Extremely fast Internet-scale port scanner
+Zmap – High-speed single-packet network scanner
+RustScan – Fast port scanner written in Rust
+Unicornscan – Asynchronous TCP/IP port scanner
+Angry IP Scanner – Lightweight cross-platform IP/port scanner
+Netcat (nc, ncat, ncat-openbsd) – General-purpose network scanner
+
+Host Discovery / Network Discovery
+Netdiscover – Active/passive ARP-based discovery
+ARP-Scan – ARP protocol based host discovery
+Fping – Parallel ICMP ping sweeper
+Arping – ARP-level host discovery
+NPing – Packet prober/generator from Nmap
+Hping3 – TCP/UDP/ICMP packet generator & scanner
+Traceroute / MTR – Path discovery
+p0f – Passive OS fingerprinting
+Xprobe2 – Active OS fingerprinting
+cdpsnarf – Cisco Discovery Protocol sniffer
+
+Service / Protocol Specific Scanners
+Amap – Application fingerprinting (banner grabbing)
+Naabu – Port scanner from ProjectDiscovery
+ike-scan – IPsec VPN discovery tool
+onesixtyone – SNMP scanner
+snmpcheck – SNMP service enumerator
+smbmap – SMB share enumerator
+enum4linux – SMB/NetBIOS enumeration
+rpcbind / rpcinfo – RPC service mapper
+ssdp-scanner – Simple Service Discovery Protocol scanner
+rtp-scanner – RTP (VoIP) protocol scanner
+pscan – Lightweight TCP port scanner
+
+Recon Frameworks (Network Modules)
+AutoRecon – Automated recon including Nmap + host discovery
+Legion – GUI automated network recon (wrapper around scanners)
+Metasploit Framework – Has auxiliary network discovery/scanning modules
+Recon-ng – Has network scanning modules (not web-focused)

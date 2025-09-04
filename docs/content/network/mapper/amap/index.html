@@ -1,0 +1,83 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">amap — Application Mapper</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Application Protocol Identification</strong> • Last Updated: <strong>2025-09-03</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    amap identifies application protocols on target ports. Unlike simple port scanners, it sends 
+    triggers and analyzes responses to fingerprint services (even on non-standard ports). 
+    Recommended usage: <code>-bqv</code> (banner, quiet, verbose) and <code>-1</code> for faster scans.
+  </p>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Modes
+amap -A 192.168.1.100 21 22 80                 # Map applications (default, active triggers)
+amap -B 192.168.1.100 8080                     # Banner grab only (no triggers)
+amap -P 192.168.1.100 1-1024                   # Full connect() port scanner
+amap -W 192.168.1.100 443                      # Map apps (same as -A, kept for compatibility)
+
+# Core Options
+amap -1 192.168.1.100 80                       # Stop after first identification (faster)
+amap -6 [IPv6-Address] 80                      # Use IPv6 instead of IPv4
+amap -b 192.168.1.100 22                       # Print ASCII banner of responses
+amap -i scan.xml                               # Read Nmap output (XML/machine-readable)
+amap -u 192.168.1.100 161                      # Use UDP instead of TCP
+amap -R 192.168.1.100 111                      # Do not identify RPC services
+amap -S 192.168.1.100 443                      # Do not identify SSL services
+amap -H 192.168.1.100 25                       # Skip potentially harmful triggers
+amap -U 192.168.1.100 1-65535                  # Suppress unrecognised responses
+amap -d 192.168.1.100 80                       # Dump all responses (debugging/scripting)
+amap -v 192.168.1.100 80                       # Verbose output
+amap -vv 192.168.1.100 80                      # Extra verbose (debug mode)
+amap -q 192.168.1.100 1-1024                   # Quiet mode (skip closed/unidentified)
+
+# Output
+amap -o results.txt 192.168.1.100 80           # Save output to file
+amap -m -o results.mach 192.168.1.100 1-1024   # Save machine-readable output
+amap -D debug.txt 192.168.1.100 80             # Write raw dump file for responses
+
+# Performance
+amap -c 64 192.168.1.100 1-1024                # Set parallel connections (default 32, max 256)
+amap -C 5 192.168.1.100 22                     # Retries per port (default 3)
+amap -T 3 192.168.1.100 22                     # Connect timeout in seconds (default 5)
+amap -t 10 192.168.1.100 22                    # Response wait timeout in seconds (default 5)
+
+# Protocol-specific
+amap -p ftp 192.168.1.100 21                   # Only send FTP triggers
+amap -p http 192.168.1.100 8080                # Only send HTTP triggers
+
+# Example Best Practices
+amap -bqv -1 192.168.1.100 1-65535             # Recommended: banner+quiet+verbose, fast mode
+amap -i scan.xml -bqv -o amap_results.txt      # Parse Nmap XML, run amap, save results
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://www.thc.org/thc-amap/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        THC amap Official Page
+      </a>
+    </li>
+    <li>
+      <a href="https://tools.kali.org/information-gathering/amap" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Kali Linux amap Documentation
+      </a>
+    </li>
+  </ul>
+</section>

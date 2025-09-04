@@ -1,0 +1,510 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Nmap — Network Mapper</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Port, Service & OS Enumeration</strong> • Last Updated: <strong>2025-09-03</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Nmap (Network Mapper) is a powerful open-source tool for network discovery and security auditing. 
+    It supports host discovery, port scanning, service/version detection, OS fingerprinting, 
+    firewall evasion, IDS bypass, and scriptable automation with NSE. 
+    Below is the complete offensive security note with all key commands, techniques, and examples.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify target hosts or IP ranges.</li>
+    <li>Select appropriate scan technique (TCP, UDP, stealth, evasion).</li>
+    <li>Run service/version and OS detection where applicable.</li>
+    <li>Apply NSE scripts for vulnerability discovery.</li>
+    <li>Tune performance, timing, and evasion flags.</li>
+    <li>Save results in desired output format.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Target Specification
+nmap scanme.nmap.org                           # Scan a single host by DNS
+   → Example: nmap scanme.nmap.org
+
+nmap microsoft.com/24                          # Scan a /24 CIDR range
+   → Example: nmap microsoft.com/24
+
+nmap 192.168.0.1                               # Scan a single IPv4 address
+   → Example: nmap 192.168.0.1
+
+nmap 10.0.0-255.1-254                          # Dash/range notation for multiple IPs
+   → Example: nmap 10.0.0-255.1-254
+
+nmap -iL hosts.txt                             # Read targets from file
+   → Example: nmap -iL my_targets.txt
+
+nmap -iR 10000                                 # Randomly pick 10k targets from Internet
+   → Example: nmap -iR 10000
+
+nmap --exclude 192.168.1.1,10.0.0.1            # Exclude specific hosts
+   → Example: nmap -p 80 --exclude 192.168.1.1,10.0.0.1 192.168.0.0/24
+
+nmap --excludefile exclude.txt                 # Exclude hosts listed in file
+   → Example: nmap -p 22 --excludefile exclude.txt 10.0.0.0/24
+
+
+# Host Discovery
+nmap -sL target                                # List targets only (no packets sent to them)
+   → Example: nmap -sL 192.168.1.0/24
+
+nmap -sn target                                # Ping scan (no port scan)
+   → Example: nmap -sn 10.0.0.0/24
+
+nmap -Pn target                                # Skip host discovery; treat all as up
+   → Example: nmap -Pn 192.168.1.100
+
+nmap -PS80,443 target                          # TCP SYN ping to given ports
+   → Example: nmap -PS80,443 192.168.1.0/24
+
+nmap -PA80,443 target                          # TCP ACK ping to given ports
+   → Example: nmap -PA80,443 10.10.10.0/24
+
+nmap -PU53 target                              # UDP ping to given ports
+   → Example: nmap -PU53 192.168.1.1
+
+nmap -PE target                                # ICMP echo request
+   → Example: nmap -PE 192.168.1.0/24
+
+nmap -PP target                                # ICMP timestamp request
+   → Example: nmap -PP 192.168.1.10
+
+nmap -PM target                                # ICMP netmask request
+   → Example: nmap -PM 192.168.1.0/24
+
+nmap -PO1,2,4 target                           # IP protocol ping (1=ICMP, 2=IGMP, 4=IP-in-IP)
+   → Example: nmap -PO1,2,4 10.0.0.0/8
+
+nmap -n target                                 # Disable DNS resolution (no reverse/forward DNS)
+   → Example: nmap -n 192.168.1.50
+
+nmap -R target                                 # Always resolve DNS
+   → Example: nmap -R 192.168.1.5
+
+nmap --dns-servers 8.8.8.8,1.1.1.1 target      # Use custom DNS servers
+   → Example: nmap --dns-servers 8.8.8.8 10.0.0.0/24
+
+nmap --system-dns target                       # Use OS resolver instead of Nmap’s
+   → Example: nmap --system-dns scanme.nmap.org
+
+nmap --traceroute target                       # Trace hop path to host(s)
+   → Example: nmap --traceroute 192.168.1.1
+
+
+# Scan Techniques
+nmap -sS target                                # TCP SYN (stealth) scan
+   → Example: nmap -sS 192.168.1.1
+
+nmap -sT target                                # TCP connect() scan
+   → Example: nmap -sT scanme.nmap.org
+
+nmap -sA target                                # TCP ACK scan (firewall state inference)
+   → Example: nmap -sA 10.0.0.1
+
+nmap -sW target                                # TCP Window scan
+   → Example: nmap -sW 192.168.1.100
+
+nmap -sM target                                # TCP Maimon scan
+   → Example: nmap -sM 192.168.1.50
+
+nmap -sU target                                # UDP scan
+   → Example: nmap -sU 192.168.1.0/24
+
+nmap -sN target                                # TCP Null scan (no flags set)
+   → Example: nmap -sN 192.168.1.10
+
+nmap -sF target                                # TCP FIN scan
+   → Example: nmap -sF 10.10.10.5
+
+nmap -sX target                                # TCP Xmas scan
+   → Example: nmap -sX 172.16.1.1
+
+nmap --scanflags URGACKPSHRSTSYNFIN target     # Custom TCP flags
+   → Example: nmap --scanflags SYNFIN 192.168.1.1
+
+nmap -sI zombie.com:80 target                  # Idle/Zombie scan (IP spoofing via zombie)
+   → Example: nmap -sI 10.0.0.50:80 192.168.1.1
+
+nmap -sY target                                # SCTP INIT scan
+   → Example: nmap -sY 192.168.1.20
+
+nmap -sZ target                                # SCTP COOKIE-ECHO scan
+   → Example: nmap -sZ 192.168.1.30
+
+nmap -sO target                                # IP protocol scan (enumerate supported protocols)
+   → Example: nmap -sO 10.0.0.0/24
+
+nmap -b ftp.relay.com target                   # FTP bounce scan via relay server
+   → Example: nmap -b ftp.example.com 192.168.1.100
+
+
+# Port Specification
+nmap -p22 target                               # Scan a single port
+   → Example: nmap -p22 192.168.1.1
+
+nmap -p1-65535 target                          # Scan full TCP port range
+   → Example: nmap -p1-65535 192.168.1.1
+
+nmap -p U:53,111,137,T:21-25,80,139,8080,S:9 target  # Mixed protocol port list
+   → Example: nmap -p U:53,111,137,T:21-25,80,139,8080,S:9 192.168.1.100
+
+nmap --exclude-ports 80,135 target             # Omit specific ports
+   → Example: nmap --exclude-ports 80,135 10.0.0.0/24
+
+nmap -F target                                 # Fast mode (fewer ports than default)
+   → Example: nmap -F 192.168.1.50
+
+nmap -r target                                 # Sequential port order (disable randomization)
+   → Example: nmap -r 192.168.1.200
+
+nmap --top-ports 100 target                    # Scan N most common ports
+   → Example: nmap --top-ports 100 scanme.nmap.org
+
+nmap --port-ratio 0.90 target                  # Scan ports more common than ratio
+   → Example: nmap --port-ratio 0.90 192.168.1.10
+
+
+# Service / Version Detection
+nmap -sV target                                # Probe services/versions on open ports
+   → Example: nmap -sV 192.168.1.1
+
+nmap --version-intensity 0-9 target            # Control probe intensity (0–9)
+   → Example: nmap -sV --version-intensity 9 192.168.1.1
+
+nmap --version-light target                    # Faster, lighter probes (intensity 2)
+   → Example: nmap -sV --version-light scanme.nmap.org
+
+nmap --version-all target                      # Try every version probe (intensity 9)
+   → Example: nmap -sV --version-all 10.0.0.5
+
+nmap --version-trace target                    # Verbose version-scan activity (debugging)
+   → Example: nmap -sV --version-trace 192.168.1.100
+
+
+# Script Scan (NSE)
+nmap -sC target                                # Run default script set
+   → Example: nmap -sC 192.168.1.1
+
+nmap --script=vuln target                      # Run “vuln” category scripts
+   → Example: nmap --script=vuln scanme.nmap.org
+
+nmap --script http-title,http-headers target   # Run specific scripts by name
+   → Example: nmap --script http-title,http-headers 192.168.1.100
+
+nmap --script-args user=admin,pass=test target # Pass arguments to scripts
+   → Example: nmap --script ftp-brute --script-args user=admin,pass=test 192.168.1.50
+
+nmap --script-args-file args.txt target        # Load script args from file
+   → Example: nmap --script ftp-brute --script-args-file args.txt 192.168.1.50
+
+nmap --script-trace target                     # Show all script I/O
+   → Example: nmap --script http-title --script-trace scanme.nmap.org
+
+nmap --script-updatedb                         # Update the script database
+   → Example: nmap --script-updatedb
+
+nmap --script-help http-title                  # Show help for script(s)
+   → Example: nmap --script-help http-title
+
+
+# OS Detection
+nmap -O target                                 # Enable OS fingerprinting
+   → Example: nmap -O 192.168.1.1
+
+nmap --osscan-limit target                     # Only attempt OS detection on promising targets
+   → Example: nmap -O --osscan-limit 192.168.1.100
+
+nmap --osscan-guess target                     # Aggressively guess OS if not certain
+   → Example: nmap -O --osscan-guess scanme.nmap.org
+
+
+# Timing / Performance
+nmap -T0 target                                # Paranoid timing (very slow, IDS evasion)
+   → Example: nmap -T0 192.168.1.1
+
+nmap -T1 target                                # Sneaky timing (slow, IDS evasion)
+   → Example: nmap -T1 192.168.1.1
+
+nmap -T2 target                                # Polite timing (slower, less bandwidth/CPU)
+   → Example: nmap -T2 192.168.1.100
+
+nmap -T3 target                                # Normal timing (default)
+   → Example: nmap -T3 scanme.nmap.org
+
+nmap -T4 target                                # Aggressive timing (faster, good for LANs)
+   → Example: nmap -T4 10.0.0.0/24
+
+nmap -T5 target                                # Insane timing (fastest, noisy)
+   → Example: nmap -T5 192.168.1.50
+
+nmap --min-hostgroup 10 target                 # Minimum hosts to scan in parallel
+   → Example: nmap --min-hostgroup 10 192.168.1.0/24
+
+nmap --max-hostgroup 100 target                # Maximum hosts to scan in parallel
+   → Example: nmap --max-hostgroup 100 10.0.0.0/16
+
+nmap --min-parallelism 10 target               # Minimum probe parallelism
+   → Example: nmap --min-parallelism 10 192.168.1.1
+
+nmap --max-parallelism 100 target              # Maximum probe parallelism
+   → Example: nmap --max-parallelism 100 192.168.1.0/24
+
+nmap --min-rate 1000 target                    # Send at least N packets per second
+   → Example: nmap --min-rate 1000 192.168.1.1
+
+nmap --max-rate 5000 target                    # Send no more than N packets per second
+   → Example: nmap --max-rate 5000 10.0.0.1
+
+nmap --max-retries 2 target                    # Limit probe retransmissions
+   → Example: nmap --max-retries 2 192.168.1.1
+
+nmap --host-timeout 60m target                 # Timeout host after duration
+   → Example: nmap --host-timeout 60m 192.168.1.100
+
+nmap --scan-delay 100ms target                 # Delay between probes
+   → Example: nmap --scan-delay 100ms 10.0.0.0/24
+
+nmap --max-scan-delay 1s target                # Maximum allowed probe delay
+   → Example: nmap --max-scan-delay 1s 192.168.1.10
+
+
+# Firewall / IDS Evasion & Spoofing
+nmap -f target                                 # Fragment packets to evade IDS/filters
+   → Example: nmap -f 192.168.1.1
+
+nmap --mtu 24 target                           # Set custom MTU size (must be multiple of 8)
+   → Example: nmap --mtu 24 192.168.1.1
+
+nmap -D decoy1,decoy2,ME target                # Use decoys to hide real source
+   → Example: nmap -D 10.0.0.5,10.0.0.6,ME 192.168.1.1
+
+nmap -S 10.10.10.10 target                     # Spoof source IP address
+   → Example: nmap -S 10.10.10.10 192.168.1.1
+
+nmap -e eth0 target                            # Use a specific network interface
+   → Example: nmap -e eth0 scanme.nmap.org
+
+nmap -g 53 target                              # Use a given source port (e.g., 53 for DNS)
+   → Example: nmap -g 53 192.168.1.1
+
+nmap --proxies socks4://127.0.0.1:9050 target  # Proxies for NSE/version connections
+   → Example: nmap -sV --proxies socks4://127.0.0.1:9050 192.168.1.1
+
+nmap --data-string "hello" target              # Append custom ASCII payload
+   → Example: nmap --data-string "HELLO" 192.168.1.1 -p80
+
+nmap --data-length 20 target                   # Add random data padding
+   → Example: nmap --data-length 20 192.168.1.100
+
+nmap --ip-options "LSRR 192.0.2.1,198.51.100.1" target  # Loose Source Route via specified hops
+   → Example: nmap --ip-options "LSRR 192.0.2.1,198.51.100.1" 192.168.1.1
+
+nmap --ttl 65 target                           # Set custom TTL value
+   → Example: nmap --ttl 65 192.168.1.1
+
+nmap --spoof-mac 0A:1B:2C:3D:4E:5F target      # Spoof specific MAC address
+   → Example: nmap --spoof-mac 0A:1B:2C:3D:4E:5F 192.168.1.1
+
+nmap --badsum target                           # Send packets with bad checksums (IDS evasion)
+   → Example: nmap --badsum 192.168.1.1
+
+
+# Output
+nmap -oN result.txt target                     # Save normal human-readable output
+   → Example: nmap -oN scan_results.txt 192.168.1.1
+
+nmap -oX result.xml target                     # Save XML output
+   → Example: nmap -oX scan_results.xml 192.168.1.1
+
+nmap -oS result.scr target                     # Save script-kiddie style output
+   → Example: nmap -oS lolz.txt 192.168.1.1
+
+nmap -oG result.grep target                    # Save grepable output
+   → Example: nmap -oG grep_results.txt 192.168.1.1
+
+nmap -oA scan_all target                       # Save output in all formats with same basename
+   → Example: nmap -oA fullscan 192.168.1.1
+
+nmap -v target                                 # Increase verbosity
+   → Example: nmap -v scanme.nmap.org
+
+nmap -vv target                                # More verbosity (very verbose)
+   → Example: nmap -vv 192.168.1.1
+
+nmap -d target                                 # Increase debugging
+   → Example: nmap -d 10.0.0.1
+
+nmap -dd target                                # Very high debug level
+   → Example: nmap -dd 192.168.1.1
+
+nmap --reason target                           # Show reasons why ports are in states
+   → Example: nmap --reason 192.168.1.1
+
+nmap --open target                             # Show only open (or possibly open) ports
+   → Example: nmap --open 192.168.1.1
+
+nmap --packet-trace target                     # Show all packets sent/received
+   → Example: nmap --packet-trace 192.168.1.1
+
+nmap --iflist                                  # List network interfaces and routes
+   → Example: nmap --iflist
+
+nmap --append-output -oN output.txt target     # Append results instead of overwrite
+   → Example: nmap --append-output -oN results.txt 192.168.1.1
+
+nmap --resume session.txt                      # Resume from a saved scan
+   → Example: nmap --resume fullscan.nmap
+
+nmap --noninteractive target                   # Disable interactive runtime controls
+   → Example: nmap --noninteractive 192.168.1.1
+
+
+# Misc
+nmap -6 target                                 # Enable IPv6 scanning
+   → Example: nmap -6 scanme.nmap.org
+
+nmap -A target                                 # Aggressive mode: OS, version, scripts, traceroute
+   → Example: nmap -A 192.168.1.1
+
+nmap --datadir /custom/nmap target             # Use a custom Nmap data directory
+   → Example: nmap --datadir /opt/nmap-data 192.168.1.1
+
+nmap --send-eth target                         # Force sending using raw Ethernet frames
+   → Example: nmap --send-eth 192.168.1.100
+
+nmap --send-ip target                          # Force sending using raw IP packets
+   → Example: nmap --send-ip 10.0.0.5
+
+nmap --privileged target                       # Assume user has raw socket privileges
+   → Example: nmap --privileged 192.168.1.1
+
+nmap --unprivileged target                     # Assume user lacks raw socket privileges
+   → Example: nmap --unprivileged 192.168.1.1
+
+nmap -V                                        # Show Nmap version
+   → Example: nmap -V
+
+nmap -h                                        # Show help summary
+   → Example: nmap -h
+
+
+# Example Usage
+
+nmap -v -A scanme.nmap.org                     # Verbose, aggressive scan (OS, version, scripts, traceroute)
+   → Example: nmap -v -A scanme.nmap.org
+
+nmap -v -sn 192.168.0.0/16 10.0.0.0/8          # Verbose ping sweep on two large networks
+   → Example: nmap -v -sn 192.168.0.0/16 10.0.0.0/8
+
+nmap -v -iR 10000 -Pn -p 80                    # Random 10k hosts, treat all as up, scan port 80
+   → Example: nmap -v -iR 10000 -Pn -p 80
+
+nmap -sS -T4 -p1-1000 192.168.1.0/24           # Stealth SYN scan, fast timing, first 1000 ports
+   → Example: nmap -sS -T4 -p1-1000 192.168.1.0/24
+
+nmap -sU -sV -p53,161 192.168.1.100            # UDP scan with service detection on DNS & SNMP
+   → Example: nmap -sU -sV -p53,161 192.168.1.100
+
+nmap -O --osscan-guess 192.168.1.1             # OS detection with aggressive guessing
+   → Example: nmap -O --osscan-guess 192.168.1.1
+
+nmap -sC --script=vuln 192.168.1.1             # Run default and vulnerability scripts
+   → Example: nmap -sC --script=vuln 192.168.1.1
+
+nmap -f -D RND:5,ME 192.168.1.50               # Fragment packets + random decoys for firewall evasion
+   → Example: nmap -f -D RND:5,ME 192.168.1.50
+
+nmap -sS -Pn -T2 --data-length 50 192.168.1.100 # Stealth scan, skip ping, slow timing, add padding
+   → Example: nmap -sS -Pn -T2 --data-length 50 192.168.1.100
+
+nmap -sV -p- --version-all --reason 10.0.0.5   # Full port scan with deep version detection
+   → Example: nmap -sV -p- --version-all --reason 10.0.0.5
+
+nmap -A -T4 -oA corp_scan 192.168.10.0/24      # Aggressive scan with timing, save all outputs
+   → Example: nmap -A -T4 -oA corp_scan 192.168.10.0/24
+
+
+# Best Flag Combinations (Cheat Ready)
+
+# Local Network (fast, noisy, full discovery)
+nmap -A -T4 -p- 192.168.1.0/24
+   → Aggressive mode, all ports, fast timing on LAN
+
+# Local Network (stealthy / IDS evasion)
+nmap -sS -T2 -Pn -f --data-length 50 192.168.1.0/24
+   → SYN stealth scan, no ping, fragmentation + random padding
+
+# Remote Host (safe, basic info)
+nmap -sS -sV -T3 -p- scanme.nmap.org
+   → SYN scan with version detection, full port range, normal timing
+
+# Remote Host (deep enumeration)
+nmap -A -sS -p- -T4 --script vuln scanme.nmap.org
+   → Aggressive mode with vuln scripts, full port sweep
+
+# Firewall/IDS Evasion
+nmap -sS -Pn -f -D RND:10,ME -g 53 192.168.1.100
+   → SYN stealth, skip ping, fragmentation, decoys, source port 53 (DNS)
+
+# Quick Service Enumeration
+nmap -sV --top-ports 1000 -T4 192.168.1.1
+   → Detect services on top 1000 ports, fast timing
+
+# Vulnerability Testing
+nmap -sV --script vuln 10.0.0.5
+   → Run vulnerability detection scripts
+
+# OS Fingerprinting
+nmap -O --osscan-guess 192.168.1.100
+   → Attempt OS detection with aggressive guessing
+
+# Save Everything
+nmap -A -T4 -p- -oA full_audit 10.0.0.0/24
+   → Aggressive full port scan, save in all output formats
+
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://nmap.org/book/man.html" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Nmap Official Manual
+      </a>
+    </li>
+    <li>
+      <a href="https://nmap.org/nsedoc/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        NSE (Nmap Scripting Engine) Documentation
+      </a>
+    </li>
+    <li>
+      <a href="https://www.youtube.com/watch?v=f6gwr333RZM" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Nmap Full Course (YouTube)
+      </a>
+    </li>
+  </ul>
+</section>
