@@ -760,6 +760,97 @@ header nav .domain-chip.chip-osint {
   [srcHN, srcGH, srcNVD, srcEDB].forEach(el => el && el.addEventListener('change', refresh));
 })();
 </script>
+<!-- Scroll Controls (Back to Top + Scroll to Bottom) -->
+<div id="scrollControls" class="fixed bottom-5 right-5 z-40 flex flex-col gap-2">
+
+  <!-- Back to Top -->
+  <button id="backToTop"
+    aria-label="Back to top"
+    class="hidden
+           bg-gray-800/70 backdrop-blur-sm text-gray-200
+           w-10 h-10 md:w-11 md:h-11 rounded-full
+           flex items-center justify-center
+           border border-gray-600/40
+           opacity-50 hover:opacity-90 focus:opacity-90
+           transition duration-300 ease-out
+           hover:scale-105 focus:scale-105
+           shadow-none hover:shadow-lg hover:shadow-purple-700/20
+           select-none">
+    ▲
+  </button>
+
+  <!-- Scroll to Bottom -->
+  <button id="scrollToBottom"
+    aria-label="Scroll to bottom"
+    class="hidden
+           bg-gray-800/70 backdrop-blur-sm text-gray-200
+           w-10 h-10 md:w-11 md:h-11 rounded-full
+           flex items-center justify-center
+           border border-gray-600/40
+           opacity-50 hover:opacity-90 focus:opacity-90
+           transition duration-300 ease-out
+           hover:scale-105 focus:scale-105
+           shadow-none hover:shadow-lg hover:shadow-purple-700/20
+           select-none">
+    ▼
+  </button>
+
+</div>
+
+<script>
+  (function () {
+    const btnTop = document.getElementById('backToTop');
+    const btnBottom = document.getElementById('scrollToBottom');
+
+    function toggleButtons() {
+      // Show Back to Top if scrolled down
+      if (window.scrollY > 300) {
+        btnTop.classList.remove('hidden');
+      } else {
+        btnTop.classList.add('hidden');
+      }
+
+      // Show Scroll to Bottom if not near bottom
+      if (window.innerHeight + window.scrollY < document.body.offsetHeight - 300) {
+        btnBottom.classList.remove('hidden');
+      } else {
+        btnBottom.classList.add('hidden');
+      }
+    }
+
+    btnTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    btnBottom.addEventListener('click', () => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+
+    window.addEventListener('scroll', toggleButtons, { passive: true });
+    window.addEventListener('load', toggleButtons);
+  })();
+</script>
+
+<style>
+  /* Subtle fade-in for both buttons */
+  #backToTop, #scrollToBottom {
+    animation: fadeInSoft .4s ease-out;
+  }
+
+  @keyframes fadeInSoft {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 0.5; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #backToTop, #scrollToBottom { transition: none !important; animation: none !important; }
+  }
+
+  @media print {
+    #scrollControls { display: none !important; }
+  }
+</style>
+
 
 </body>
 </html>
