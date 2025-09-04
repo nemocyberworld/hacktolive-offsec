@@ -1,0 +1,484 @@
+  <div class="container">
+    <h1 class="mb-4">🔍 Bug Bounty Web Checklist</h1>
+    <p class="lead">Track your web pentesting progress by checking each subcategory.</p>
+
+<!-- Category: Reconnaissance -->
+<div class="category">
+  <h2><a href="https://nemocyberworld.github.io/BugBountyCheckList/Reconnaissance/">🛰️ Reconnaissance</a></h2>
+
+  <ol class="subcategory">
+    <li>Subdomain Enumeration (amass, subfinder, <a href="http://crt.sh" target="_blank">crt.sh</a>)</li>
+    <li>Port Scanning (nmap, rustscan)</li>
+    <li>Directory Bruteforcing (ffuf, dirsearch)</li>
+    <li>Wayback Machine / Archive Recon</li>
+    <li>JS File Analysis (endpoints, keys, secrets)</li>
+    <li>Content Discovery (robots.txt, sitemap.xml)</li>
+    <li>Dorks (Google, Github, Shodan, Censys)</li>
+    <li>WHOIS & DNS Recon</li>
+    <li>DNS Zone Transfers</li>
+    <li>URLextractor</li>
+  </ol>
+</div>
+
+
+
+<!-- Category: Information Disclosure -->
+<div class="category">
+  <h2><a href="https://nemocyberworld.github.io/BugBountyCheckList/InformationDisclosure/">📢 Information Disclosure</a></h2>
+
+  <ol class="subcategory">
+    <li>Debug messages in responses</li>
+    <li>Leaked <code>.git/</code> directory</li>
+    <li>Leaked <code>.env</code> file</li>
+    <li>Stack trace on exception</li>
+    <li>Verbose error messages</li>
+    <li>Sensitive info in <code>robots.txt</code></li>
+    <li>Exposed backup files (.bak, .old, .zip)</li>
+    <li>API keys in JavaScript files</li>
+    <li>Internal IPs in response headers</li>
+    <li>Credit card info in logs</li>
+    <li>Misconfigured GitHub repo (public leaks)</li>
+    <li>Environment variables in response body</li>
+    <li>Exposed Sentry / monitoring logs</li>
+    <li>Source maps exposed in production</li>
+    <li>Leaked memory dumps</li>
+    <li>User tokens in HTML comments</li>
+    <li>Full path disclosure</li>
+    <li>Version disclosure via headers</li>
+    <li>Sensitive data in Referer headers</li>
+    <li>Email/password pairs in export files</li>
+  </ol>
+</div>
+
+
+<!-- Category: Authentication -->
+<div class="category">
+  <h2><a href="https://nemocyberworld.github.io/BugBountyCheckList/Authentication/">🔐 Authentication</a></h2>
+
+  <ol class="subcategory">
+    <li>Brute Force Login</li>
+    <li>2FA Bypass</li>
+    <li>No rate limiting on login</li>
+    <li>Missing account lockout</li>
+    <li>User enumeration on login</li>
+    <li>Reusable password reset token</li>
+    <li>Reset link doesn't expire</li>
+    <li>Password reset sent to admin email</li>
+    <li>Weak password policy</li>
+    <li>2FA bypass via fallback method</li>
+    <li>Session not invalidated after password change</li>
+    <li>Session fixation</li>
+    <li>Insecure "remember me" token</li>
+    <li>OAuth login without reauthentication</li>
+    <li>Open registration to admin role</li>
+    <li>Predictable password reset tokens</li>
+    <li>Public registration for internal application</li>
+    <li>Bypassing login with null/empty password</li>
+    <li>Fallback login method enabled (e.g., SSH)</li>
+    <li>Login allowed with unverified email</li>
+    <li>Reset token leaked in Referer header</li>
+    <li>Session ID exposed in URL</li>
+  </ol>
+</div>
+
+
+<!-- Category: Authorization -->
+<div class="category">
+  <h2><a href="https://nemocyberworld.github.io/BugBountyCheckList/Authorization/">🛂 Authorization</a></h2>
+
+  <ol class="subcategory">
+    <li>IDOR (Insecure Direct Object Reference)</li>
+    <li>Accessing others’ data via UUID guessing</li>
+    <li>Horizontal Privilege Escalation</li>
+    <li>Vertical Privilege Escalation</li>
+    <li>No access control on sensitive endpoints</li>
+    <li>Admin-only feature accessible by normal users</li>
+    <li>Misconfigured feature toggles</li>
+    <li>Changing roles via PUT/POST body</li>
+    <li>Accessing data by changing GraphQL ID</li>
+    <li>JWT with upgradable role claims</li>
+    <li>Tampering group ID to escalate privileges</li>
+    <li>Misconfigured middleware (e.g., no auth check)</li>
+    <li>Authorization missing in async jobs</li>
+    <li>Lack of validation in frontend</li>
+    <li>Bypass auth using mobile API endpoints</li>
+    <li>Auth enforced only via UI</li>
+    <li>Disclosure of access control matrix</li>
+    <li>Local file request bypasses proxy RBAC</li>
+    <li>Wildcard permissions misused</li>
+    <li>Access via soft-deleted accounts</li>
+  </ol>
+</div>
+<!-- Category: Input Validation -->
+<div class="category">
+  <h2>💉 Input Validation</h2>
+
+  <h3>1. Cross Site Scripting (XSS)</h3>
+  <ol>
+    <li>Reflected XSS</li>
+    <li>Stored XSS</li>
+    <li>DOM-based XSS</li>
+    <li>XSS in file name</li>
+    <li>SVG upload with JavaScript</li>
+    <li>XSS in redirect URL</li>
+    <li>XSS in JSON response</li>
+    <li>XSS in markdown renderer</li>
+    <li>XSS in PDF export</li>
+    <li>XSS in 404 page</li>
+    <li>Payload in document.write</li>
+    <li>CSP bypass</li>
+    <li>Legacy browser XSS vector</li>
+    <li>Drag-and-drop XSS</li>
+    <li>XSS via input autofill</li>
+    <li>Mutation XSS in React</li>
+    <li>Unescaped template variables</li>
+    <li>XSS in &lt;title&gt; tag (tabnabbing)</li>
+    <li>XSS via email field</li>
+    <li>Nested JSON XSS</li>
+  </ol>
+
+  <h3>2. Injection Attacks</h3>
+  <ol>
+    <li>SQL Injection (classic)</li>
+    <li>Blind SQLi (timing-based)</li>
+    <li>Second-order SQLi</li>
+    <li>NoSQL Injection (MongoDB)</li>
+    <li>Command Injection</li>
+    <li>LDAP Injection</li>
+    <li>SSTI (Server-Side Template Injection)</li>
+    <li>XXE (XML External Entity)</li>
+    <li>CRLF Injection</li>
+    <li>Log Injection</li>
+    <li>Regex DoS</li>
+    <li>Host Header Injection</li>
+    <li>Code Injection in sandbox</li>
+    <li>XPath Injection</li>
+    <li>GraphQL Injection</li>
+    <li>OS-level injection via file parser</li>
+    <li>Deserialization attacks</li>
+    <li>PHP object injection</li>
+    <li>YAML deserialization</li>
+    <li>Dynamic language eval injection</li>
+  </ol>
+
+  <h3>3. Command Injection Types</h3>
+  <ol>
+    <li>Classic Command Injection</li>
+    <li>Blind Command Injection</li>
+    <li>Time-based Command Injection</li>
+    <li>Reverse Shell Injection</li>
+    <li>Blind Reverse Shell Injection</li>
+    <li>File Injection via Command</li>
+    <li>OS Command Injection via Parameter</li>
+    <li>Command Injection via Environment Variables</li>
+    <li>Injection via Shell Metacharacters (e.g., `;`, `&&`)</li>
+    <li>Injection via Pipes and Redirects (e.g., `|`, `>`)</li>
+    <li>Injection via Backticks (`` ` ``)</li>
+    <li>Injection via $( ) command substitution</li>
+    <li>Blind Time-Delay Command Injection</li>
+  </ol>
+</div>
+
+
+<!-- Category: Client-Side -->
+<div class="category">
+  <h2>🖥️ Client-Side</h2>
+
+  <ol class="subcategory">
+    <li>
+      Cross-Site Request Forgery (CSRF)
+      <ol class="nested">
+        <li>CSRF on payment</li>
+        <li>CSRF on settings change</li>
+        <li>Logout CSRF</li>
+        <li>CSRF on password change</li>
+        <li>No CSRF token in form</li>
+        <li>Misconfigured SameSite attribute</li>
+        <li>Referer leakage causes CSRF</li>
+        <li>CSRF via mobile endpoints</li>
+        <li>CSRF on 2FA toggle</li>
+        <li>CSRF + XSS combo</li>
+        <li>CORS misused as CSRF protection</li>
+        <li>Content-type based CSRF</li>
+        <li>JSON CSRF</li>
+        <li>No CSRF on multipart upload</li>
+        <li>Preflight bypass via GET</li>
+        <li>CSRF on profile picture upload</li>
+        <li>CSRF in legacy iframe</li>
+        <li>Bypass via null origin</li>
+        <li>DNS rebinding to trigger CSRF</li>
+      </ol>
+    </li>
+
+    <li>
+      Clickjacking
+      <ol class="nested">
+        <li>Clickjacking login iframe</li>
+      </ol>
+    </li>
+  </ol>
+</div>
+
+
+
+<!-- Category: File Handling -->
+<div class="category">
+  <h2>📂 File Handling</h2>
+
+  <ol class="subcategory">
+    <li>
+      Unrestricted File Upload
+      <ol class="nested">
+        <li>Uploading executable file</li>
+        <li>Double extension bypass</li>
+        <li>Bypassing MIME type check</li>
+        <li>File overwrite</li>
+        <li>Uploading with SSRF vector</li>
+        <li>LFI via filename</li>
+        <li>XSS via uploaded filename</li>
+        <li>Upload to web root</li>
+        <li>Misconfigured CDN cache</li>
+        <li>Polyglot file upload</li>
+        <li>Image with malicious EXIF</li>
+        <li>RAR/ZIP bombs</li>
+        <li>Uploading large file to cause DoS</li>
+        <li>Upload with local file path in name</li>
+        <li>SVG with embedded JS</li>
+        <li>Backup file upload</li>
+        <li>Ghostscript RCE via uploaded file</li>
+        <li>File upload directory traversal</li>
+        <li>Insecure PDF parsing</li>
+        <li>Upload bypass via nested multipart</li>
+      </ol>
+    </li>
+
+    <li>Path Traversal</li>
+  </ol>
+</div>
+
+
+
+<!-- Category: Business Logic -->
+<div class="category">
+  <h2>📊 Business Logic</h2>
+
+  <ol class="subcategory">
+    <li>Coupon/Reward Abuse</li>
+    <li>Rate Limiting Issues</li>
+
+    <ol class="nested">
+      <li>Buying product with negative price</li>
+      <li>Skipping payment step</li>
+      <li>Infinite coupon redemption</li>
+      <li>Price manipulation in cart</li>
+      <li>Loyalty points fraud</li>
+      <li>Refer-a-friend abuse</li>
+      <li>Duplicate request = multiple rewards</li>
+      <li>Logic flaw in rate limit</li>
+      <li>Changing plan without paying</li>
+      <li>Gifting subscription bypass</li>
+      <li>Inventory bypass</li>
+      <li>Uploading same receipt multiple times</li>
+      <li>Applying expired discount</li>
+      <li>Refund logic abuse</li>
+      <li>Abuse of trial periods</li>
+      <li>Bonus triggered without conditions met</li>
+      <li>OAuth token reuse</li>
+      <li>Redeeming coupons on others' accounts</li>
+      <li>Buying restricted item as guest</li>
+      <li>Flawed voting/rating logic</li>
+    </ol>
+  </ol>
+</div>
+
+
+
+<!-- Category: Misc -->
+<div class="category">
+  <h2>🧪 Miscellaneous</h2>
+
+  <ol class="subcategory">
+    <li>Open Redirect</li>
+    <li>Server Side Request Forgery (SSRF)</li>
+
+    <ol class="nested">
+      <li>Subdomain takeover</li>
+      <li>Blind SSRF</li>
+      <li>DNS rebinding</li>
+      <li>Prototype pollution</li>
+      <li>WebSocket hijacking</li>
+      <li>JWT None algorithm</li>
+      <li>JWT unsigned tokens accepted</li>
+      <li>Path traversal (../etc/passwd)</li>
+      <li>Unrestricted internal redirection</li>
+      <li>Broken CAPTCHA bypass</li>
+      <li>Cache poisoning</li>
+      <li>Host header injection (reset link)</li>
+      <li>Misconfigured cronjob leading to RCE</li>
+      <li>Publicly accessible S3 bucket</li>
+      <li>Desync attack (HTTP Request Smuggling)</li>
+      <li>Insecure HTTP method enabled (PUT, TRACE)</li>
+      <li>Abuse of X-Forwarded headers</li>
+      <li>Webhook injection</li>
+    </ol>
+  </ol>
+</div>
+
+
+<!-- Category: CORS Misconfigurations -->
+<div class="category">
+  <h2>🌐 CORS Misconfigurations</h2>
+
+  <ol class="subcategory">
+    <li>Wildcard origin + credentials</li>
+    <li>Unvalidated reflected origin</li>
+    <li>CORS on admin panel</li>
+    <li>Misconfigured preflight</li>
+    <li>Allowed subdomain CORS leak</li>
+    <li>JSONP with CORS enabled</li>
+    <li>Internal service exposed via CORS</li>
+    <li>Cross-origin token access</li>
+    <li>Wildcard in Access-Control-Allow-Headers</li>
+    <li>Overly permissive CORS on private API</li>
+    <li>Unauthenticated endpoints with CORS</li>
+    <li>CORS allowed via * but credentials sent</li>
+    <li>Origin spoof bypass</li>
+    <li>Allowed local origins (localhost)</li>
+    <li>Legacy browser CORS bypass</li>
+    <li>CORS in error handling endpoint</li>
+    <li>Multi-origin bypass</li>
+    <li>Malicious iframes triggering CORS</li>
+    <li>CORS on logout endpoint</li>
+    <li>API key leak via misused CORS</li>
+  </ol>
+</div>
+
+
+
+<!-- Category: API Security Testing -->
+<div class="category">
+  <h2>🔗 API Security Testing</h2>
+
+  <ol class="subcategory">
+    <li>Authentication Bypass</li>
+    <li>Broken Object Level Authorization (BOLA)</li>
+    <li>Broken Function Level Authorization (BFLA)</li>
+    <li>IDOR (Insecure Direct Object Reference)</li>
+    <li>Rate Limiting Bypass</li>
+    <li>HTTP Method Abuse (GET/POST/PUT/DELETE)</li>
+    <li>Mass Assignment</li>
+    <li>Sensitive Data Exposure</li>
+    <li>Token Leakage (JWT/API Keys)</li>
+    <li>Injection Attacks (SQL, NoSQL, Command)</li>
+    <li>API Version Exposure</li>
+    <li>Verbose Error Messages</li>
+    <li>SSRF via API</li>
+    <li>CORS Misconfigurations in API</li>
+    <li>GraphQL Endpoint IDOR</li>
+    <li>JSON Hijacking</li>
+    <li>Swagger/Docs Exposure</li>
+    <li>Replay Attacks (No nonce/timestamp)</li>
+    <li>Unrestricted File Upload via API</li>
+    <li>API Cache Poisoning</li>
+    <li>Unauthenticated API Access</li>
+    <li>Abuse of Batch Request APIs</li>
+    <li>Over-Permissioned Tokens</li>
+    <li>WebSocket Security in API</li>
+  </ol>
+</div>
+
+
+<!-- Category: Mobile App Security Testing -->
+<div class="category">
+  <h2>📱 Mobile App Security Testing</h2>
+
+  <ol class="subcategory">
+    <li>Insecure Local Storage (Shared Prefs, SQLite, Keychain)</li>
+    <li>Unencrypted Network Traffic (HTTP)</li>
+    <li>SSL Pinning Misconfigured or Bypassed</li>
+    <li>Debuggable Build Enabled</li>
+    <li>Reverse Engineering (APK/IPA/Dex/Smali)</li>
+    <li>Sensitive Data in System/Crash Logs</li>
+    <li>Leakage via Screen Capture/Snapshot</li>
+    <li>Insecure Intent Handling / Intent Sniffing</li>
+    <li>Bypass Root/Jailbreak Detection</li>
+    <li>Exported Activity/Services/Broadcasts</li>
+    <li>Runtime Hooking (Frida/Xposed Detection)</li>
+    <li>Hardcoded Secrets/API Keys in App</li>
+    <li>Insecure Deeplinks / URL Schemes</li>
+    <li>Sensitive Data Leaked to Clipboard</li>
+    <li>WebView Misuse (JavaScript Injection, File Access)</li>
+    <li>Backup Enabled for Sensitive Data</li>
+    <li>Injection via Autofill or Paste Events</li>
+    <li>Accessing Root Files/System Resources</li>
+    <li>SSL/TLS Disabled in Some Components</li>
+    <li>Insecure Authentication Flow (Tokens, OTPs)</li>
+  </ol>
+</div>
+
+
+
+<!-- Category: IoT Device Security Testing -->
+<div class="category">
+  <h2>📡 IoT Device Security Testing</h2>
+
+  <ol class="subcategory">
+    <li>Physical Access (JTAG, UART, SWD, Debug Ports)</li>
+    <li>Firmware Extraction & Analysis (Binwalk, strings, Ghidra)</li>
+    <li>Cleartext Credentials or API Keys in Firmware</li>
+    <li>Unsigned/Unencrypted Firmware Updates</li>
+    <li>Exposed Network Services (Telnet, FTP, Web UI, SSH)</li>
+    <li>Web Interface Authentication & Session Handling</li>
+    <li>Cloud API & Mobile App Communication Security</li>
+    <li>Bluetooth/BLE Vulnerabilities (Unauthenticated Pairing, Sniffing)</li>
+    <li>Zigbee/Z-Wave/NFC/WiFi Attack Surface</li>
+    <li>Default Credentials or Hardcoded Logins</li>
+    <li>Access via Serial Interfaces (Bootloader/Recovery)</li>
+    <li>Insecure Boot Process / No Secure Boot</li>
+    <li>Open Ports Enumeration & Exploitation</li>
+    <li>Use of Weak or Custom Encryption Protocols</li>
+    <li>Buffer Overflows or Memory Corruption (Stack/Heap)</li>
+    <li>Hardcoded SSL Certificates or Private Keys</li>
+    <li>Insecure Mobile App Integration with IoT Device</li>
+    <li>Debug Logs or Verbose Output Enabled in Prod</li>
+    <li>LFI/RCE/Command Injection in Device Web Server</li>
+    <li>Certificate Pinning Implemented/Bypassable</li>
+  </ol>
+</div>
+
+
+
+<!-- Category: Network Security Testing -->
+<div class="category">
+  <h2>🌐 Network Security Testing</h2>
+
+  <ol class="subcategory">
+    <li>Perform Active & Passive Reconnaissance</li>
+    <li>Port & Service Scanning (Nmap, Masscan, Rustscan)</li>
+    <li>Enumerate Services (SMB, RDP, FTP, SNMP, RPC)</li>
+    <li>Test for Default Credentials on Services</li>
+    <li>Packet Sniffing & Traffic Analysis (Wireshark, tcpdump)</li>
+    <li>Man-in-the-Middle (MITM) Attacks (ARP Spoofing, DNS Poisoning)</li>
+    <li>Run Vulnerability Scanners (Nessus, OpenVAS, Nexpose)</li>
+    <li>Attempt Firewall, IDS/IPS Evasion (Fragmentation, Encoding)</li>
+    <li>Check for Lateral Movement & Pivoting (proxychains, socks5)</li>
+    <li>Wi-Fi Attacks (WPA2 Cracking, Evil Twin, Deauth, Rogue AP)</li>
+    <li>Rogue DHCP Server Setup & Poisoning</li>
+    <li>DNS Tunneling & Exfiltration Techniques</li>
+    <li>VPN Exposure & Split-Tunnel Testing</li>
+    <li>SMB Relay Attacks (NTLMv1/v2 Capture, Pass-the-Hash)</li>
+    <li>Broadcast Protocol Enumeration (LLMNR, NBNS, mDNS)</li>
+    <li>Test SNMP (v1/v2) for Community String Bruteforce</li>
+    <li>Insecure Protocol Use (Telnet, FTP, Rlogin)</li>
+    <li>SSL/TLS Misconfigurations (Weak Ciphers, Expired Certs)</li>
+    <li>ICMP Tunneling (Data Exfil via Ping)</li>
+    <li>Misconfigured Proxies (open SOCKS, open HTTP)</li>
+  </ol>
+</div>
+
+
+    <footer class="text-center mt-5">
+      <hr>
+      <p>Made with ❤️ by <a href="https://github.com/nemocyberworld/BugBountyCheckList" target="_blank">Captain Nemo</a></p>
+    </footer>
+  </div>

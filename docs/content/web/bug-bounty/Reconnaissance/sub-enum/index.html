@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Subdomain Enumeration Notes</title>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 900px; margin: 2em auto; padding: 0 1em; }
+  h1, h2 { color: #2a7ae2; }
+  code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+  pre { background: #f9f9f9; border-left: 4px solid #2a7ae2; padding: 1em; overflow-x: auto; }
+  ul { margin-top: 0; }
+  .tool { margin-bottom: 1.5em; }
+</style>
+</head>
+<body>
+
+<h1>📚 Subdomain Enumeration Notes</h1>
+
+<p>This guide summarizes popular subdomain enumeration tools used in reconnaissance phases. It covers passive enumeration, permutation/brute-force techniques, aggregation of results, resolving live subdomains, and subdomain takeover checks.</p>
+
+<hr />
+
+<h2>1. Passive Enumeration Tools</h2>
+
+<div class="tool">
+  <h3>Amass</h3>
+  <p>Passive enumeration using multiple data sources and APIs.</p>
+  <pre>amass enum -passive -d &lt;domain&gt; -o amass.txt</pre>
+
+  <!-- Toggle Button -->
+  <button onclick="toggleScript()" aria-expanded="false" aria-controls="bashScript" style="cursor:pointer; margin-top:10px;">
+    ▶ Show Python Script to Extract All Types of Records Uniquely</button>
+
+  <!-- Collapsible Script Section -->
+  <pre id="bashScript" style="display:none; background:#f4f4f4; padding:10px; border-radius:5px; margin-top:10px; overflow-x:auto;">
+import re
+
+def extract_records(filename):
+    pattern = re.compile(r'--> ([^ ]+) -->')
+    domain_pattern = re.compile(
+        r'\b(?:[a-zA-Z0-9-_]+\.)+[a-zA-Z]{2,}\b'
+    )  # simple domain regex
+
+    records = {}
+    subdomains = set()
+
+    with open(filename, 'r') as f:
+        for line in f:
+            line = line.rstrip('\n')
+            # Extract tagged records
+            match = pattern.search(line)
+            if match:
+                record_type = match.group(1)
+                records.setdefault(record_type, []).append(line)
+
+            # Extract subdomains anywhere in the line
+            domains_found = domain_pattern.findall(line)
+            for domain in domains_found:
+                subdomains.add(domain)
+
+    if not records and not subdomains:
+        print("No matching records or subdomains found.")
+        return
+
+    # Write tagged record files
+    for record_type, lines in records.items():
+        output_file = f"{record_type}.txt"
+        with open(output_file, 'w') as f_out:
+            f_out.write("\n".join(lines) + "\n")
+        print(f"Wrote {len(lines)} lines to {output_file}")
+
+    # Write subdomains uniquely
+    if subdomains:
+        with open("subdomains.txt", 'w') as f_sub:
+            for sd in sorted(subdomains):
+                f_sub.write(sd + "\n")
+        print(f"Wrote {len(subdomains)} unique subdomains to subdomains.txt")
+
+if __name__ == "__main__":
+    extract_records('amass.txt')
+
+  </pre>
+</div>
+
+<script>
+function toggleScript() {
+  const scriptBlock = document.getElementById('bashScript');
+  const btn = event.target;
+  if (scriptBlock.style.display === 'none') {
+    scriptBlock.style.display = 'block';
+    btn.textContent = '▼ Hide Bash Script to Extract Subdomains with Progress & Timing';
+    btn.setAttribute('aria-expanded', 'true');
+  } else {
+    scriptBlock.style.display = 'none';
+    btn.textContent = '▶ Show Bash Script to Extract Subdomains with Progress & Timing';
+    btn.setAttribute('aria-expanded', 'false');
+  }
+}
+</script>
+
+
+<div class="tool">
+  <h3>Subfinder</h3>
+  <p>Fast passive subdomain discovery.</p>
+  <pre>subfinder -d &lt;domain&gt; -o subfinder.txt</pre>
+</div>
+
+<div class="tool">
+  <h3>Assetfinder</h3>
+  <p>Find subdomains using public sources.</p>
+  <pre>assetfinder --subs-only &lt;domain&gt; &gt; assetfinder.txt</pre>
+</div>
+
+<div class="tool">
+  <h3>Sublist3r</h3>
+  <p>Enumerate subdomains via search engines and APIs.</p>
+  <pre>sublist3r -d &lt;domain&gt; -o sublist3r.txt</pre>
+</div>
+
+<div class="tool">
+  <h3>DNSRecon 🔍</h3>
+  <p>Advanced DNS Enumeration and Reconnaissance Tool.</p>
+  <pre>dnsrecon -d &lt;domain&gt; -n 8.8.8.8 -j dnsrecon.json</pre>
+
+  <!-- Toggle Button -->
+  <button onclick="toggleNote(this)" aria-expanded="false" aria-controls="dnsrecon-details" style="cursor:pointer; margin-top:10px;">
+    ▶ Show Details
+  </button>
+
+  <!-- Collapsible Content -->
+  <pre id="dnsrecon-details" style="display:none; background:#f4f4f4; padding:10px; border-radius:5px; margin-top:10px; overflow-x:auto;">
+🔹 Standard Record Enumeration:
+    dnsrecon -d example.com
+
+🔹 Zone Transfer (AXFR):
+    dnsrecon -d example.com -a
+
+🔹 Reverse DNS Lookup:
+    dnsrecon -r 192.168.1.0/24
+
+🔹 Google Dorking:
+    dnsrecon -d example.com -g
+
+🔹 Subdomain Brute Forcing:
+    dnsrecon -d example.com -D wordlist.txt -t brt
+
+🔹 Cache Snooping:
+    dnsrecon -d example.com -t snoop
+
+🔹 Zone Walking (NSEC/NSEC3):
+    dnsrecon -d example.com -t zonewalk
+  </pre>
+</div>
+
+<script>
+function toggleNote(button) {
+  const toggleId = button.getAttribute('aria-controls');
+  const content = document.getElementById(toggleId);
+
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    button.textContent = '▼ Hide Details';
+    button.setAttribute('aria-expanded', 'true');
+  } else {
+    content.style.display = 'none';
+    button.textContent = '▶ Show Details';
+    button.setAttribute('aria-expanded', 'false');
+  }
+}
+</script>
+
+
+<div class="tool">
+  <h3>TheHarvester 🔍</h3>
+  <p>Harvest subdomains and emails from public sources.</p>
+  <pre>theharvester -d &lt;domain&gt; -b all -f theharvester.xml</pre>
+
+  <!-- Toggle Button -->
+  <button onclick="toggleNote(this)" aria-expanded="false" aria-controls="theharvester-details" style="cursor:pointer; margin-top:10px;">
+    ▶ Show Details
+  </button>
+
+  <!-- Collapsible Content -->
+  <pre id="theharvester-details" style="display:none; background:#f4f4f4; padding:10px; border-radius:5px; margin-top:10px; overflow-x:auto;">
+🌐 Sources Supported:
+  - Google
+  - Bing
+  - Baidu
+  - Yahoo
+  - DuckDuckGo
+  - Hunter.io
+  - LinkedIn
+  - Twitter
+  - Shodan (API key required)
+  - VirusTotal
+  - DNSDumpster
+  - Anubis
+  - Otx.alienvault.com
+  - Github
+  - ThreatCrowd
+
+⚙️ Common Usage Examples:
+
+# Basic domain search:
+  theharvester -d example.com -b google
+
+# Multiple engines + save to HTML:
+  theharvester -d example.com -b google,bing,linkedin -f report.html
+
+# Emails only (using hunter.io):
+  theharvester -d example.com -b hunter
+
+# Limit results to 100:
+  theharvester -d example.com -b bing -l 100
+
+# Shodan host data (API key needed):
+  theharvester -d example.com -b shodan
+
+🔍 Use Cases:
+
+- Pre-engagement reconnaissance for pen testing
+- Target identification in red teaming
+- Attack surface mapping
+- Threat intelligence gathering
+- Email harvesting for phishing simulations
+  </pre>
+</div>
+
+<script>
+function toggleNote(button) {
+  const toggleId = button.getAttribute('aria-controls');
+  const content = document.getElementById(toggleId);
+
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    button.textContent = '▼ Hide Details';
+    button.setAttribute('aria-expanded', 'true');
+  } else {
+    content.style.display = 'none';
+    button.textContent = '▶ Show Details';
+    button.setAttribute('aria-expanded', 'false');
+  }
+}
+</script>
+
+
+<div class="tool">
+  <h3>Subscraper</h3>
+  <p>Enumerates subdomains using various techniques.</p>
+  <pre>subscraper -t &lt;domain&gt; -o subscraper.txt</pre>
+</div>
+
+<div class="tool">
+  <h3>CT-Exposer</h3>
+  <p>Extract subdomains from Certificate Transparency logs.</p>
+  <pre>sudo ct-exposer -d &lt;domain&gt; -o ct-exposer.txt</pre>
+</div>
+
+<div class="tool">
+  <h3>Online Subdomain Finder</h3>
+  <li><a href="https://opentunnel.net/subdomain-finder/">https://opentunnel.net/subdomain-finder/</a></li>
+  <li><a href="https://suip.biz/?act=subfinder">https://suip.biz/?act=subfinder</a></li>
+  <li><a href="https://www.vedbex.com/tools/subdomain_finder">https://www.vedbex.com/tools/subdomain_finder</a></li>
+  <li><a href="https://hackertarget.com/find-dns-host-records/">https://hackertarget.com/find-dns-host-records/</a></li>
+  <li><a href="https://www.nmmapper.com/">https://www.nmmapper.com/</a></li>
+  <li><a href="https://subdomains.whoisxmlapi.com/">https://subdomains.whoisxmlapi.com/</a></li>
+</div>
+<hr />
+
+<hr />
+
+<h2>2. Aggregate and Deduplicate Subdomains</h2>
+
+<p>Combine all results from various tools and remove duplicates:</p>
+<pre>cat results/example.com/*.txt | sort -u &gt; results/example.com/all_subs.txt</pre>
+
+<hr />
+
+<h2>3. Resolve Live Subdomains</h2>
+
+<p>Use <code>httpx</code> to check which subdomains are alive and responding over HTTP/HTTPS:</p>
+<pre>httpx -l results/example.com/all_subs.txt -threads 50 -o results/example.com/live_subs.txt</pre>
+
+<hr />
+
+<h2>4. Subdomain Takeover Checks</h2>
+
+<p>Check live subdomains for potential takeover vulnerabilities:</p>
+<pre>
+subjack -w results/example.com/live_subs.txt -t 50 -timeout 30 -ssl -v -o results/example.com/subjack.txt
+subover -l results/example.com/live_subs.txt -o results/example.com/subover.txt
+second-order -d example.com -l results/example.com/live_subs.txt -o results/example.com/second_order.txt
+</pre>
+
+<hr />
+
+<h2>5. Screenshot Live Subdomains</h2>
+
+<p>Capture screenshots of live subdomains using <code>gowitness</code>:</p>
+<pre>gowitness file -f results/example.com/live_subs.txt -P results/example.com/screenshots --threads 50</pre>
+
+<hr />
+
+<h2>Summary</h2>
+
+<ul>
+  <li>Use passive tools first to gather as many subdomains as possible.</li>
+  <li>Run permutation/bruteforce tools on the initial results and wordlists.</li>
+  <li>Aggregate and deduplicate all results into one file.</li>
+  <li>Use <code>httpx</code> to filter live/active subdomains.</li>
+  <li>Check for takeover vulnerabilities with <code>subjack</code>, <code>subover</code>, and <code>second-order</code>.</li>
+  <li>Optionally, screenshot live domains for quick visual assessment.</li>
+</ul>
+
+<p>Happy hunting! 🕵️‍♂️🔍</p>
+  <div style="margin-top: 2em;">
+  <a href="javascript:history.back()" style="text-decoration: none; font-weight: bold; font-size: 1.1em;">
+    &#8592; Go Back
+  </a>
+</div>
+</body>
+</html>

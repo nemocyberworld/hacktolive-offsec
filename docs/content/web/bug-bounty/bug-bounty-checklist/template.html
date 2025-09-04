@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bug Bounty Checklist</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f4f6f8;
+      padding: 2rem;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    .category {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      border-left: 5px solid #0d6efd;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+    .subcategory {
+      margin-left: 1.5rem;
+    }
+    .subcategory.nested {
+      margin-left: 20px;
+      border-left: 2px solid #ddd;
+      padding-left: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="mb-4">🔍 Bug Bounty Web Checklist</h1>
+    <p class="lead">Track your web pentesting progress by checking each subcategory.</p>
+
+    <!-- Clear Progress Button -->
+    <button class="btn btn-danger mb-4" onclick="clearProgress()">🗑️ Clear All Progress</button>
+
+    <div class="category">
+      <h2>🛰️ Reconnaissance</h2>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-subdomain" />
+        <label class="form-check-label" for="recon-subdomain">
+          Subdomain Enumeration (amass, subfinder, <a href="http://crt.sh" target="_blank">crt.sh</a>)
+        </label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-port-scan" />
+        <label class="form-check-label" for="recon-port-scan">Port Scanning (nmap, rustscan)</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-dir-brute" />
+        <label class="form-check-label" for="recon-dir-brute">Directory Bruteforcing (ffuf, dirsearch)</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-wayback" />
+        <label class="form-check-label" for="recon-wayback">Wayback Machine / Archive Recon</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-js-analysis" />
+        <label class="form-check-label" for="recon-js-analysis">JS File Analysis (endpoints, keys, secrets)</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-asn" />
+        <label class="form-check-label" for="recon-asn">ASN / CIDR Discovery</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-vhost" />
+        <label class="form-check-label" for="recon-vhost">Virtual Host Discovery</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-content" />
+        <label class="form-check-label" for="recon-content">Content Discovery (robots.txt, sitemap.xml)</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-github-dorks" />
+        <label class="form-check-label" for="recon-github-dorks">GitHub Dorking (company leaks, tokens)</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-search-dorks" />
+        <label class="form-check-label" for="recon-search-dorks">Search Engine Dorks (Google, Shodan, Censys)</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-whois" />
+        <label class="form-check-label" for="recon-whois">WHOIS & DNS Recon</label>
+      </div>
+
+      <div class="form-check subcategory">
+        <input class="form-check-input" type="checkbox" id="recon-zone-transfer" />
+        <label class="form-check-label" for="recon-zone-transfer">DNS Zone Transfers</label>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load & Save checkbox states
+    window.onload = function () {
+      const checkboxes = document.querySelectorAll("input[type='checkbox']");
+      checkboxes.forEach((checkbox) => {
+        const saved = localStorage.getItem(checkbox.id);
+        if (saved !== null) checkbox.checked = saved === "true";
+        checkbox.addEventListener("change", () => {
+          localStorage.setItem(checkbox.id, checkbox.checked);
+          console.log("✅ Progress saved");
+        });
+      });
+    };
+
+    // Clear progress
+    function clearProgress() {
+      if (confirm("Are you sure you want to reset all progress?")) {
+        const checkboxes = document.querySelectorAll("input[type='checkbox']");
+        checkboxes.forEach((cb) => {
+          cb.checked = false;
+          localStorage.removeItem(cb.id);
+        });
+      }
+    }
+  </script>
+</body>
+</html>
