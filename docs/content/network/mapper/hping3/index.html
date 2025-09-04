@@ -1,0 +1,390 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">hping3</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Packet Crafting & Firewall Testing</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    hping3 is a powerful network tool used for crafting and sending custom TCP/IP packets. 
+    It supports TCP, UDP, ICMP, and RAW-IP protocols, making it highly useful for firewall 
+    testing, advanced traceroute, port scanning, and network auditing. Security professionals 
+    often use it to simulate attacks, test intrusion detection systems, and analyze how 
+    packets traverse a network. Its flexibility makes it a Swiss Army knife for low-level 
+    network reconnaissance and penetration testing.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify the target host or network (IP or hostname).</li>
+    <li>Select the protocol and packet options (TCP, UDP, ICMP, raw IP).</li>
+    <li>Run crafted packet tests for scanning, firewall evasion, or DoS simulations.</li>
+    <li>Analyze responses and document findings for vulnerabilities or network behavior.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# General Options
+-h, --help                                    # Show help
+hping3 -h                                     # Display help message
+
+-v, --version                                 # Show version
+hping3 -v                                     # Display version info
+
+-c, --count N                                 # Number of packets to send
+hping3 -c 5 -S -p 80 target.com               # Send 5 SYN packets to port 80
+
+-i, --interval TIME                           # Wait time (e.g., -i u1000 for 1000µs)
+hping3 -i u1000 -S -p 80 target.com           # Send packet every 1ms
+
+--fast                                        # Alias for -i u10000 (10 pps)
+hping3 --fast -S -p 22 target.com             # Send 10 packets/sec to port 22
+
+--faster                                      # Alias for -i u1000 (100 pps)
+hping3 --faster -S -p 22 target.com           # Send 100 packets/sec to port 22
+
+--flood                                       # Send as fast as possible, no replies
+hping3 --flood -S -p 80 target.com            # SYN flood simulation on port 80
+
+-n, --numeric                                 # Numeric output only
+hping3 -n -S -p 443 target.com                # Don’t resolve hostnames, only show IPs
+
+-q, --quiet                                   # Quiet mode
+hping3 -q -c 3 -S -p 443 target.com           # Only show summary, suppress details
+
+-I, --interface IFACE                         # Use specific interface
+hping3 -I eth0 -S -p 80 target.com            # Send packets via eth0 interface
+
+-V, --verbose                                 # Verbose output
+hping3 -V -S -p 80 target.com                 # Show detailed packet information
+
+-D, --debug                                   # Debug info
+hping3 -D -S -p 80 target.com                 # Enable debug mode
+
+-z, --bind                                    # Bind Ctrl+Z to TTL (default dst port)
+hping3 -S -p 80 -z target.com                 # Ctrl+Z will increment TTL
+
+-Z, --unbind                                  # Unbind Ctrl+Z
+hping3 -S -p 80 -Z target.com                 # Remove Ctrl+Z TTL binding
+
+--beep                                        # Beep for every matching packet
+hping3 -S -p 80 target.com --beep             # Beep when packet response received
+
+# Modes
+default mode (TCP)                            # Default sends TCP packets
+hping3 -S -p 80 target.com                    # Default TCP SYN packet to port 80
+
+-0, --rawip                                   # RAW IP mode
+hping3 -0 -a 1.2.3.4 target.com               # Send custom RAW IP packet with spoofed source
+
+-1, --icmp                                    # ICMP mode
+hping3 -1 target.com                          # ICMP echo request (like ping)
+
+-2, --udp                                     # UDP mode
+hping3 -2 -p 53 target.com                    # Send UDP packet to port 53 (DNS)
+
+-8, --scan                                    # SCAN mode (port scanning)
+hping3 -8 1-100 -S target.com                 # TCP SYN scan ports 1–100
+hping3 --scan 1-30,70-90 -S target.com        # Custom range port scan with SYN
+
+-9, --listen                                  # Listen mode
+hping3 -9                                     # Listen for packets containing hping signature
+
+
+# IP Options
+-a, --spoof ADDR      # Spoof source address
+hping3 -a 192.168.1.100 -S 10.0.0.5 -p 80
+
+--rand-dest           # Random destination address
+hping3 --rand-dest -S 10.0.0.0/24 -p 80
+
+--rand-source         # Random source address
+hping3 --rand-source -S 10.0.0.5 -p 80
+
+-t, --ttl N           # Set TTL (default 64)
+hping3 -t 1 -S 10.0.0.5 -p 80
+
+-N, --id ID           # Packet ID (default random)
+hping3 -N 1337 -S 10.0.0.5 -p 80
+
+-W, --winid           # Use Windows byte order for ID
+hping3 -W -S 10.0.0.5 -p 80
+
+-r, --rel             # Relative ID field (estimate traffic)
+hping3 -r -S 10.0.0.5 -p 80
+
+-f, --frag            # Fragment packets
+hping3 -f -S 10.0.0.5 -p 80
+
+-x, --morefrag        # Set "more fragments" flag
+hping3 -x -S 10.0.0.5 -p 80
+
+-y, --dontfrag        # Set "don’t fragment" flag
+hping3 -y -S 10.0.0.5 -p 80
+
+-g, --fragoff         # Set fragment offset
+hping3 -f -g 100 -S 10.0.0.5 -p 80
+
+-m, --mtu SIZE        # Virtual MTU (implies --frag if > MTU)
+hping3 -m 16 -S 10.0.0.5 -p 80
+
+-o, --tos N           # Type of service (default 0x00)
+hping3 -o 0x10 -S 10.0.0.5 -p 80
+
+-G, --rroute          # Include RECORD_ROUTE option
+hping3 -G -S 10.0.0.5 -p 80
+
+--lsrr                # Loose source routing + record route
+hping3 --lsrr 192.168.1.1 10.0.0.5 -p 80
+
+--ssrr                # Strict source routing + record route
+hping3 --ssrr 192.168.1.1 10.0.0.5 -p 80
+
+-H, --ipproto PROTO   # Set IP protocol (RAW mode only)
+hping3 -H 47 --rawip -d 120 10.0.0.5
+
+
+# ICMP Options
+-C, --icmptype N      # ICMP type (default: echo request)
+hping3 -1 -C 8 10.0.0.5          # Send ICMP Echo Request (type 8)
+
+-K, --icmpcode N      # ICMP code (default: 0)
+hping3 -1 -C 3 -K 1 10.0.0.5     # ICMP Destination Unreachable, code 1
+
+--force-icmp          # Send all ICMP types
+hping3 -1 --force-icmp 10.0.0.5  # Force sending unsupported ICMP types
+
+--icmp-gw ADDR        # Gateway for ICMP redirect (default 0.0.0.0)
+hping3 -1 -C 5 --icmp-gw 192.168.1.1 10.0.0.5   # ICMP Redirect via gateway
+
+--icmp-ts             # ICMP timestamp request
+hping3 -1 --icmp-ts 10.0.0.5     # Send ICMP Timestamp Request
+
+--icmp-addr           # ICMP address subnet mask
+hping3 -1 --icmp-addr 10.0.0.5   # Request subnet mask (ICMP type 17)
+
+--icmp-help           # Show ICMP help
+hping3 --icmp-help               # Display supported ICMP types/codes
+
+
+# TCP/UDP Options
+-s, --baseport PORT   # Base source port (default random)
+hping3 -S -s 12345 -p 80 10.0.0.5     # Source port 12345 → dest 80
+
+-p, --destport PORT   # Destination port (ctrl+z inc/dec)
+hping3 -S -p 443 10.0.0.5             # Target port 443 (HTTPS)
+
+-k, --keep            # Keep source port fixed
+hping3 -S -s 9999 -k -p 80 10.0.0.5   # Always send from port 9999
+
+-w, --win SIZE        # TCP window size (default 64)
+hping3 -S -w 512 -p 80 10.0.0.5       # Set TCP window size 512
+
+-O, --tcpoff OFFSET   # Fake TCP data offset
+hping3 -S -O 5 -p 80 10.0.0.5         # Custom TCP offset
+
+-Q, --seqnum          # Show only TCP sequence number
+hping3 -S -Q -p 80 10.0.0.5           # Display TCP SEQ only
+
+-b, --badcksum        # Send with bad checksum
+hping3 -S -b -p 80 10.0.0.5           # Craft invalid checksum
+
+-M, --setseq NUM      # Set TCP sequence number
+hping3 -S -M 12345 -p 80 10.0.0.5     # Force SEQ=12345
+
+-L, --setack NUM      # Set TCP ACK number
+hping3 -A -L 98765 -p 80 10.0.0.5     # Force ACK=98765
+
+-F, --fin             # Set FIN flag
+hping3 -F -p 80 10.0.0.5              # Send TCP FIN packet
+
+-S, --syn             # Set SYN flag
+hping3 -S -p 80 10.0.0.5              # Classic SYN probe
+
+-R, --rst             # Set RST flag
+hping3 -R -p 80 10.0.0.5              # Send TCP RST packet
+
+-P, --push            # Set PUSH flag
+hping3 -P -p 80 10.0.0.5              # Send TCP PUSH packet
+
+-A, --ack             # Set ACK flag
+hping3 -A -p 80 10.0.0.5              # Send TCP ACK packet
+
+-U, --urg             # Set URG flag
+hping3 -U -p 80 10.0.0.5              # Send TCP URG packet
+
+-X, --xmas            # Xmas flag (FIN+PSH+URG)
+hping3 -X -p 80 10.0.0.5              # Xmas tree scan packet
+
+-Y, --ymas            # Ymas flag (0x80, uncommon)
+hping3 -Y -p 80 10.0.0.5              # Set experimental Ymas flag
+
+--tcpexitcode         # Use last TCP flag as exit code
+hping3 -S --tcpexitcode -p 80 10.0.0.5 # Exit code=last flag response
+
+--tcp-timestamp       # TCP timestamp option (uptime guessing)
+hping3 -S --tcp-timestamp -p 80 10.0.0.5 # Probe for uptime via TSopt
+
+
+# Clock Skew Detection
+--clock-skew              # Enable clock skew detection
+hping3 --clock-skew -S -p 80 10.0.0.5   # Measure target’s clock drift
+
+--clock-skew-win N        # Time window for detection (default 300s)
+hping3 --clock-skew --clock-skew-win 600 -S -p 80 10.0.0.5   # Use 600s window
+
+--clock-skew-shift N      # Timestamp samples for correction (default 5)
+hping3 --clock-skew --clock-skew-shift 8 -S -p 80 10.0.0.5   # Correct with 8 samples
+
+--clock-skew-packets-per-sample N   # Packets per sample (default 10)
+hping3 --clock-skew --clock-skew-packets-per-sample 20 -S -p 80 10.0.0.5   # Use 20 packets per sample
+
+
+# Common Options
+-d, --data SIZE      # Data size (default 0)
+hping3 -S -p 80 -d 120 10.0.0.5        # Send 120 bytes of data
+
+-E, --file FILE      # Data from file
+hping3 -S -p 80 -E payload.bin 10.0.0.5  # Send file contents as payload
+
+-e, --sign           # Add 'signature' to packet
+hping3 -S -p 80 -e 10.0.0.5             # Add hping signature in payload
+
+-j, --dump           # Dump packets in hex
+hping3 -S -p 80 -j 10.0.0.5             # Print received packets in hex
+
+-J, --print          # Dump printable characters
+hping3 -S -p 80 -J 10.0.0.5             # Print only ASCII chars in payload
+
+-B, --safe           # Enable 'safe' protocol
+hping3 -S -B -p 80 10.0.0.5             # Avoid sending flood traffic
+
+-u, --end            # Notify when file EOF is reached
+hping3 -S -p 80 -E data.txt -u 10.0.0.5 # Print message when file ends
+
+-T, --traceroute     # Traceroute mode (implies --bind + --ttl 1)
+hping3 -T -S -p 80 10.0.0.5             # Run TCP traceroute to port 80
+
+--tr-stop            # Exit on first non-ICMP in traceroute
+hping3 -T --tr-stop -p 80 10.0.0.5      # Stop at first closed/filtered hop
+
+--tr-keep-ttl        # Keep source TTL fixed
+hping3 -T --tr-keep-ttl -p 80 10.0.0.5  # Do not increase TTL during traceroute
+
+--tr-no-rtt          # Don’t calculate/show RTT in traceroute
+hping3 -T --tr-no-rtt -p 80 10.0.0.5    # Traceroute without RTT measurements
+
+
+# ARS (Advanced Packet Description)
+--apd-send        # Send packet described with APD (see docs/APD.txt)  
+hping3 --apd-send apd_script.txt 10.0.0.5   # Send crafted packet from APD file
+
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — hping3 -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Classic TCP SYN scan (port discovery)
+hping3 -S -p 80 192.168.1.1                   # Send SYN packets to port 80
+
+# Single SYN probe (firewall check)
+hping3 -S -p 80 -c 1 192.168.1.1              # One packet to verify reachability
+
+# ACK scan (firewall rule testing)
+hping3 -A -p 443 192.168.1.1                  # Detect filtered vs unfiltered ports
+
+# FIN scan (stealth detection)
+hping3 -F -p 21 192.168.1.1                   # FIN packet to port 21
+
+# Xmas scan (stealth detection, multiple flags set)
+hping3 -X -p 22 192.168.1.1                   # Xmas tree packet to port 22
+
+# UDP probe
+hping3 -2 -p 53 192.168.1.1                   # UDP scan on port 53 (DNS check)
+
+# ICMP echo request disguised as TCP
+hping3 -1 -p 80 192.168.1.1                   # ICMP ping (protocol 1) to host
+
+# SYN flood (DoS testing)
+hping3 --flood -S -p 80 192.168.1.1           # Flood port 80 with SYNs
+
+# SYN flood with spoofed random IPs
+hping3 --flood --rand-source -S -p 80 192.168.1.1  # Stress-test IDS/IPS
+
+# Traceroute with TCP packets
+hping3 --traceroute -V -S -p 80 192.168.1.1   # TCP-based traceroute on port 80
+
+# Advanced: source spoofing
+hping3 -S -a 10.0.0.100 -p 22 192.168.1.1     # Spoof source IP for SYN scan
+
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="http://www.hping.org" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Official hping3 Website
+      </a>
+    </li>
+    <li>
+      <a href="https://linux.die.net/man/8/hping3" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        hping3 Man Page
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — hping3 -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of hping3</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ hping3 -S -p 80 -c 3 192.168.1.1
+HPING 192.168.1.1 (eth0 192.168.1.1): S set, 40 headers + 0 data bytes
+len=46 ip=192.168.1.1 ttl=64 DF id=0 sport=80 flags=SA seq=0 win=29200 rtt=0.4 ms
+len=46 ip=192.168.1.1 ttl=64 DF id=0 sport=80 flags=SA seq=1 win=29200 rtt=0.3 ms
+len=46 ip=192.168.1.1 ttl=64 DF id=0 sport=80 flags=SA seq=2 win=29200 rtt=0.3 ms
+
+--- 192.168.1.1 hping statistic ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 0.3/0.3/0.4 ms
+
+[saide ~]$ hping3 -A -p 443 -c 2 192.168.1.1
+HPING 192.168.1.1 (eth0 192.168.1.1): A set, 40 headers + 0 data bytes
+len=46 ip=192.168.1.1 ttl=64 DF id=0 sport=443 flags=RA seq=0 win=0 rtt=0.5 ms
+len=46 ip=192.168.1.1 ttl=64 DF id=0 sport=443 flags=RA seq=1 win=0 rtt=0.4 ms
+
+--- 192.168.1.1 hping statistic ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 0.4/0.5/0.5 ms
+
+[saide ~]$ hping3 --traceroute -S -p 80 8.8.8.8
+HPING 8.8.8.8 (eth0 8.8.8.8): S set, 40 headers + 0 data bytes
+hop=1   192.168.1.1   ttl=1   rtt=0.3 ms
+hop=2   203.0.113.1   ttl=2   rtt=8.1 ms
+hop=3   8.8.8.8       ttl=3   rtt=24.5 ms
+
+    </pre>
+  </details>
+</section>

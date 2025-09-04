@@ -1,0 +1,415 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Nping</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Packet Generation, Timing, and Response Analysis</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Nping is a flexible network packet generation and response analysis tool, 
+    distributed with the Nmap suite. It allows testers to craft custom TCP, 
+    UDP, ICMP, and ARP packets to evaluate firewall rules, latency, packet loss, 
+    and IDS/IPS evasion. Nping is invaluable for performance benchmarking, 
+    security testing, and troubleshooting connectivity — often functioning as 
+    a more advanced alternative to ping with precise control over payloads 
+    and timing.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Install the Nmap package (Nping comes bundled with it).</li>
+    <li>Select target host(s) or subnet for probing.</li>
+    <li>Choose protocol (ICMP, TCP, UDP, ARP) and customize flags/payloads.</li>
+    <li>Adjust timing, retries, and output mode to fit the scenario.</li>
+    <li>Interpret results to measure latency, detect filtering, or fingerprint defenses.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Target Specification
+nping scanme.nmap.org                 # Hostname target
+nping microsoft.com/24                 # CIDR target
+nping 192.168.0.1;10.0.*.1-24          # Range/wildcard target
+
+# Probe Modes
+--tcp-connect                          # Unprivileged TCP connect mode
+nping --tcp-connect -p 80 example.com  # Full TCP connect probe
+
+--tcp                                  # TCP probe mode
+nping --tcp -p 22 example.com          # Send TCP SYN to port 22
+
+--udp                                  # UDP probe mode
+nping --udp -p 53 example.com          # UDP probe to DNS
+
+--icmp                                 # ICMP probe mode
+nping --icmp -c 5 8.8.8.8              # Send 5 ICMP echo requests
+
+--arp                                  # ARP probe mode
+nping --arp 192.168.1.0/24             # ARP scan on LAN
+
+--tr, --traceroute                     # Traceroute mode
+nping --tr --icmp example.com          # ICMP traceroute
+
+
+# TCP Connect Mode Options
+-p, --dest-port <ports>                # Destination port(s)
+nping --tcp-connect -p 80,443 example.com
+
+-g, --source-port <port>               # Source port
+nping --tcp-connect -g 12345 -p 80 example.com
+
+
+# TCP Probe Mode Options
+--seq <num>                            # Set sequence number
+nping --tcp -p 80 --seq 1000 example.com
+
+--flags <list>                         # Set TCP flags
+nping --tcp -p 80 --flags SYN,ACK example.com
+
+--ack <num>                            # Set ACK number
+nping --tcp -p 80 --ack 12345 example.com
+
+--win <size>                           # Window size
+nping --tcp -p 80 --win 2048 example.com
+
+--badsum                               # Invalid checksum
+nping --tcp -p 80 --badsum example.com
+
+
+# UDP Probe Mode Options
+nping --udp -p 53 --badsum example.com # UDP with invalid checksum
+
+
+# ICMP Probe Mode Options
+--icmp-type <type>                     # ICMP type
+nping --icmp --icmp-type 8 8.8.8.8     # Echo request
+
+--icmp-code <code>                     # ICMP code
+nping --icmp --icmp-type 3 --icmp-code 1 8.8.8.8
+
+--icmp-id <id>                         # Identifier
+nping --icmp --icmp-id 999 8.8.8.8
+
+--icmp-seq <n>                         # Sequence number
+nping --icmp --icmp-seq 5 8.8.8.8
+
+--icmp-redirect-addr <addr>            # Redirect address
+nping --icmp --icmp-type redirect --icmp-redirect-addr 192.168.1.1 target
+
+--icmp-param-pointer <pnt>             # Parameter problem pointer
+nping --icmp --icmp-type param-problem --icmp-param-pointer 4 target
+
+--icmp-advert-lifetime <time>          # Router adv. lifetime
+nping --icmp --icmp-type router-advert --icmp-advert-lifetime 600 target
+
+--icmp-advert-entry <IP,pref>          # Router adv. entry
+nping --icmp --icmp-type router-advert --icmp-advert-entry 192.168.1.1,100 target
+
+--icmp-orig-time <ts>                  # Originate timestamp
+nping --icmp --icmp-type timestamp --icmp-orig-time 123456 target
+
+--icmp-recv-time <ts>                  # Receive timestamp
+nping --icmp --icmp-type timestamp --icmp-recv-time 123789 target
+
+--icmp-trans-time <ts>                 # Transmit timestamp
+nping --icmp --icmp-type timestamp --icmp-trans-time 123890 target
+
+
+# ARP/RARP Probe Mode Options
+--arp-type <type>                      # ARP, ARP-reply, RARP, etc.
+nping --arp --arp-type ARP 192.168.1.1
+
+--arp-sender-mac <mac>                 # Sender MAC
+nping --arp --arp-sender-mac 00:11:22:33:44:55 target
+
+--arp-sender-ip <ip>                   # Sender IP
+nping --arp --arp-sender-ip 192.168.1.100 target
+
+--arp-target-mac <mac>                 # Target MAC
+nping --arp --arp-target-mac ff:ff:ff:ff:ff:ff target
+
+--arp-target-ip <ip>                   # Target IP
+nping --arp --arp-target-ip 192.168.1.1 target
+
+
+# IPv4 Options
+-S, --source-ip <ip>                   # Source IP address
+nping --tcp -p 80 -S 192.168.1.50 target
+
+--dest-ip <ip>                         # Destination IP address
+nping --tcp --dest-ip 10.0.0.5 -p 80
+
+--tos <tos>                            # Type of service
+nping --tcp --tos 16 -p 80 target
+
+--id <id>                              # Identification field
+nping --tcp --id 1234 target
+
+--df                                   # Don't Fragment flag
+nping --tcp --df -p 80 target
+
+--mf                                   # More Fragments flag
+nping --tcp --mf -p 80 target
+
+--evil                                 # Evil flag
+nping --tcp --evil -p 80 target
+
+--ttl <hops>                           # Time to live
+nping --tcp --ttl 2 target
+
+--badsum-ip                            # Invalid IP checksum
+nping --tcp --badsum-ip target
+
+--ip-options <opts>                    # Set IP options
+nping --tcp --ip-options R 192.168.1.1 target
+
+--mtu <size>                           # Set MTU, force fragmentation
+nping --tcp --mtu 100 target
+
+
+# IPv6 Options
+-6, --IPv6                             # Enable IPv6
+nping -6 --tcp -p 80 ipv6.example.com
+
+--dest-ip <ip>                         # Destination IPv6 address
+nping -6 --tcp --dest-ip fe80::1 -p 80
+
+--hop-limit <n>                        # Hop limit
+nping -6 --tcp --hop-limit 4 target
+
+--traffic-class <class>                # IPv6 traffic class
+nping -6 --tcp --traffic-class 10 target
+
+--flow <label>                         # Flow label
+nping -6 --tcp --flow 12345 target
+
+
+# Ethernet Options
+--dest-mac <mac>                       # Destination MAC
+nping --ether-type 0x0800 --dest-mac 00:11:22:33:44:55 target
+
+--source-mac <mac>                     # Source MAC
+nping --source-mac 66:77:88:99:AA:BB target
+
+--ether-type <type>                    # EtherType value
+nping --ether-type 0x0800 target
+
+
+# Payload Options
+--data <hex>                           # Custom hex payload
+nping --tcp -p 80 --data deadbeef target
+
+--data-string <text>                   # Custom ASCII payload
+nping --udp -p 53 --data-string "hello" target
+
+--data-length <len>                    # Random byte payload
+nping --udp -p 161 --data-length 32 target
+
+
+# Echo Client/Server
+--echo-client <pass>                   # Echo client
+nping --echo-client "public" echo.nmap.org --tcp -p 80
+
+--echo-server <pass>                   # Echo server
+nping --echo-server "public" -e eth0 -vvv
+
+--echo-port <port>                     # Custom echo port
+nping --echo-server "public" --echo-port 8080
+
+--no-crypto                            # Disable crypto
+nping --echo-client "test" echo.nmap.org --no-crypto
+
+--once                                 # Stop after one connection
+nping --echo-server "public" --once
+
+--safe-payloads                        # Strip application data
+nping --echo-client "public" echo.nmap.org --safe-payloads
+
+
+# Timing & Performance
+--delay <time>                         # Delay between probes
+nping --icmp --delay 500ms 8.8.8.8
+
+--rate <rate>                          # Packets per second
+nping --tcp -p 80 --rate 100 target
+
+
+# Misc
+-h, --help                             # Show help
+nping -h
+
+-V, --version                          # Show version
+nping -V
+
+-c, --count <n>                        # Stop after N rounds
+nping --icmp -c 5 8.8.8.8
+
+-e, --interface <iface>                # Network interface
+nping --tcp -p 80 -e eth0 target
+
+-H, --hide-sent                        # Hide sent packets
+nping --icmp -H 8.8.8.8
+
+-N, --no-capture                       # Don’t capture replies
+nping --tcp -p 80 -N target
+
+--privileged                           # Assume root privileges
+nping --tcp --privileged -p 80 target
+
+--unprivileged                         # Assume unprivileged mode
+nping --tcp-connect --unprivileged -p 80 target
+
+--send-eth                             # Send raw Ethernet frames
+nping --tcp --send-eth target
+
+--send-ip                              # Send raw IP packets
+nping --tcp --send-ip target
+
+--bpf-filter <filter>                  # Custom BPF filter
+nping --tcp --bpf-filter "tcp port 80" target
+
+
+# Output Control
+-v                                     # Increase verbosity
+nping --tcp -v -p 80 target
+
+-v4                                    # Set verbosity to level 4
+nping --tcp -v4 target
+
+-d                                     # Increase debugging
+nping --tcp -d target
+
+-d3                                    # Debug level 3
+nping --tcp -d3 target
+
+-q                                     # Decrease verbosity
+nping --tcp -q target
+
+-q2                                    # Decrease verbosity by 2
+nping --tcp -q2 target
+
+--quiet                                # Minimum verbosity/debug
+nping --tcp --quiet target
+
+--debug                                # Maximum verbosity/debug
+nping --tcp --debug target
+
+
+# Example Usage
+nping scanme.nmap.org                      # Default probe
+nping --tcp -p 80 --flags RST --ttl 2 192.168.1.1
+nping --icmp --icmp-type time --delay 500ms 192.168.254.254
+nping --echo-server "public" -e wlan0 -vvv
+nping --echo-client "public" echo.nmap.org --tcp -p 1-1024 --flags ACK
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — Nping -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick ICMP latency test (like ping, but richer)
+nping --icmp -c 5 8.8.8.8                   # 5 ICMP echo requests with RTT stats
+
+# TCP SYN handshake probe (stealthy port test)
+nping --tcp -p 80 --flags SYN example.com   # SYN-only probe to check port filtering
+
+# TCP connect mode (service availability check)
+nping --tcp-connect -p 443 example.com      # Full TCP connect to HTTPS port
+
+# UDP service check
+nping --udp -p 53 example.com               # UDP probe against DNS server
+
+# ARP host discovery (LAN only)
+nping --arp 192.168.1.0/24                  # Discover live hosts on local subnet
+
+# Traceroute-style probing
+nping --tr --icmp example.com               # ICMP-based traceroute
+nping --tr --tcp -p 80 example.com          # TCP-based traceroute to port 80
+
+# Firewall/IDS evasion (bad checksum + custom TTL)
+nping --tcp -p 80 --flags SYN --badsum --ttl 3 target
+
+# Custom payload injection (testing filters or services)
+nping --udp -p 161 --data-string "hello" target
+nping --tcp -p 80 --data deadbeef target
+
+# Echo client/server (connectivity + latency measurement)
+nping --echo-server "secretpass" -e eth0 -vv   # Start echo server
+nping --echo-client "secretpass" echo.nmap.org --tcp -p 80
+
+# High-speed stress test
+nping --tcp -p 80 --rate 1000 target         # 1000 packets/sec to port 80
+
+# IPv6 probing
+nping -6 --icmp -c 3 ipv6.google.com         # ICMPv6 echo requests
+
+# Combined reliability probe
+nping --tcp -p 22 --flags SYN --count 5 --delay 1s target
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://nmap.org/nping/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Official Nping Documentation
+      </a>
+    </li>
+    <li>
+      <a href="https://nmap.org/book/nping-manual.html" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Nping Manual (Nmap Book)
+      </a>
+    </li>
+    <li>Bundled with the Nmap suite — supports ICMP, TCP, UDP, and ARP probing.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Nping -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Nping</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ nping --icmp -c 3 8.8.8.8
+Starting Nping 0.7.97 ( https://nmap.org/nping )
+SENT (0.0510s) ICMP [192.168.1.100 > 8.8.8.8 Echo request (type=8/code=0) id=35050 seq=1] IP [ttl=64 id=47662 iplen=28 ]
+RCVD (0.0921s) ICMP [8.8.8.8 > 192.168.1.100 Echo reply (type=0/code=0) id=35050 seq=1] IP [ttl=117 id=0 iplen=28 ]
+SENT (1.0520s) ICMP [...]
+RCVD (1.0932s) ICMP [...]
+SENT (2.0530s) ICMP [...]
+RCVD (2.0940s) ICMP [...]
+Max rtt: 42.1ms | Min rtt: 40.1ms | Avg rtt: 41.2ms
+
+[saide ~]$ nping --tcp -p 80 --flags SYN example.com
+Starting Nping 0.7.97 ( https://nmap.org/nping )
+SENT (0.0010s) TCP 192.168.1.100:53784 > 93.184.216.34:80 S ttl=64 id=39448 iplen=40  flags=SYN seq=284978349 win=1480
+RCVD (0.0431s) TCP 93.184.216.34:80 > 192.168.1.100:53784 SA ttl=56 id=0 iplen=44  flags=SYN|ACK seq=345892375 ack=284978350 win=29200
+
+[saide ~]$ nping --tr --icmp example.com -c 4
+SENT (0.0010s) ICMP [192.168.1.100 > 93.184.216.34 Echo request (type=8/code=0)]
+RCVD (0.0205s) ICMP [192.168.1.1 > 192.168.1.100 Time exceeded (type=11/code=0)]
+RCVD (0.0408s) ICMP [10.10.0.1 > 192.168.1.100 Time exceeded (type=11/code=0)]
+RCVD (0.0905s) ICMP [93.184.216.34 > 192.168.1.100 Echo reply (type=0/code=0)]
+Max rtt: 90.5ms | Min rtt: 20.5ms | Avg rtt: 50.6ms
+
+    </pre>
+  </details>
+</section>

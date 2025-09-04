@@ -1,0 +1,261 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">fping</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Fast ICMP Host Discovery</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    <code>fping</code> is a high-performance ping tool designed for scanning multiple hosts quickly. Unlike the traditional 
+    <code>ping</code>, it can send ICMP echo requests to multiple IP addresses or ranges simultaneously, making it ideal for 
+    host discovery, availability checks, and large network sweeps. Widely used in penetration testing and sysadmin workflows 
+    for fast, scriptable ICMP-based reconnaissance.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify the network range or hosts to test (CIDR, list, or file input).</li>
+    <li>Select appropriate <code>fping</code> flags (parallelism, count, interval, etc.).</li>
+    <li>Run the scan and gather ICMP responses.</li>
+    <li>Analyze results to identify live hosts and unreachable targets.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Probing Options
+-4, --ipv4                                     # Only ping IPv4 addresses
+fping -4 google.com                            # Force IPv4 ping
+
+-6, --ipv6                                     # Only ping IPv6 addresses
+fping -6 ipv6.google.com                       # Force IPv6 ping
+
+-b, --size=BYTES                               # Ping data size in bytes (default: 56)
+fping -b 128 google.com                        # Send 128-byte ping payloads
+
+-B, --backoff=N                                # Exponential backoff factor (default: 1.5)
+fping -B 2 google.com                          # Double timeout each retry
+
+-c, --count=N                                  # Count mode: send N pings per target and report stats
+fping -c 5 google.com                          # Send 5 pings, show stats
+
+-f, --file=FILE                                # Read targets from file (- means stdin)
+fping -f hosts.txt                             # Ping list of hosts from file
+
+-g, --generate                                 # Generate target list (start-end or CIDR)
+fping -g 192.168.1.0 192.168.1.255             # Generate from start to end IPs
+fping -g 192.168.1.0/24                        # Generate targets from CIDR
+
+-H, --ttl=N                                    # Set IP TTL (hops)
+fping -H 10 google.com                         # Set TTL=10
+
+-i, --interval=MSEC                            # Interval between sending ping packets (default: 10 ms)
+fping -i 50 -f hosts.txt                       # 50ms interval between hosts
+
+-I, --iface=IFACE                              # Bind to a particular interface
+fping -I eth0 google.com                       # Use eth0 for pinging
+
+-k, --fwmark=FWMARK                            # Set routing mark
+fping -k 10 google.com                         # Apply fwmark=10
+
+-l, --loop                                     # Loop mode: send pings forever
+fping -l google.com                            # Continuous ping
+
+-m, --all                                      # Use all IPs of hostnames (IPv4 and IPv6), with -A
+fping -mA google.com                           # Ping all resolved addresses
+
+-M, --dontfrag                                 # Set the Don't Fragment flag
+fping -M google.com                            # Ping with DF flag set
+
+-O, --tos=N                                    # Set the TOS (Type of Service) flag
+fping -O 16 google.com                         # Ping with TOS=16
+
+-p, --period=MSEC                              # Interval between pings to one target (default: 1000 ms)
+fping -c 5 -p 200 google.com                   # 5 pings, 200ms apart
+
+-r, --retry=N                                  # Number of retries (default: 3)
+fping -r 5 google.com                          # Retry up to 5 times
+
+-R, --random                                   # Random packet data
+fping -R google.com                            # Randomize ping payload
+
+-S, --src=IP                                   # Set source address
+fping -S 192.168.1.100 google.com              # Use specific source IP
+
+-t, --timeout=MSEC                             # Initial per-target timeout (default: 500 ms)
+fping -t 800 google.com                        # Timeout set to 800ms
+
+--check-source                                 # Discard replies not from target
+fping --check-source google.com                # Only accept responses from target
+
+--icmp-timestamp                               # Use ICMP Timestamp instead of Echo
+fping --icmp-timestamp google.com              # ICMP timestamp mode
+
+# Output Options
+-a, --alive                                    # Show only alive targets
+fping -a -f hosts.txt                          # List only alive hosts from file
+
+-A, --addr                                     # Show targets by address
+fping -A google.com                            # Show resolved IP address
+
+-C, --vcount=N                                 # Verbose count mode: show per-ping results
+fping -C 5 google.com                          # Send 5 pings, show each reply
+
+-d, --rdns                                     # Show targets by reverse DNS name
+fping -d 8.8.8.8                               # Show reverse DNS for IP
+
+-D, --timestamp                                # Print timestamp before output
+fping -D google.com                            # Show timestamped results
+
+--timestamp-format=FORMAT                      # Format timestamps: ctime|iso|rfc3339
+fping -D --timestamp-format=iso google.com     # ISO-formatted timestamps
+
+-e, --elapsed                                  # Show elapsed time on replies
+fping -e google.com                            # Include elapsed time in ms
+
+-n, --name                                     # Show targets by name (reverse DNS lookup)
+fping -n 8.8.8.8                               # Show resolved hostname
+
+-N, --netdata                                  # Netdata-compatible output (with -l -Q)
+fping -N -l -Q 10 google.com                   # Stream to Netdata every 10s
+
+-o, --outage                                   # Show accumulated outage time
+fping -o -c 10 google.com                      # Show outage statistics after 10 pings
+
+-q, --quiet                                    # Quiet: suppress per-target/ping results
+fping -q -c 5 google.com                       # Only final summary
+
+-Q, --squiet=SECS[,cumulative]                 # Interval summary every SECS (optional cumulative)
+fping -Q 5 google.com                          # Print summary every 5s
+fping -Q 10,cumulative google.com              # Print cumulative stats every 10s
+
+-s, --stats                                    # Print final statistics
+fping -s -c 5 google.com                       # Final stats after 5 pings
+
+-u, --unreach                                  # Show unreachable targets
+fping -u -f hosts.txt                          # Print only unreachable hosts
+
+-v, --version                                  # Show version
+fping -v                                       # Display fping version
+
+-x, --reachable=N                              # Exit success if >=N hosts reachable
+fping -x 2 -f hosts.txt                        # Exit true if 2+ hosts respond
+
+-X, --fast-reachable=N                         # Exit immediately when N hosts found
+fping -X 3 -f hosts.txt                        # Stop when 3 hosts respond
+
+--print-tos                                    # Show received TOS value
+fping --print-tos google.com                   # Print ICMP TOS field
+
+--print-ttl                                    # Show received TTL value
+fping --print-ttl google.com                   # Print TTL value of response
+
+
+  </pre>
+</section>
+
+<!-- Best Flag Combinations (Cheat Ready) — fping -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick LAN sweep (fast & quiet)
+fping -a -q -g 192.168.1.0/24                  # Print only alive hosts from a /24
+
+# Large CIDR, paced to be gentle on the network
+fping -a -q -g 10.0.0.0/16 -i 20 -t 800        # Slow send (20ms), 800ms timeout
+
+# Reliability-focused multi-ping with summary
+fping -c 5 -p 1000 -r 2 -s google.com          # 5 pings, 1s period, 2 retries, print stats
+
+# Timestamped monitoring stream
+fping -l -Q 10 -D --timestamp-format=iso 8.8.8.8  # Loop, summary every 10s with ISO timestamps
+
+# Dual-stack discovery (when hostnames resolve to v4 & v6)
+fping -m -A -f hosts.txt                       # Use all IPs per host (v4+v6), show addresses
+
+# MTU/path testing (Do Not Fragment + increasing size)
+fping -c 3 -M -b 1200 8.8.8.8                  # Send larger DF packets to test fragmentation
+
+# Interface pinning + source address (multi-homed hosts)
+fping -I eth0 -S 192.168.1.10 -c 3 gateway     # Force interface and source IP
+
+# High-fanout list with backoff (WAN-friendly)
+fping -f hosts.txt -a -q -B 2.0 -i 25 -t 900   # Exponential backoff, slower pacing
+
+# Netdata-friendly live view
+fping -N -l -Q 5 1.1.1.1                       # Output compatible with Netdata every 5s
+
+# Fast "are N up?" gating for scripts/CI
+fping -X 3 -f hosts.txt                        # Exit true immediately after 3 hosts respond
+
+# Reachability SLO check (require at least N hosts)
+fping -x 10 -f hosts.txt -q                    # Exit status true if ≥10 hosts reachable
+
+# IPv6-only subnet probe
+fping -6 -a -q -g 2001:db8::/120               # Alive-only, quiet, on IPv6 /120
+
+# Reverse DNS annotated inventory
+fping -d -c 1 -a -f hosts.txt                  # rDNS names for alive targets
+
+# Detailed per-ping telemetry (single host)
+fping -C 10 -e 9.9.9.9                         # 10 pings, show each RTT with elapsed time
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://fping.org" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        fping Official Website
+      </a>
+    </li>
+    <li>
+      <a href="https://linux.die.net/man/8/fping" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        fping Man Page
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — fping -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of fping</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ fping -a -q -g 192.168.1.0/30
+192.168.1.1 is alive
+192.168.1.2 is alive
+
+[saide ~]$ fping -c 3 -p 1000 google.com
+google.com : [0], 84 bytes, 18.2 ms (18.2 avg, 0% loss)
+google.com : [1], 84 bytes, 19.0 ms (18.6 avg, 0% loss)
+google.com : [2], 84 bytes, 17.8 ms (18.3 avg, 0% loss)
+google.com : xmt/rcv/%loss = 3/3/0%, min/avg/max = 17.8/18.3/19.0
+
+[saide ~]$ fping -l -Q 5 8.8.8.8
+8.8.8.8 : [0], 84 bytes, 25.1 ms
+8.8.8.8 : [1], 84 bytes, 24.9 ms
+8.8.8.8 : [2], 84 bytes, 25.0 ms
+--- 8.8.8.8 fping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, min/avg/max = 24.9/25.0/25.1 ms
+
+    </pre>
+  </details>
+</section>

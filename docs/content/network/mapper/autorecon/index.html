@@ -1,0 +1,322 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">AutoRecon</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Automated Reconnaissance & Enumeration</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    AutoRecon is a powerful automated reconnaissance tool for penetration testers and red teamers. It orchestrates
+    <code>nmap</code> scans, service enumeration, and plugin-driven checks against multiple targets. AutoRecon helps
+    streamline the discovery process by identifying services, performing enumeration, and organizing results into structured
+    output directories. It fits into offensive workflows during the information-gathering and enumeration stages of network
+    assessments, reducing manual effort while still allowing full customization of scans and plugins.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Define the targets (IP, CIDR, or hostname) or load them from a file.</li>
+    <li>Select desired scan options, ports, and plugins (port scans, service scans, reports).</li>
+    <li>Run AutoRecon to perform automated port scanning, service enumeration, and reporting.</li>
+    <li>Review results in the output directory (organized by scans, services, loot, and reports).</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Positional Arguments
+autorecon target.com                          # Single target (IP, CIDR, or hostname)
+autorecon 10.0.0.1/24                         # CIDR range
+autorecon -t targets.txt                      # Load targets from file
+
+# General Options
+-t, --target-file targets.txt                 # Read targets from file
+   → Example: autorecon -t targets.txt
+
+-p, --ports 80,443,8080                       # Comma separated list / ranges (TCP/UDP/Both)
+   → Example: autorecon -p 21-25,80,U:53 10.0.0.5
+
+-m, --max-scans 20                            # Max concurrent scans (default: 50)
+   → Example: autorecon -m 20 target.com
+
+-mp, --max-port-scans 5                       # Max concurrent port scans (default: 10)
+   → Example: autorecon -mp 5 192.168.1.0/24
+
+-c, --config custom_config.toml               # Path to config file
+   → Example: autorecon -c custom_config.toml target.com
+
+-g, --global-file global.toml                 # Path to global file
+   → Example: autorecon -g global.toml 10.0.0.10
+
+--tags default+http,ssl                       # Tags to include (grouping with +, multiple with ,)
+   → Example: autorecon --tags web+http,ftp target.com
+
+--exclude-tags smb,ftp                        # Tags to exclude
+   → Example: autorecon --exclude-tags smb,ftp target.com
+
+--port-scans nmap,simple                      # Override tags for PortScan plugins
+   → Example: autorecon --port-scans nmap target.com
+
+--service-scans dirbuster,enum4linux          # Override tags for ServiceScan plugins
+   → Example: autorecon --service-scans dirbuster target.com
+
+--reports html,json                           # Override tags for Report plugins
+   → Example: autorecon --reports html,json target.com
+
+--plugins-dir /opt/plugins                    # Main plugin directory
+   → Example: autorecon --plugins-dir /opt/plugins target.com
+
+--add-plugins-dir /extra/plugins              # Additional plugin directory
+   → Example: autorecon --add-plugins-dir /extra/plugins target.com
+
+-l, --list service                            # List all plugins, or by type
+   → Example: autorecon --list service
+
+-o, --output results_dir                      # Output directory (default: results)
+   → Example: autorecon -o pentest_results 10.0.0.1
+
+--single-target                               # Don’t create per-target directories
+   → Example: autorecon --single-target target.com
+
+--only-scans-dir                              # Only create "scans" directory
+   → Example: autorecon --only-scans-dir target.com
+
+--no-port-dirs                                # Don’t create directories per port
+   → Example: autorecon --no-port-dirs target.com
+
+--heartbeat 30                                # Status interval in seconds
+   → Example: autorecon --heartbeat 30 target.com
+
+--timeout 120                                 # Global timeout (minutes)
+   → Example: autorecon --timeout 120 target.com
+
+--target-timeout 60                           # Timeout per target (minutes)
+   → Example: autorecon --target-timeout 60 target.com
+
+--nmap "-A -T4"                               # Override default nmap args
+   → Example: autorecon --nmap "-sC -sV -T4" target.com
+
+--nmap-append "--top-ports 1000"              # Append to default nmap args
+   → Example: autorecon --nmap-append "--top-ports 1000" target.com
+
+--proxychains                                 # Run AutoRecon via proxychains
+   → Example: proxychains autorecon target.com
+
+--disable-sanity-checks                       # Skip sanity checks
+   → Example: autorecon --disable-sanity-checks target.com
+
+--disable-keyboard-control                    # Disable keyboard shortcuts (useful in SSH/Docker)
+   → Example: autorecon --disable-keyboard-control target.com
+
+--ignore-plugin-checks                        # Ignore plugin check errors
+   → Example: autorecon --ignore-plugin-checks target.com
+
+--force-services tcp/80/http tcp/443/https    # Force service detection
+   → Example: autorecon --force-services tcp/445/smb target.com
+
+-mpti nmap-http:2 dirbuster:1                 # Limit plugin instances per target
+   → Example: autorecon -mpti nmap-http:2 dirbuster:1 target.com
+
+-mpgi nmap-http:5                             # Limit plugin instances globally
+   → Example: autorecon -mpgi nmap-http:5 target.com
+
+--accessible                                  # Accessible output for screen readers
+   → Example: autorecon --accessible target.com
+
+-v, --verbose                                 # Verbose output (repeat -vv for more)
+   → Example: autorecon -vv target.com
+
+--version                                     # Show version and exit
+   → Example: autorecon --version
+
+-h, --help                                    # Show help and exit
+   → Example: autorecon -h
+
+
+# Plugin Arguments
+--curl.path /admin                            # Path on web server to curl (default: /)
+   → Example: autorecon --curl.path /login target.com
+
+--dirbuster.tool gobuster                     # Tool: feroxbuster, gobuster, dirsearch, ffuf, dirb
+   → Example: autorecon --dirbuster.tool dirsearch target.com
+
+--dirbuster.wordlist common.txt               # Wordlist(s) for dir busting (default: dirbuster.txt)
+   → Example: autorecon --dirbuster.wordlist /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt target.com
+
+--dirbuster.threads 20                        # Threads for dir busting (default: 10)
+   → Example: autorecon --dirbuster.threads 20 target.com
+
+--dirbuster.ext txt,php,asp                   # Extensions to fuzz
+   → Example: autorecon --dirbuster.ext php,asp,aspx target.com
+
+--dirbuster.recursive                         # Enable recursive searching
+   → Example: autorecon --dirbuster.recursive target.com
+
+--dirbuster.extras "-s 200,301"               # Extra options for dirbuster
+   → Example: autorecon --dirbuster.extras="-s 200,301 --discover-backup" target.com
+
+--enum4linux.tool enum4linux                  # Tool: enum4linux-ng, enum4linux (default: enum4linux-ng)
+   → Example: autorecon --enum4linux.tool enum4linux target.com
+
+--onesixtyone.community-strings snmp.txt      # SNMP community strings wordlist
+   → Example: autorecon --onesixtyone.community-strings /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt 10.0.0.5
+
+--subdomain-enum.domain example.com           # Base domain for subdomain enum
+   → Example: autorecon --subdomain-enum.domain corp.local
+
+--subdomain-enum.wordlist subdomains.txt      # Subdomain wordlist(s)
+   → Example: autorecon --subdomain-enum.wordlist subdomains-top1million-5000.txt example.com
+
+--subdomain-enum.threads 25                   # Threads for subdomain enum (default: 10)
+   → Example: autorecon --subdomain-enum.threads 25 example.com
+
+--vhost-enum.hostname example.com             # Base hostname for vhost enum
+   → Example: autorecon --vhost-enum.hostname internal.example.com
+
+--vhost-enum.wordlist vhosts.txt              # Vhost wordlist(s)
+   → Example: autorecon --vhost-enum.wordlist vhosts-top1000.txt example.com
+
+--vhost-enum.threads 15                       # Threads for vhost enum (default: 10)
+   → Example: autorecon --vhost-enum.threads 15 example.com
+
+--wpscan.api-token XXXXXX                     # WPScan API token for vuln detection
+   → Example: autorecon --wpscan.api-token ABC123DEF456 target.com
+
+
+# Global Plugin Arguments
+--global.username-wordlist users.txt          # Usernames wordlist (default: top-usernames-shortlist.txt)
+   → Example: autorecon --global.username-wordlist /usr/share/seclists/Usernames/top-usernames.txt target.com
+
+--global.password-wordlist passwords.txt      # Passwords wordlist (default: darkweb2017-top100.txt)
+   → Example: autorecon --global.password-wordlist /usr/share/seclists/Passwords/rockyou.txt target.com
+
+--global.domain corp.local                    # Domain for DNS/Active Directory
+   → Example: autorecon --global.domain corp.local 10.0.0.5
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Local Network (fast, full sweep)
+autorecon -p 1-65535 --nmap-append "-T4" 192.168.1.0/24
+   → Full TCP/UDP sweep on local subnet with aggressive timing
+
+# Single Target (web focus)
+autorecon target.com --tags http,https,web
+   → Focus only on web-related services & enumeration
+
+# Multi-Target (batch file)
+autorecon -t targets.txt -m 30 -mp 5
+   → Load targets from file, 30 max scans, 5 max port scans
+
+# Stealthier Run (slow + polite)
+autorecon target.com --nmap-append "-T2 --max-retries 2 --scan-delay 200ms"
+   → Slow timing, reduced retries, avoid IDS alarms
+
+# Proxychains / VPN
+proxychains autorecon 10.10.10.10
+   → Run all scans through proxychains/TOR/VPN
+
+# With Custom Wordlists
+autorecon target.com \
+  --global.username-wordlist users.txt \
+  --global.password-wordlist rockyou.txt \
+  --subdomain-enum.wordlist subdomains.txt
+   → Supply custom user, pass, and subdomain lists
+
+# Focused Service Enumeration
+autorecon target.com --force-services tcp/80/http tcp/445/smb
+   → Force enumeration of HTTP (80) and SMB (445)
+
+# Timeout-Controlled Engagement
+autorecon -t targets.txt --timeout 120 --target-timeout 30
+   → Global timeout: 2h, per-target timeout: 30 min
+
+# Quick Recon (default + verbose)
+autorecon target.com -v
+   → Default behavior, more verbosity for monitoring
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/Tib3rius/AutoRecon" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        AutoRecon GitHub Repository
+      </a>
+    </li>
+    <li>
+      <a href="https://www.kali.org/tools/autorecon/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Kali Linux: AutoRecon Tool Page
+      </a>
+    </li>
+    <li>AutoRecon config files: <code>~/.config/AutoRecon/</code></li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Result</h2>
+  <details class="bg-gray-900/60 border border-gray-700 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">Click to view AutoRecon sample output</summary>
+    <pre class="text-sm text-grey-400 mt-3 overflow-x-auto">
+
+[saide ~]$ autorecon 10.10.10.5
+
+[*] AutoRecon v2.6.1 - by Tib3rius
+[*] Starting scan at 2025-09-04 21:15:02
+
+[*] Target: 10.10.10.5
+[*] Running initial Nmap scans...
+    nmap -vv --reason -Pn -T4 -p- -oN scans/tcp_all.nmap 10.10.10.5
+    nmap -vv --reason -Pn -T4 -sU --top-ports 200 -oN scans/udp_top200.nmap 10.10.10.5
+
+[*] TCP Ports Open:
+    21/tcp   open  ftp
+    22/tcp   open  ssh
+    80/tcp   open  http
+    445/tcp  open  microsoft-ds
+    3306/tcp open  mysql
+
+[*] Service Enumeration:
+    ftp-anon: Anonymous FTP login allowed
+    smb-enum-shares: Detected accessible SMB shares
+    http-title: "Welcome to Apache"
+    mysql-info: MySQL 5.7.33 detected
+
+[*] Running Service-Specific Plugins...
+    smbmap, enum4linux, nikto, gobuster, wpscan
+
+[*] Output Directories:
+    results/10.10.10.5/scans/
+    results/10.10.10.5/loot/
+    results/10.10.10.5/report/
+
+[*] Scan Completed in 00:12:49
+    Results saved under: results/10.10.10.5
+
+===========================================================
+✔️ Recon complete. Review loot/ and report/ for details.
+===========================================================
+
+    </pre>
+  </details>
+</section>

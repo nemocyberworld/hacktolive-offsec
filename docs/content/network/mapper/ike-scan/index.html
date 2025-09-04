@@ -1,0 +1,323 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">ike-scan</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>IPsec/IKE Discovery, Fingerprinting & PSK Capture</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    <code>ike-scan</code> discovers and fingerprints IKE services (IPsec VPNs), supporting IKEv1 Main/Aggressive and experimental IKEv2. It probes
+    UDP/500 (or NAT-T UDP/4500) and analyzes responses: vendor IDs, transforms, DH groups, backoff timing, etc. In Aggressive Mode it can extract
+    parameters for offline PSK cracking. Typical workflows: 1) discovery & banner/vendor ID grab; 2) backoff & transform fingerprinting; 3) Aggressive
+    Mode probe to export PSK parameters; 4) special cases (NAT-T, TCP, IKEv2) and fuzzing/malformed header tests for resilience checks.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scope targets (single IP/host, CIDR, range, or via file) and open ports (usually UDP/500, UDP/4500 for NAT-T).</li>
+    <li>Run baseline probes (Main Mode, vendor IDs) and enable backoff table for fingerprinting.</li>
+    <li>Switch to Aggressive Mode (if supported) and capture PSK parameters for offline cracking.</li>
+    <li>Pivot into edge cases: NAT-T, TCP encapsulations, IKEv2 checks, and robustness/fuzz tests; document results.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Target Specification (hosts...)
+
+ike-scan 192.168.1.10                         # Probe a single host (default IKEv1 Main Mode on UDP/500)
+ike-scan vpn.example.com                      # Resolve hostname and probe its IP
+ike-scan 192.168.1.0/24                       # Sweep a CIDR; includes network & broadcast addresses
+ike-scan 192.168.1.3-192.168.1.27             # Scan an inclusive IP range
+ike-scan 192.168.1.0:255.255.255.0            # Enumerate all hosts in network:netmask form
+ike-scan -f targets.txt                       # Read targets from file (one per line; use "-" for stdin)
+
+# Help / Version / Verbosity
+
+ike-scan -h                                   # Show help/usage information and exit
+
+ike-scan -V                                   # Print ike-scan version number
+
+ike-scan -v                                   # Verbose mode (add -vv or -vvv for more detail)
+ike-scan -v 192.168.1.1
+
+ike-scan -q                                   # Quiet mode, suppress detailed packet decoding
+ike-scan -q 192.168.1.1
+
+ike-scan -M                                   # Multiline decode, each payload on its own line
+ike-scan -M 192.168.1.1
+
+# Ports, Retries, Timing & Rate Control
+
+ike-scan -s 500 -d 500                        # Set source/destination UDP port (default 500)
+ike-scan -s 4500 -d 4500 192.168.1.1
+
+ike-scan -r 3                                 # Total attempts per host (default 3)
+ike-scan -r 5 192.168.1.1
+
+ike-scan -t 500                               # Initial per-host timeout in ms (default 500)
+ike-scan -t 1000 192.168.1.1
+
+ike-scan -b 1.5                               # Timeout backoff factor (default 1.50)
+ike-scan -b 2 192.168.1.1
+
+ike-scan -B 56000                             # Desired outbound bandwidth (bits/s, K/M suffix ok)
+ike-scan -B 128K 192.168.1.0/24
+
+ike-scan -i 10                                # Minimum packet interval (ms | us with "u" | s with "s")
+ike-scan -i 500u 192.168.1.0/24
+
+ike-scan -R                                   # Randomize host order (Knuth shuffle)
+ike-scan -R -f targets.txt
+
+
+# IKE Mode, IDs, DH Group, Transforms (Fingerprinting)
+
+ike-scan                                      # Default IKEv1 Main Mode
+ike-scan 192.168.1.1
+
+ike-scan -A                                   # Use Aggressive Mode (enables -g/-n/-y applicability)
+ike-scan -A 192.168.1.1
+
+ike-scan -g 2                                 # Set DH Group (1,2,5,14–21). Default 2 (Aggressive & IKEv2)
+ike-scan -A -g 5 192.168.1.1
+
+ike-scan -n test@example.com                  # Use ID value (string or hex 0xdeadbeef) [Aggressive only]
+ike-scan -A -n test@example.com 192.168.1.1
+
+ike-scan -y 3                                 # Identification type (default 3=ID_USER_FQDN) [Aggressive only]
+ike-scan -A -y 1 192.168.1.1
+
+ike-scan -a "(1=7,14=128,2=1,3=3,4=5)"        # Custom transform(s) (new attr=value style)
+ike-scan -a "(1=7,14=128,2=1,3=3,4=5)" 192.168.1.1
+
+ike-scan --trans=7/256,1,1,5                  # Old style enc[/len],hash,auth,group (not for IKEv2)
+ike-scan --trans=7/256,1,1,5 192.168.1.1
+
+ike-scan -l 28800                             # Lifetime in seconds (or hex 0xFF, or "none"); repeatable per --trans
+ike-scan -l 86400 --trans=5,2,1,2 192.168.1.1
+
+ike-scan -z 0                                 # Lifesize in KB (decimal or hex); repeatable per --trans
+ike-scan -z 1024 --trans=5,2,1,2 192.168.1.1
+
+ike-scan -m 1                                 # Auth method (1–5 per RFC2409; 64221 hybrid; 65001 GSS; 65001–65010 XAUTH)
+ike-scan -A -m 2 192.168.1.1
+
+
+# Vendor IDs & Pattern Files (Fingerprinting Aids)
+
+ike-scan -e 40496d6e...                       # Add Vendor ID (hex). Can be repeated for multiple IDs
+ike-scan -e 4f53494e54 192.168.1.1
+
+ike-scan -I /usr/share/ike-scan/ike-vendor-ids # Use Vendor ID patterns file
+ike-scan -I /usr/share/ike-scan/ike-vendor-ids 192.168.1.1
+
+ike-scan -o                                   # Show backoff fingerprint table (optional seconds with -o25)
+ike-scan -o25 192.168.1.1
+
+ike-scan -p /usr/share/ike-scan/ike-backoff-patterns  # Use custom backoff patterns file (with -o)
+ike-scan -o -p /usr/share/ike-scan/ike-backoff-patterns 192.168.1.1
+
+ike-scan -u 500                               # Set fuzz tolerance in ms for backoff matching (default 500)
+ike-scan -o -u 800 192.168.1.1
+
+
+# NAT Traversal, Transport Variants, TCP & Timeouts
+
+ike-scan --nat-t                              # Enable NAT-T (adds non-ESP marker; defaults to UDP/4500)
+ike-scan --nat-t 192.168.1.1
+
+ike-scan -s 4500 -d 4500 --nat-t              # NAT-T with explicit ports (set after --nat-t)
+ike-scan -s 4500 -d 4500 --nat-t 192.168.1.1
+
+ike-scan -T                                   # Use TCP transport (Checkpoint RAW IKE over TCP, type=1 default)
+ike-scan -T 192.168.1.1
+
+ike-scan -T2                                  # Use TCP transport Cisco encapsulated IKE (type=2). Single target only
+ike-scan -T2 192.168.1.1
+
+ike-scan -O 10                                # Set TCP connect timeout in seconds (default 10)
+ike-scan -T -O 5 192.168.1.1
+
+
+# PSK Capture & Offline Cracking (Aggressive Mode)
+
+ike-scan -A -P                                # Output Aggressive Mode PSK params to stdout (single target only)
+ike-scan -A -P 192.168.1.1
+
+ike-scan -A -Ppsk_params.txt                  # Save PSK params to file for offline cracking
+ike-scan -A -Ppsk_params.txt 192.168.1.1
+# Use psk-crack with wordlist: psk-crack -d rockyou.txt psk_params.txt
+
+
+# IKEv2 (Experimental)
+
+ike-scan -2                                   # Send IKEv2 format probe (auto-detects response type)
+ike-scan -2 192.168.1.1
+# Only default proposal is supported for sending
+
+
+# DNS & Nonce Controls (Aggressive Mode)
+
+ike-scan -N                                   # Do not resolve DNS, require IP-only input
+ike-scan -N -f targets.txt
+
+ike-scan -c 20                                # Set nonce length in bytes (8–256; default=20) [Aggressive/IKEv2]
+ike-scan -A -c 32 192.168.1.1
+
+# ISAKMP / Header Manipulation, Fuzzing & Robustness Tests
+
+ike-scan -L +8                                # Set ISAKMP header length (+n, -n, or exact n)
+ike-scan -L +8 192.168.1.1
+
+ike-scan -Z 0                                 # Use reserved (MBZ) fields value 0–255 (non-RFC compliant)
+ike-scan -Z 255 192.168.1.1
+
+ike-scan -E 0x10                              # Specify ISAKMP header version (default 0x10)
+ike-scan -E 0x11 192.168.1.1
+
+ike-scan -C 0x01abcdef...                     # Add CertificateRequest payload (hex; first byte=type)
+ike-scan -C 0x01abcdef 192.168.1.1
+
+ike-scan -D 1                                 # Set SA DOI (default 1 = IPsec)
+ike-scan -D 2 192.168.1.1
+
+ike-scan -S 1                                 # Set SA Situation (default 1 = SIT_IDENTITY_ONLY)
+ike-scan -S 2 192.168.1.1
+
+ike-scan -j 1                                 # Set Proposal protocol ID (default 1 = PROTO_ISAKMP)
+ike-scan -j 2 192.168.1.1
+
+ike-scan -k 1                                 # Set Transform ID (default 1 = KEY_IKE)
+ike-scan -k 2 192.168.1.1
+
+ike-scan --spisize 0                          # Add random SPI to proposal if non-zero (default 0 = none)
+ike-scan --spisize 4 192.168.1.1
+
+ike-scan --hdrflags 0                         # Set ISAKMP header flags (RFC 2408 §3.1)
+ike-scan --hdrflags 2 192.168.1.1
+
+ike-scan --hdrmsgid 0                         # Set ISAKMP header message ID (Phase 1 should be 0)
+ike-scan --hdrmsgid 12345 192.168.1.1
+
+ike-scan --cookie 0xdeadbeef...               # Set initiator cookie (hex). Single target only
+ike-scan --cookie 0xdeadbeefcafebabe 192.168.1.1
+
+ike-scan --rcookie 0xfeedface...              # Set responder cookie (hex; default 0)
+ike-scan --rcookie 0xfeedface12345678 192.168.1.1
+
+ike-scan --exchange 2                         # Set exchange type (2 = Main, 4 = Aggressive, others header only)
+ike-scan --exchange 4 192.168.1.1
+
+ike-scan --nextpayload 1                      # Force next payload type in header
+ike-scan --nextpayload 2 192.168.1.1
+
+ike-scan --randomseed 12345                   # Seed PRNG for repeatable randomized fields
+ike-scan --randomseed 9999 192.168.1.1
+
+ike-scan --timestamp                          # Prepend timestamps to received packets
+ike-scan --timestamp 192.168.1.1
+
+ike-scan --sourceip random                    # Spoof source IP (or specific IP). Raw sockets & root required
+ike-scan --sourceip random 192.168.1.1
+
+ike-scan --bindip 192.0.2.10                  # Bind local IP for sending & receiving
+ike-scan --bindip 192.0.2.10 192.168.1.1
+
+ike-scan --shownum                            # Show ordinal host number before IP in output
+ike-scan --shownum 192.168.1.1
+
+  </pre>
+</section>
+
+<!-- Best Flag Combinations (Cheat Ready) — ike-scan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick discovery scan on single host
+ike-scan 192.168.1.1                           # Basic Main Mode probe
+
+# Sweep a subnet for VPN endpoints
+ike-scan -M 10.0.0.0/24                        # Multi-line decode, fingerprint all in /24
+
+# Aggressive Mode probe with ID
+ike-scan -A -n test@example.com 192.168.1.1    # Detect Aggressive Mode, use custom ID
+
+# PSK capture for offline cracking
+ike-scan -A -Ppsk_params.txt 192.168.1.1       # Save Aggressive Mode PSK params to file
+
+# Vendor ID fingerprinting
+ike-scan -e 4f53494e54 192.168.1.1             # Send custom Vendor ID hex payload
+
+# Backoff fingerprint analysis
+ike-scan -o25 192.168.1.1                      # Show backoff table, wait 25s after last packet
+
+# NAT-T VPN gateway probe
+ike-scan --nat-t 203.0.113.10                  # NAT-Traversal probe on UDP/4500
+
+# IKE over TCP (Checkpoint RAW)
+ike-scan -T 203.0.113.20                       # Send IKE packets over TCP instead of UDP
+
+# IKEv2 endpoint test
+ike-scan -2 203.0.113.42                       # Probe host using IKEv2 format
+
+# Fingerprint with custom transform
+ike-scan -a "(1=7,14=128,2=1,3=3,4=5)" 192.168.1.1  # AES/128, MD5, RSA-sig, DH Group 5
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/royhills/ike-scan" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        ike-scan – Official GitHub (source, issues, psk-crack)
+      </a>
+    </li>
+    <li>
+      <a href="https://tools.kali.org/information-gathering/ike-scan" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        Kali Tools – ike-scan page
+      </a>
+    </li>
+    <li>
+      <a href="https://www.rfc-editor.org/rfc/rfc2408" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        RFC 2408 (ISAKMP), RFC 2409 (IKEv1), RFC 3947 (NAT-T), RFC 4306 (IKEv2)
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — ike-scan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of ike-scan</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ ike-scan 192.168.1.1
+Starting ike-scan 1.9 with 1 hosts (http://www.nta-monitor.com/tools/ike-scan/)
+192.168.1.1 Main Mode Handshake returned
+HDR=(CKY-R=1234567890ABCDEF) SA=(Enc=3DES Hash=SHA1 Auth=PSK Group=2:modp1024 LifeType=Seconds LifeDuration=28800)
+
+[saide ~]$ ike-scan -A -n test@example.com 192.168.1.1
+192.168.1.1 Aggressive Mode Handshake returned
+HDR=(CKY-R=ABCDEF1234567890) SA=(Enc=AES Hash=SHA1 Auth=PSK Group=2:modp1024 LifeType=Seconds LifeDuration=86400)
+VID=4f53494e54 ("OSNT-VPN-Gateway")
+
+[saide ~]$ ike-scan -A -Ppsk_params.txt 192.168.1.1
+Writing PSK parameters to 'psk_params.txt'
+PSK params captured for offline cracking with psk-crack
+
+    </pre>
+  </details>
+</section>

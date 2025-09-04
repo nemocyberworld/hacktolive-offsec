@@ -1,0 +1,292 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Masscan</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>High-Speed Port Scanning</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Masscan is a fast, asynchronous TCP port scanner capable of scanning the entire IPv4 Internet within minutes.
+    Known as the “fastest Internet port scanner,” it uses a custom TCP/IP stack for speed and flexibility.
+    It is widely used by penetration testers, researchers, and network administrators to discover open ports,
+    detect services, and map network exposure. While similar in syntax to Nmap, it prioritizes raw speed and 
+    scalability over deep service fingerprinting.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify target(s) — IPs, ranges, or entire subnets.</li>
+    <li>Choose scan type and configure speed (rate, ports, output format).</li>
+    <li>Run Masscan with appropriate flags (requires root for raw sockets).</li>
+    <li>Analyze results and optionally feed them into Nmap or other tools for deeper analysis.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Target & Ports
+-p [ports]                  # Ports to scan
+masscan -p80,443 192.168.1.0/24
+
+--ports [ports]             # Same as -p
+masscan --ports 22,3306 10.0.0.5
+
+--range [start-end]         # Scan specific IP range
+masscan -p80 192.168.1.1-192.168.1.50
+
+[targets]                   # CIDR, range, or IP
+masscan -p22 10.0.0.0/16
+
+
+# Performance / Speed
+--rate [pps]                # Packets per second (default 100)
+masscan -p80 192.168.1.0/24 --rate=1000
+
+--max-rate [pps]            # Maximum send rate
+masscan -p80 192.168.1.0/24 --max-rate=50000
+
+--retries [n]               # Retries per host/port
+masscan -p22 192.168.1.0/24 --retries=2
+
+--randomize-hosts           # Shuffle target order
+masscan -p80 192.168.1.0/24 --randomize-hosts
+
+
+# Scan Types / Payloads
+--banners                   # Grab service banners
+masscan -p80,22 192.168.1.0/24 --banners
+
+--nmap                      # Show only Nmap-compatible options
+masscan --nmap
+
+--open                      # Show only open ports
+masscan -p0-65535 192.168.1.0/24 --open
+
+--ping                      # ICMP echo ping before scanning
+masscan -p80 192.168.1.1 --ping
+
+--syn                       # SYN scan (default)
+masscan -p443 192.168.1.1 --syn
+
+--ack                       # ACK scan
+masscan -p80 192.168.1.1 --ack
+
+--fin                       # FIN scan
+masscan -p80 192.168.1.1 --fin
+
+--null                      # NULL scan
+masscan -p80 192.168.1.1 --null
+
+--xmas                      # Xmas scan
+masscan -p80 192.168.1.1 --xmas
+
+--udp                       # UDP scan
+masscan -p53 192.168.1.0/24 --udp
+
+
+# Output Options
+-oB [file]                  # Save results in binary format
+masscan -p80 192.168.1.0/24 -oB results.bin
+
+-oX [file]                  # Save results in XML format
+masscan -p80 192.168.1.0/24 -oX results.xml
+
+-oJ [file]                  # Save results in JSON format
+masscan -p80 192.168.1.0/24 -oJ results.json
+
+-oL [file]                  # Save results in list format
+masscan -p80 192.168.1.0/24 -oL results.lst
+
+-oG [file]                  # Save results in grepable format
+masscan -p80 192.168.1.0/24 -oG results.grep
+
+--output-filename [file]    # Set generic output filename
+masscan -p80 192.168.1.0/24 --output-filename scan.out
+
+--readscan [file]           # Read saved binary scan results
+masscan --readscan results.bin -oX parsed.xml
+
+--append-output             # Append to existing output file
+masscan -p22 192.168.1.0/24 -oX results.xml --append-output
+
+
+# Source & Network Settings
+--adapter [iface]           # Set network adapter
+masscan -p80 192.168.1.1 --adapter eth0
+
+--adapter-ip [ip]           # Set source IP
+masscan -p80 192.168.1.1 --adapter-ip 192.168.1.50
+
+--adapter-mac [mac]         # Set source MAC
+masscan -p80 192.168.1.1 --adapter-mac 00:11:22:33:44:55
+
+--adapter-port [port]       # Set source port
+masscan -p80 192.168.1.1 --adapter-port 40000
+
+--router-mac [mac]          # Set gateway MAC
+masscan -p80 192.168.1.1 --router-mac 66:77:88:99:AA:BB
+
+--source-port [port]        # Force source port
+masscan -p80 192.168.1.1 --source-port 12345
+
+--seed [int]                # PRNG seed for reproducibility
+masscan -p80 192.168.1.0/24 --seed 1337
+
+--ttl [n]                   # Set TTL value
+masscan -p80 192.168.1.1 --ttl 64
+
+--mtu [n]                   # Set MTU size
+masscan -p80 192.168.1.1 --mtu 1500
+
+
+# Timing / Scan Control
+--shard [n/x]               # Divide scan into shards
+masscan -p80 10.0.0.0/8 --rate=100000 --shard 1/10
+
+--resume [file]             # Resume scan from log
+masscan --resume paused.conf
+
+--wait [secs]               # Wait for late responses
+masscan -p80 192.168.1.0/24 --wait=10
+
+
+# Service Detection / App Layer
+--http-user-agent [string]  # Custom HTTP User-Agent
+masscan -p80 web.local --banners --http-user-agent "Mozilla/5.0 Test"
+
+--hello-string [string]     # Custom hello string for probes
+masscan -p25 mail.local --banners --hello-string "EHLO test"
+
+--heartbleed                # Check Heartbleed vulnerability
+masscan -p443 192.168.1.1 --heartbleed
+
+
+# Exclusions
+--exclude [ip,…]            # Exclude IPs/subnets
+masscan -p80 192.168.1.0/24 --exclude 192.168.1.1,192.168.1.2
+
+--excludefile [file]        # Exclude from file
+masscan -p80 192.168.1.0/24 --excludefile exclude.txt
+
+
+# Debug / Misc
+--echo [file]               # Save config as scriptable file
+masscan -p80 192.168.1.0/24 --rate=1000 --echo config.conf
+
+--conf [file]               # Load options from config file
+masscan --conf config.conf
+
+--pcap [file]               # Save raw packets to PCAP
+masscan -p80 192.168.1.0/24 --pcap capture.pcap
+
+--log-level [n]             # Verbosity level (0–5)
+masscan -p80 192.168.1.0/24 --log-level 5
+
+--version                   # Show version
+masscan --version
+
+--help                      # Show help
+masscan --help
+
+  </pre>
+</section>
+
+<!-- Best Flag Combinations (Cheat Ready) — Masscan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick LAN sweep (fast scan)
+masscan -p80,443 192.168.1.0/24 --rate=1000
+# Scan web ports across subnet at 1kpps
+
+# Full port range scan on single host
+masscan -p0-65535 192.168.1.10 --rate=5000
+# Enumerate all TCP ports on target host
+
+# Internet-wide HTTP scan (aggressive)
+masscan 0.0.0.0/0 -p80 --rate=100000
+# Find open web servers across the Internet
+
+# Banner grabbing mode
+masscan -p22,80,443 192.168.1.0/24 --banners --rate=2000
+# Identify running services on SSH, HTTP, HTTPS
+
+# Save results for later parsing
+masscan -p445 192.168.1.0/24 -oX smb_results.xml --rate=500
+# Store scan results in XML
+
+# Read saved binary results and convert
+masscan --readscan results.bin -oJ results.json
+# Convert previous scan data to JSON
+
+# Exclude sensitive IPs during scan
+masscan -p80 192.168.0.0/16 --excludefile exclude.txt --rate=2000
+# Skip scanning specific subnets/IPs
+
+# Shard scan for distributed scanning
+masscan -p22 10.0.0.0/8 --rate=100000 --shard 1/5
+# Divide scan into 5 parts (this is shard 1)
+
+# Resume from interrupted scan
+masscan --resume paused.conf
+# Continue scanning from saved state
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/robertdavidgraham/masscan" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Masscan GitHub Repository
+      </a>
+    </li>
+    <li>
+      <a href="https://tools.kali.org/information-gathering/masscan" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Masscan – Kali Linux Tools Documentation
+      </a>
+    </li>
+    <li>Often paired with Nmap for detailed service/version detection after fast discovery.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Masscan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Masscan</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ masscan -p80,443 192.168.1.0/24 --rate=1000
+Starting masscan 1.3.2 (http://bit.ly/14GZzcT) at 2025-09-04 09:32:11 GMT
+Initiating SYN Stealth Scan
+Scanning 256 hosts [2 ports/host]
+
+Discovered open port 80/tcp on 192.168.1.10
+Discovered open port 443/tcp on 192.168.1.10
+Discovered open port 80/tcp on 192.168.1.22
+
+[+] Scan completed in 2.10 seconds
+[+] Results written to: results.xml
+
+[saide ~]$ masscan --readscan results.bin -oJ results.json
+[*] Loaded 3 results from results.bin
+[*] Saved results to results.json
+
+    </pre>
+  </details>
+</section>

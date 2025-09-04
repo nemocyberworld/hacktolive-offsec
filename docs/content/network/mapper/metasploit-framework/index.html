@@ -1,0 +1,361 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Metasploit Framework (Network Mapping)</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Mapping, Discovery & Service Enumeration</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Metasploit Framework is a penetration testing platform best known for exploitation, but it also includes 
+    powerful reconnaissance modules. From a network mapping perspective, Metasploit integrates host discovery, 
+    port scanning, service fingerprinting, and OS detection into workflows that complement or extend tools like Nmap. 
+    These features allow red teamers to build attack surface maps while defenders can validate network exposure and 
+    inventory services across environments.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Start Metasploit Framework Console with <code>msfconsole</code>.</li>
+    <li>Load auxiliary scanner modules for host discovery or port scanning.</li>
+    <li>Set required options (RHOSTS, RPORTS, THREADS, etc.).</li>
+    <li>Run the module and analyze discovered hosts, services, and OS details.</li>
+    <li>Document and export results for use in attack planning or defensive audits.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Discovery
+use auxiliary/scanner/discovery/arp_sweep             # ARP sweep for live hosts
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/discovery/icmp_sweep            # ICMP ping sweep
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/discovery/ipv6_multicast_ping   # IPv6 multicast ping discovery
+set RHOSTS ff02::1; run
+
+use auxiliary/scanner/discovery/ipv6_neighbor         # IPv6 neighbor discovery
+set RHOSTS fe80::/64; run
+
+use auxiliary/scanner/discovery/ipv6_neighbor_router  # IPv6 router advertisement discovery
+set RHOSTS fe80::/64; run
+
+use auxiliary/scanner/discovery/ipv6_neighbor_advertise # Send IPv6 neighbor advertisement
+set RHOSTS fe80::/64; run
+
+use auxiliary/scanner/discovery/udp_probe             # Send custom UDP probes
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/discovery/udp_sweep             # UDP ping sweep
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/discovery/route                 # Enumerate network routes
+set SESSION 1; run
+
+
+# Port Scanning
+use auxiliary/scanner/portscan/ack                    # ACK scan (firewall testing)
+set RHOSTS 192.168.1.100; set PORTS 80,443; run
+
+use auxiliary/scanner/portscan/ftpbounce              # FTP bounce scan
+set RHOSTS 10.0.0.5; set RPORT 21; set PORTS 80; run
+
+use auxiliary/scanner/portscan/syn                    # SYN (stealth) scan
+set RHOSTS 192.168.1.0/24; set PORTS 22,80,443; run
+
+use auxiliary/scanner/portscan/tcp                    # TCP connect scan
+set RHOSTS 192.168.1.100; set PORTS 1-1000; run
+
+use auxiliary/scanner/portscan/udp                    # UDP port scan
+set RHOSTS 192.168.1.100; set PORTS 53,161; run
+
+use auxiliary/scanner/portscan/xmas                   # Xmas scan
+set RHOSTS 192.168.1.100; set PORTS 21,25,80; run
+
+
+# SNMP
+use auxiliary/scanner/snmp/snmp_enum                  # Enumerate SNMP information
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/snmp/snmp_enumshares            # Enumerate Windows shares via SNMP
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/snmp/snmp_enumusers             # Enumerate users via SNMP
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/snmp/snmp_login                 # Attempt SNMP login
+set RHOSTS 192.168.1.100; set COMMUNITY public; run
+
+use auxiliary/scanner/snmp/snmp_walk                  # SNMP tree walk
+set RHOSTS 192.168.1.100; set COMMUNITY public; run
+
+
+# DNS
+use auxiliary/scanner/dns/dns_amp                     # Detect DNS amplification
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/dns/dns_enum                    # DNS enumeration
+set DOMAIN example.com; run
+
+use auxiliary/scanner/dns/dns_reverse_lookup          # Reverse DNS lookup
+set RHOSTS 192.168.1.0/24; run
+
+
+# Service & Version
+use auxiliary/scanner/dcerpc/endpoint_mapper          # Enumerate DCERPC endpoints
+set RHOSTS 192.168.1.200; run
+
+use auxiliary/scanner/ftp/ftp_version                 # Detect FTP version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/http/http_version               # Detect HTTP version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/imap/imap_version               # Detect IMAP service/version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/mysql/mysql_version             # Detect MySQL version
+set RHOSTS 192.168.1.50; run
+
+use auxiliary/scanner/mssql/mssql_ping                # Discover MSSQL instances
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/oracle/tnslsnr_version          # Detect Oracle TNS listener version
+set RHOSTS 192.168.1.200; run
+
+use auxiliary/scanner/pop3/pop3_version               # Detect POP3 version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/postgres/postgres_version       # Detect PostgreSQL version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/smb/smb_version                 # Detect SMB version
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/smtp/smtp_version               # Detect SMTP version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/ssh/ssh_version                 # Detect SSH version
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/telnet/telnet_version           # Detect Telnet version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/vnc/vnc_none_auth               # Detect VNC with no authentication
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/rdp/rdp_scanner                 # Detect RDP service
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/rdp/rdp_udp_scanner             # Detect RDP over UDP
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/ssl/ssl_version                 # Detect SSL/TLS version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/ike/ike_version                 # Detect IKE VPN service/version
+set RHOSTS 192.168.1.0/24; run
+
+
+# Proxy / Routing
+use auxiliary/scanner/proxy/proxy_version             # Detect proxy service/version
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/socks/socks_version             # Detect SOCKS proxy service/version
+set RHOSTS 192.168.1.100; run
+
+
+# Other Protocols
+use auxiliary/scanner/ntp/ntp_monlist                 # Enumerate NTP monlist
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/ntp/ntp_peer_list               # Enumerate NTP peers
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/ntp/ntp_info                    # Gather NTP info
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/netbios/nbname                  # NetBIOS name service query
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/netbios/nbstat                  # NetBIOS node status
+set RHOSTS 192.168.1.0/24; run
+
+use auxiliary/scanner/mdns/query                      # Multicast DNS query
+set RHOSTS 224.0.0.251; run
+
+use auxiliary/scanner/sip/sip_options                 # Detect SIP service/options
+set RHOSTS 192.168.1.100; run
+
+use auxiliary/scanner/lotus/lotus_domino_version      # Detect Lotus Domino version
+set RHOSTS 192.168.1.150; run
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — Metasploit Framework -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick LAN discovery → SYN scan (core workflow)
+msfconsole -q
+use auxiliary/scanner/discovery/arp_sweep      # Fast live-host sweep on local subnet
+set RHOSTS 192.168.1.0/24; run
+use auxiliary/scanner/portscan/syn             # Stealthy port triage
+set RHOSTS 192.168.1.0/24; set PORTS 22,80,443,445,3389; set THREADS 50; run
+
+# Deep TCP connect scan (single host, wider range)
+use auxiliary/scanner/portscan/tcp
+set RHOSTS 192.168.1.50; set PORTS 1-10000; set CONCURRENCY 20; run
+
+# UDP discovery + focused UDP ports
+use auxiliary/scanner/discovery/udp_sweep
+set RHOSTS 10.0.0.0/24; run
+use auxiliary/scanner/portscan/udp
+set RHOSTS 10.0.0.0/24; set PORTS 53,67,68,69,123,137,161,500; set THREADS 30; run
+
+# Web mapping: identify HTTP(S) quickly
+use auxiliary/scanner/http/http_version
+set RHOSTS 192.168.1.0/24; set RPORTS 80,443,8080,8443; run
+
+# SMB/RPC surface mapping (Windows estates)
+use auxiliary/scanner/smb/smb_version
+set RHOSTS 192.168.1.0/24; run
+use auxiliary/scanner/dcerpc/endpoint_mapper
+set RHOSTS 192.168.1.0/24; run
+
+# Remote desktop exposure check
+use auxiliary/scanner/rdp/rdp_scanner
+set RHOSTS 192.168.1.0/24; run
+use auxiliary/scanner/rdp/rdp_udp_scanner
+set RHOSTS 192.168.1.0/24; run
+
+# SSH estate versioning (Linux/Network devices)
+use auxiliary/scanner/ssh/ssh_version
+set RHOSTS 10.10.0.0/16; set THREADS 100; run
+
+# Mail services quick sweep (SMTP/IMAP/POP3)
+use auxiliary/scanner/smtp/smtp_version
+set RHOSTS 10.0.5.0/24; run
+use auxiliary/scanner/imap/imap_version
+set RHOSTS 10.0.5.0/24; run
+use auxiliary/scanner/pop3/pop3_version
+set RHOSTS 10.0.5.0/24; run
+
+# Database discovery (MySQL/MSSQL/Postgres)
+use auxiliary/scanner/mysql/mysql_version
+set RHOSTS 10.1.0.0/16; run
+use auxiliary/scanner/mssql/mssql_ping
+set RHOSTS 10.1.0.0/16; run
+use auxiliary/scanner/postgres/postgres_version
+set RHOSTS 10.1.0.0/16; run
+
+# DNS mapping (amp check + enum + reverse)
+use auxiliary/scanner/dns/dns_amp
+set RHOSTS 10.2.0.0/16; run
+use auxiliary/scanner/dns/dns_enum
+set DOMAIN example.com; run
+use auxiliary/scanner/dns/dns_reverse_lookup
+set RHOSTS 10.2.0.0/16; run
+
+# SNMP footprint (common defaults)
+use auxiliary/scanner/snmp/snmp_login
+set RHOSTS 10.3.0.0/16; set COMMUNITY public,private; run
+use auxiliary/scanner/snmp/snmp_enum
+set RHOSTS 10.3.0.0/16; set COMMUNITY public; run
+
+# VPN/IKE exposure check
+use auxiliary/scanner/ike/ike_version
+set RHOSTS 0.0.0.0/0; set THREADS 200; run
+
+# Proxies and SOCKS detection
+use auxiliary/scanner/proxy/proxy_version
+set RHOSTS 10.4.0.0/16; run
+use auxiliary/scanner/socks/socks_version
+set RHOSTS 10.4.0.0/16; run
+
+# IPv6 neighbor & multicast discovery (dual-stack nets)
+use auxiliary/scanner/discovery/ipv6_neighbor
+set RHOSTS fe80::/64; run
+use auxiliary/scanner/discovery/ipv6_multicast_ping
+set RHOSTS ff02::1; run
+
+# Time services & NTP reflection footprint
+use auxiliary/scanner/ntp/ntp_info
+set RHOSTS 10.5.0.0/16; run
+use auxiliary/scanner/ntp/ntp_monlist
+set RHOSTS 10.5.0.0/16; run
+
+# NetBIOS estate quick map
+use auxiliary/scanner/netbios/nbname
+set RHOSTS 10.6.0.0/16; run
+use auxiliary/scanner/netbios/nbstat
+set RHOSTS 10.6.0.0/16; run
+
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://docs.metasploit.com/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Metasploit Official Documentation
+      </a>
+    </li>
+    <li>
+      <a href="https://www.offensive-security.com/metasploit-unleashed/scanning/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Metasploit Unleashed – Scanning & Enumeration
+      </a>
+    </li>
+    <li>Metasploit’s auxiliary scanners complement Nmap for mapping live hosts, open ports, and service details.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Metasploit Framework -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Metasploit Framework</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ msfconsole -q
+msf6 > use auxiliary/scanner/portscan/syn
+msf6 auxiliary(scanner/portscan/syn) > set RHOSTS 192.168.1.0/24
+RHOSTS => 192.168.1.0/24
+msf6 auxiliary(scanner/portscan/syn) > set PORTS 22,80,445
+PORTS => 22,80,445
+msf6 auxiliary(scanner/portscan/syn) > run
+
+[+] 192.168.1.10:22 - TCP OPEN
+[+] 192.168.1.10:80 - TCP OPEN
+[+] 192.168.1.15:445 - TCP OPEN
+[*] Scanned 256 of 256 hosts (100% complete)
+[*] Auxiliary module execution completed
+
+msf6 > use auxiliary/scanner/ssh/ssh_version
+msf6 auxiliary(scanner/ssh/ssh_version) > set RHOSTS 192.168.1.10
+RHOSTS => 192.168.1.10
+msf6 auxiliary(scanner/ssh/ssh_version) > run
+
+[*] 192.168.1.10:22, SSH server version: SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5
+[*] Scanned 1 of 1 hosts (100% complete)
+[*] Auxiliary module execution completed
+
+    </pre>
+  </details>
+</section>

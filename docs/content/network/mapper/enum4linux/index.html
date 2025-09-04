@@ -1,0 +1,228 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">enum4linux</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>SMB/Windows Enumeration</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    <code>enum4linux</code> is a Linux tool for gathering information from Windows machines 
+    using SMB (Server Message Block) protocol. It automates enumeration techniques 
+    against Windows hosts and Samba shares, making it useful for penetration testers 
+    and red teamers. It is often compared to <code>smbclient</code>, <code>rpcclient</code>, and 
+    <code>nmblookup</code>, combining their functionalities into a single script.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify a target Windows host or Samba server running SMB.</li>
+    <li>Select enumeration options (users, shares, policies, groups, etc.).</li>
+    <li>Run <code>enum4linux</code> with the chosen flags against the target.</li>
+    <li>Analyze results for accounts, shares, and vulnerabilities to use in further exploitation.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Core Options
+-U                                            # Get userlist
+enum4linux -U 192.168.1.10                     # Enumerate all users
+
+-M                                            # Get machine list
+enum4linux -M 192.168.1.10                     # List all machines in the domain
+
+-S                                            # Get sharelist
+enum4linux -S 192.168.1.10                     # List shared folders
+
+-P                                            # Get password policy information
+enum4linux -P 192.168.1.10                     # Show password policy
+
+-G                                            # Get group and member list
+enum4linux -G 192.168.1.10                     # Enumerate groups and members
+
+-d                                            # Detailed output (applies to -U and -S)
+enum4linux -U -d 192.168.1.10                  # Verbose user enumeration
+
+-u <user>                                     # Specify username (default: "")
+enum4linux -u admin 192.168.1.10               # Use admin as username
+
+-p <pass>                                     # Specify password (default: "")
+enum4linux -u admin -p pass123 192.168.1.10    # Use password for authentication
+
+# Additional Options
+-a                                            # Run all simple enumeration
+enum4linux -a 192.168.1.10                     # Run full scan (users, shares, groups, OS info, etc.)
+
+-h                                            # Show help message and exit
+enum4linux -h                                  # Show help and usage
+
+-r                                            # Enumerate users via RID cycling
+enum4linux -r 192.168.1.10                     # Extract users via RID cycling
+
+-R <range>                                    # RID ranges to enumerate
+enum4linux -R 1000-1200 192.168.1.10           # Enumerate users in custom RID range
+
+-K <n>                                        # Keep searching RIDs until n misses
+enum4linux -K 20 192.168.1.10                  # Continue RID search until 20 fails
+
+-l                                            # Limited info via LDAP (for DCs only)
+enum4linux -l 192.168.1.10                     # Query basic LDAP info
+
+-s <file>                                     # Brute-force share names
+enum4linux -s shares.txt 192.168.1.10          # Try guessing shares from list
+
+-k <users>                                    # Known users for SID lookup
+enum4linux -k admin,guest 192.168.1.10         # Lookup SID for admin & guest
+
+-o                                            # Get OS information
+enum4linux -o 192.168.1.10                     # Show OS details
+
+-i                                            # Get printer information
+enum4linux -i 192.168.1.10                     # Enumerate printers
+
+-w <workgroup>                                # Manually specify workgroup
+enum4linux -w WORKGROUP 192.168.1.10           # Use specific workgroup name
+
+-n                                            # Perform nmblookup
+enum4linux -n 192.168.1.10                     # Run NetBIOS name lookup
+
+-v                                            # Verbose output (show commands run)
+enum4linux -v 192.168.1.10                     # Show full command execution
+
+-A                                            # Aggressive checks (write/share access tests)
+enum4linux -A 192.168.1.10                     # Aggressive share and write access checks
+
+
+  </pre>
+</section>
+
+<!-- Best Flag Combinations (Cheat Ready) — enum4linux -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# 1) Quick Anonymous Sweep (default "do-all")
+enum4linux -a 192.168.1.10                     # Users, shares, groups, policy, OS, RID cycle, nmb, printers
+
+# 2) Authenticated Deep Enumeration
+enum4linux -a -d -u admin -p 'Passw0rd!' 192.168.1.10   # Full sweep with creds + detailed output
+
+# 3) Share Hunting + Write Checks
+enum4linux -S -A -d 192.168.1.10               # List shares (verbose) and test for write access
+
+# 4) User & Group Mapping (fast)
+enum4linux -U -G 192.168.1.10                  # Enumerate users and groups/members
+
+# 5) RID Cycling (Restricted Anonymous targets)
+enum4linux -r 192.168.1.10                     # Try to extract users via RID cycling
+enum4linux -R 1000-2000 192.168.1.10           # Custom RID range sweep (implies -r)
+enum4linux -K 25 192.168.1.10                  # Continue until 25 consecutive misses (good vs DCs)
+
+# 6) Domain Controller Focus (LDAP + NetBIOS)
+enum4linux -l -n 192.168.1.10                  # Basic LDAP info (DCs only) + nmblookup
+
+# 7) OS, Policy & Printers Snapshot
+enum4linux -o -P -i 192.168.1.10               # OS details, password policy, printer info
+
+# 8) Known-User SID Discovery
+enum4linux -k administrator,guest 192.168.1.10 # Lookup SIDs for known/builtin users
+
+# 9) Wordlist Share Discovery
+enum4linux -s shares.txt 192.168.1.10          # Brute-force share names from wordlist
+
+# 10) Workgroup Mismatch Handling
+enum4linux -w WORKGROUP -a 192.168.1.10        # Force workgroup then run full sweep
+
+# 11) Verbose Troubleshooting
+enum4linux -v -U -S 192.168.1.10               # Show underlying samba/rpcclient commands while listing users/shares
+
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://tools.kali.org/information-gathering/enum4linux" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Kali Linux — enum4linux Documentation
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com/CiscoCXSecurity/enum4linux" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        GitHub Repository
+      </a>
+    </li>
+    <li>Useful for SMB/NetBIOS enumeration during penetration testing.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Results (Toggle) — enum4linux -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer font-semibold text-gray-200 hover:text-purple-400">
+      Example Result
+    </summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+[ saide ~ ]$ enum4linux -a 192.168.1.10
+
+[+] Enumerating users via RID cycling
+User found: Administrator (RID: 500)
+User found: Guest (RID: 501)
+User found: John (RID: 1000)
+User found: Mary (RID: 1001)
+
+[+] Enumerating machine accounts
+Machine: DC01$ (RID: 1005)
+Machine: FILESRV01$ (RID: 1006)
+
+[+] Password Policy Information
+Minimum password length: 8
+Password history length: 24
+Maximum password age: 42 days
+Lockout threshold: 5 attempts
+
+[+] Enumerating shares
+Sharename       Type    Comment
+---------       ----    -------
+ADMIN$          Disk    Remote Admin
+C$              Disk    Default share
+IPC$            IPC     Remote IPC
+SharedDocs      Disk    Company Documents
+
+[+] OS Information
+Target OS: Windows Server 2016 Standard 14393 (Build 1770)
+Server Comment: Primary Domain Controller
+
+[+] Group and Member List
+Group: Domain Admins (RID: 512)
+   - Administrator
+   - John
+
+Group: Domain Users (RID: 513)
+   - Mary
+   - Guest
+
+[+] Printers
+Printer: HP-LaserJet-01
+Status: Online
+Shared: Yes
+
+enum4linux complete on 192.168.1.10
+
+    </pre>
+  </details>
+</section>

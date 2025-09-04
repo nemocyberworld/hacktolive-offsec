@@ -1,0 +1,348 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Naabu</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Port Scanning & Host Discovery</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Naabu is a fast, reliable port scanner developed by ProjectDiscovery. It focuses on 
+    identifying open TCP and UDP ports across targets, making it a lightweight alternative to 
+    heavy scanners while still offering integration with Nmap for deep service fingerprinting. 
+    Naabu is widely used in bug bounty, penetration testing, and defensive asset discovery to 
+    quickly map the attack surface of networks and applications.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Install Naabu (from ProjectDiscovery releases or package manager).</li>
+    <li>Identify target IPs, ranges, or hostnames.</li>
+    <li>Select scan parameters (ports, rate, exclude, output format).</li>
+    <li>Run Naabu to detect open ports and optionally pipe results to Nmap or other tools.</li>
+    <li>Interpret results and document findings for further analysis.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Input
+-host string[]                 # Hosts to scan (comma-separated)
+naabu -host hackerone.com,example.com        # Scan multiple hosts
+
+-list, -l string               # File with list of hosts
+naabu -list targets.txt                        # Read targets from file
+
+-exclude-hosts, -eh string     # Hosts to exclude (comma-separated)
+naabu -host scope.txt -exclude-hosts 192.168.1.1  # Skip specific hosts
+
+-exclude-file, -ef string      # File with excluded hosts
+naabu -list targets.txt -exclude-file exclude.txt # Exclude list from file
+
+
+# Port
+-port, -p string               # Ports to scan
+naabu -host 192.168.1.1 -p 22,80,443          # Scan specific ports
+
+-top-ports, -tp string         # Top ports to scan [full,100,1000]
+naabu -host 192.168.1.1 -top-ports 1000       # Scan top 1000 ports
+
+-exclude-ports, -ep string     # Exclude ports (comma-separated)
+naabu -host 192.168.1.1 -p 1-1000 -exclude-ports 22,80 # Exclude specific ports
+
+-ports-file, -pf string        # File containing ports
+naabu -host 192.168.1.1 -ports-file ports.txt # Scan ports from file
+
+-port-threshold, -pts int      # Skip scanning if host exceeds port threshold
+naabu -list targets.txt -port-threshold 1000  # Skip overly large hosts
+
+-exclude-cdn, -ec              # Skip full scans on CDN/WAF (only 80,443)
+naabu -host example.com -exclude-cdn          # Only check 80/443 on CDNs
+
+-display-cdn, -cdn             # Display CDN info
+naabu -host example.com -display-cdn          # Show CDN provider
+
+
+# Rate Limit
+-c int                         # Worker threads (default 25)
+naabu -host 192.168.1.1 -c 50                  # Increase concurrency
+
+-rate int                      # Packets per second (default 1000)
+naabu -host 192.168.1.1 -rate 20000            # High-speed scan
+
+
+# Update
+-up, -update                   # Update Naabu to latest
+naabu -update                                   # Pull latest release
+
+-duc, -disable-update-check    # Disable auto-update check
+naabu -disable-update-check                      # Run without update check
+
+
+# Output
+-o, -output string             # Save output to file
+naabu -host 192.168.1.1 -o results.txt          # Save results to file
+
+-j, -json                      # JSON output
+naabu -host 192.168.1.1 -json                   # Output in JSON format
+
+-csv                           # CSV output
+naabu -host 192.168.1.1 -csv                    # Output in CSV format
+
+
+# Configuration
+-config string                 # Custom config file
+naabu -host 192.168.1.1 -config custom.yaml     # Use custom config
+
+-scan-all-ips, -sa             # Scan all IPs for a DNS record
+naabu -host google.com -scan-all-ips            # Resolve all A records
+
+-ip-version, -iv string[]      # IP version (4 or 6) (default 4)
+naabu -host example.com -iv 6                   # Force IPv6 scanning
+
+-scan-type, -s string          # Scan type (SYN/CONNECT) (default SYN)
+naabu -host 192.168.1.1 -s connect              # Use TCP connect scan
+
+-source-ip string              # Source IP and port
+naabu -host 192.168.1.1 -source-ip 10.0.0.5:40000 # Set custom source
+
+-interface-list, -il           # List available interfaces and IPs
+naabu -interface-list                            # Show interfaces
+
+-interface, -i string          # Set interface for scanning
+naabu -host 192.168.1.1 -i eth0                  # Use eth0
+
+-nmap                          # Invoke Nmap scan (deprecated)
+naabu -host 192.168.1.1 -nmap                   # Pipe results to nmap
+
+-nmap-cli string               # Custom Nmap command
+naabu -host 192.168.1.1 -nmap-cli "nmap -sV"    # Run nmap -sV on results
+
+-r string                      # Custom resolvers
+naabu -host example.com -r resolvers.txt        # Set custom DNS resolvers
+
+-proxy string                  # SOCKS5 proxy
+naabu -host 192.168.1.1 -proxy 127.0.0.1:9050   # Run via proxy
+
+-proxy-auth string             # SOCKS5 proxy auth (user:pass)
+naabu -host 192.168.1.1 -proxy 127.0.0.1:9050 -proxy-auth user:pass
+
+-resume                        # Resume scan from resume.cfg
+naabu -resume                                   # Continue previous scan
+
+-stream                        # Stream mode (no resume/verify/nmap)
+naabu -list scope.txt -stream                  # Fast stream scan
+
+-passive                       # Passive mode (Shodan InternetDB)
+naabu -host example.com -passive                # Get passive results
+
+-irt, -input-read-timeout val  # Input read timeout (default 3m0s)
+naabu -list scope.txt -irt 1m                   # Set 1 min input timeout
+
+-no-stdin                      # Disable stdin processing
+cat targets.txt | naabu -no-stdin                # Ignore stdin input
+
+
+# Host Discovery
+-sn, -host-discovery           # Host discovery only
+naabu -list scope.txt -sn                       # Discovery without port scan
+
+-Pn, -skip-host-discovery      # Skip host discovery
+naabu -list scope.txt -Pn                       # Treat all as live
+
+-ps, -probe-tcp-syn string[]   # TCP SYN ping
+naabu -list scope.txt -ps 80,443                # SYN ping on 80/443
+
+-pa, -probe-tcp-ack string[]   # TCP ACK ping
+naabu -list scope.txt -pa 80,443                # ACK ping check
+
+-pe, -probe-icmp-echo          # ICMP echo request
+naabu -list scope.txt -pe                       # Standard ping discovery
+
+-pp, -probe-icmp-timestamp     # ICMP timestamp request
+naabu -list scope.txt -pp                       # Timestamp ping
+
+-pm, -probe-icmp-address-mask  # ICMP address mask
+naabu -list scope.txt -pm                       # Address mask ping
+
+-arp, -arp-ping                # ARP ping
+naabu -list scope.txt -arp                      # ARP discovery
+
+-nd, -nd-ping                  # IPv6 Neighbor Discovery
+naabu -list scope.txt -nd                       # IPv6 ND probe
+
+-rev-ptr                       # Reverse PTR lookup
+naabu -host 192.168.1.1 -rev-ptr                # Reverse DNS lookup
+
+
+# Services Discovery
+-sD, -service-discovery        # Service discovery
+naabu -host 192.168.1.1 -sD                      # Enable service probes
+
+-sV, -service-version          # Service version detection
+naabu -host 192.168.1.1 -sV                      # Detect versions
+
+
+# Optimization
+-retries int                   # Retries per port (default 3)
+naabu -host 192.168.1.1 -retries 1               # Set retry count
+
+-timeout int                   # Timeout in ms (default 1000)
+naabu -host 192.168.1.1 -timeout 500             # Adjust timeout
+
+-warm-up-time int              # Seconds between scan phases (default 2)
+naabu -list scope.txt -warm-up-time 5            # Add warmup delay
+
+-ping                          # Use ping verification
+naabu -host 192.168.1.1 -ping                    # Verify with ping
+
+-verify                        # Validate ports with TCP verification
+naabu -host 192.168.1.1 -verify                  # Double-check open ports
+
+
+# Debug
+-health-check, -hc             # Run diagnostics
+naabu -health-check                               # Perform health check
+
+-debug                         # Debug mode
+naabu -host 192.168.1.1 -debug                   # Show debug logs
+
+-verbose, -v                   # Verbose output
+naabu -host 192.168.1.1 -v                      # Verbose results
+
+-no-color, -nc                 # Disable colors
+naabu -host 192.168.1.1 -nc                     # Plain output
+
+-silent                        # Silent mode (only results)
+naabu -host 192.168.1.1 -silent                  # Print open ports only
+
+-version                       # Show version
+naabu -version                                   # Show Naabu version
+
+-stats                         # Show stats (deprecated)
+naabu -list scope.txt -stats                   # Show scan stats
+
+-si, -stats-interval int       # Interval for stats (default 5s, deprecated)
+naabu -list scope.txt -si 10                    # Update stats every 10s
+
+-mp, -metrics-port int         # Port for metrics (default 63636)
+naabu -host 192.168.1.1 -mp 9090                # Export metrics on port 9090
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — Naabu -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick web sweep on a subnet (fast & quiet)
+naabu -host 192.168.1.0/24 -p 80,443 -rate 5000 -silent
+
+# Full TCP sweep on a single host (all ports, high speed)
+naabu -host 192.168.1.10 -p - -rate 20000 -c 100 -o full_ports.txt
+
+# Top 1000 ports across a scope file (save JSON for tooling)
+naabu -list scope.txt -top-ports 1000 -json -o naabu_top1k.json
+
+# Verify services immediately after discovery (version + service probes)
+naabu -host prod.example.com -p 22,80,443 -sV -sD -rate 5000
+
+# Auto-resolve and scan all IPs for a hostname (multi-homed/CDN-aware)
+naabu -host app.example.com -scan-all-ips -p 80,443 -cdn -silent
+
+# Skip deep scans on CDN/WAF; only check 80/443 quickly
+naabu -list domains.txt -exclude-cdn -p 80,443 -rate 10000 -silent
+
+# Stream mode for massive target sets (no resume/verify; max throughput)
+naabu -list huge_scope.txt -stream -top-ports 100 -rate 50000 -silent
+
+# Host discovery only with mixed probes (pre-stage for large scans)
+naabu -list scope.txt -sn -ps 80,443 -pa 80,443 -pe -arp -silent -o alive.txt
+
+# IPv6 discovery and scan (where dual-stack exists)
+naabu -host ipv6.example.com -iv 6 -p 80,443 -rate 5000 -silent
+
+# Read via SOCKS5 proxy (opsec-friendly pathing)
+naabu -host 10.10.10.0/24 -p 22,80,443 -proxy 127.0.0.1:9050 -silent
+
+# Pipe results to a custom Nmap run for deep fingerprints
+naabu -list scope.txt -top-ports 100 -nmap-cli "nmap -sV -Pn -oA nmap_enrich"
+
+# Resume an interrupted campaign
+naabu -resume -o resumed_results.txt
+
+# Exclusions (both hosts and ports) for safe-in-scope scans
+naabu -list scope.txt -p 1-10000 -exclude-file exclude_hosts.txt -ep 25,110,143
+
+# Custom resolvers + higher concurrency for flaky DNS environments
+naabu -list domains.txt -r resolvers.txt -c 100 -rate 15000 -silent
+
+# Minimal telemetry output for CI pipelines
+naabu -list scope.txt -top-ports 100 -silent -json -o ci_open_ports.json
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/projectdiscovery/naabu" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Naabu GitHub Repository (ProjectDiscovery)
+      </a>
+    </li>
+    <li>
+      <a href="https://projectdiscovery.io" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        ProjectDiscovery Tools Suite
+      </a>
+    </li>
+    <li>Naabu is often combined with Nmap, httpx, or nuclei for deeper reconnaissance workflows.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Naabu -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Naabu</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ naabu -host 192.168.1.10 -p 22,80,443
+                  __       
+  _  ______  ____/ /__     
+ | |/_/ __ \/ __  / _ \    
+ |__/ /_/ / /_/ /  __/    
+  \__/\____/\____/\___/ v2.1.0  
+
+		projectdiscovery.io
+
+[INF] Running TCP/Connect scan on 1 host(s)
+[INF] Found 3 ports on host 192.168.1.10 (192.168.1.10)
+192.168.1.10:22
+192.168.1.10:80
+192.168.1.10:443
+
+[saide ~]$ naabu -list scope.txt -top-ports 1000 -silent
+192.168.1.5:80
+192.168.1.5:443
+192.168.1.20:22
+192.168.1.22:445
+
+[saide ~]$ naabu -host example.com -sV -json
+{"ip":"93.184.216.34","port":80,"service":"http","version":"nginx/1.18.0"}
+{"ip":"93.184.216.34","port":443,"service":"https","version":"nginx/1.18.0"}
+
+    </pre>
+  </details>
+</section>

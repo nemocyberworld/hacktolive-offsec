@@ -1,0 +1,185 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Netdiscover</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>ARP-based Host Discovery</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Netdiscover is a lightweight active/passive ARP reconnaissance tool for network discovery. 
+    It is especially useful in environments without DHCP servers or when Nmap and other scanners 
+    are too noisy. Netdiscover listens for ARP requests or actively probes ranges to quickly map 
+    live hosts, their MAC addresses, and associated vendors. It is commonly used in penetration 
+    testing, wireless assessments, and network troubleshooting.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Install Netdiscover (commonly included in Kali Linux and Parrot OS).</li>
+    <li>Identify target subnet or let Netdiscover auto-detect interfaces.</li>
+    <li>Run in passive mode (listening) or active mode (sending ARP requests).</li>
+    <li>Adjust timing, retries, and range according to the environment.</li>
+    <li>Document live hosts, MAC addresses, and vendors for further scanning.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Interface & Targets
+-i device                  # Specify network interface
+netdiscover -i eth0        # Scan using eth0 interface
+
+-r range                   # Scan a specific CIDR range
+netdiscover -r 192.168.1.0/24   # Scan all hosts in 192.168.1.0/24
+
+-l file                    # Scan ranges from file
+netdiscover -l ranges.txt       # Load subnets from ranges.txt
+
+-p                         # Passive mode (no packets sent, sniff only)
+netdiscover -i wlan0 -p         # Listen for ARP on wlan0 only
+
+
+# MAC & Filters
+-m file                    # Known MAC/hostname mapping file
+netdiscover -m maclist.txt      # Use predefined MAC mapping
+
+-F filter                  # Custom pcap filter (default "arp")
+netdiscover -F "arp or rarp"    # Capture ARP + RARP packets
+
+
+# Timing & Performance
+-s time                    # Sleep time (ms) between ARPs
+netdiscover -s 50 -r 192.168.1.0/24   # 50ms delay between requests
+
+-c count                   # Send each ARP request multiple times
+netdiscover -c 3 -r 192.168.1.0/24    # 3 retries per host
+
+-n node                    # Set last octet of source IP (2–253)
+netdiscover -n 10 -r 192.168.1.0/24   # Start with .10 as ARP sender
+
+-d                         # Ignore local config files
+netdiscover -d -r 192.168.1.0/24      # Fresh scan, no configs used
+
+-R                         # Assume root/caps without checks
+netdiscover -R -r 192.168.1.0/24      # Skip privilege validation
+
+-f                         # Fast mode (quicker ARP sweep)
+netdiscover -f -r 192.168.1.0/24      # Fast scan through subnet
+
+
+# Output Modes
+-P                         # Parseable output, stop after scan
+netdiscover -P -r 192.168.1.0/24      # Print machine-parseable results
+
+-L                         # Like -P but continue listening
+netdiscover -L -r 192.168.1.0/24      # Keep ARP sniffing after active scan
+
+-N                         # Suppress header (only with -P or -L)
+netdiscover -PN -r 192.168.1.0/24     # Parseable output without headers
+
+-S                         # Suppress sleep (hardcore mode)
+netdiscover -S -r 192.168.1.0/24      # Ultra-fast ARP flooding
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — Netdiscover -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick LAN sweep (fast default scan)
+netdiscover -r 192.168.1.0/24 -f            # Fast ARP scan of /24 subnet
+
+# Full /16 subnet mapping (slower, thorough)
+netdiscover -r 10.0.0.0/16 -c 5 -s 50       # Retry 5 times, 50ms delay
+
+# Passive sniffing (stealth mode)
+netdiscover -i wlan0 -p                     # Listen on wlan0, no packets sent
+
+# Continuous monitoring (active + passive)
+netdiscover -L -r 192.168.1.0/24            # Scan and keep listening for new hosts
+
+# Parseable output for scripting
+netdiscover -P -r 192.168.1.0/24            # Machine-readable ARP results
+netdiscover -PN -r 192.168.1.0/24           # Parseable results without headers
+
+# Custom MAC vendor mapping
+netdiscover -m maclist.txt -r 192.168.1.0/24 # Use custom MAC-to-vendor file
+
+# Hardcore mode (maximum speed)
+netdiscover -S -r 192.168.1.0/24            # Suppress sleep, rapid ARP floods
+
+# Custom filter for extended reconnaissance
+netdiscover -F "arp or rarp or ip" -r 192.168.1.0/24  # Capture more than ARP
+
+# Mixed retries + custom delays (resilient scan)
+netdiscover -c 3 -s 20 -r 192.168.1.0/24    # 3 ARPs per host, 20ms apart
+
+# Large-range sweep with config ignored
+netdiscover -d -r 172.16.0.0/12 -f          # Fast scan, ignore configs
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://www.kali.org/tools/netdiscover/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Netdiscover — Kali Linux Tools Documentation
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com/alexxy/netdiscover" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Netdiscover GitHub Repository
+      </a>
+    </li>
+    <li>Ideal for wireless pentests and quick subnet mapping when DHCP/Nmap are unavailable.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Netdiscover -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Netdiscover</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ netdiscover -r 192.168.1.0/24 -f
+
+Currently scanning: Finished!   |   Screen View: Unique Hosts
+4 Captured ARP Req/Rep packets, from 4 hosts.   Total size: 240
+____________________________________________________________________________
+  IP            At MAC Address     Count     Len  MAC Vendor
+------------------------------------------------------------------------------
+192.168.1.1     00:11:22:33:44:55    01     060  Cisco Systems
+192.168.1.10    00:16:3e:ab:cd:ef    02     120  QEMU Virtual NIC
+192.168.1.20    08:00:27:aa:bb:cc    01     060  PCS Systemtechnik GmbH
+192.168.1.50    a4:5e:60:12:34:56    01     060  Intel Corporate
+------------------------------------------------------------------------------
+
+[saide ~]$ netdiscover -p -i wlan0
+
+Currently scanning: Passive Mode   |   Screen View: Unique Hosts
+Listening for ARP requests/replies on wlan0...
+____________________________________________________________________________
+  IP            At MAC Address     Count     Len  MAC Vendor
+------------------------------------------------------------------------------
+192.168.0.100   7c:dd:90:aa:11:22    05     300  TP-Link Technologies
+192.168.0.101   b8:27:eb:22:33:44    02     120  Raspberry Pi Foundation
+
+    </pre>
+  </details>
+</section>

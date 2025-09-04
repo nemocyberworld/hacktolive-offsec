@@ -1,0 +1,206 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Legion</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Automated Enumeration & Vulnerability Discovery</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Legion is a powerful open-source network penetration testing and enumeration framework. It provides an intuitive GUI that automates
+    common recon workflows using Nmap, Nikto, Hydra, smb-enum, and other underlying tools. It is often compared to Sparta, but with
+    enhanced modules, Python3 compatibility, and extensibility. Legion allows red teamers and penetration testers to quickly identify 
+    live hosts, enumerate services, and detect potential vulnerabilities, while defenders can use it to validate exposure and misconfigurations.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Install Legion on your system (available in Kali Linux or GitHub).</li>
+    <li>Launch Legion via CLI or desktop menu to start the GUI interface.</li>
+    <li>Add single IPs, ranges, or hostnames for scanning.</li>
+    <li>Review results: Nmap service detection, brute force attempts, web scans, and vulnerability reports.</li>
+    <li>Document and export results for reporting or further exploitation.</li>
+  </ol>
+</section>
+
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# General
+legion -h                                      # Show help message and exit
+
+legion -v                                      # Verbose mode, print output when command finishes
+legion -v --host 192.168.1.10
+
+legion -r                                      # Just run the analysis immediately
+legion -r --host 192.168.1.10
+
+
+# Protocol
+legion --proto scanner                         # Protocol to test (default: "scanner")
+legion --proto ftp --host 192.168.1.10
+
+legion --protohelp                             # Show help for the selected protocol
+legion --protohelp --proto ssh
+
+
+# Target
+legion --host 127.0.0.1                        # Host to test (default: localhost)
+legion --host 192.168.1.10
+
+legion -p 80                                   # Port where protocol is listening
+legion --host 192.168.1.10 -p 443
+
+legion --domain example.com                    # Set domain name with VictimIP in --host
+legion --host 192.168.1.10 --domain corp.local
+
+legion --ipv6 2001:db8::1                      # Perform reverse DNS lookup with IPv6
+legion --host 2001:db8::1 --ipv6 2001:db8::1
+
+
+# Work Directory
+legion --workdir /tmp/legion                   # Set working directory
+legion --workdir /opt/legion_runs --host 192.168.1.10
+
+
+# Intensity / Bruteforce
+legion -i 1                                    # Intensity: 1 = Main checks
+legion --host 192.168.1.10 -i 1
+
+legion -i 2                                    # Intensity: 2 = Main + vuln checks (default)
+legion --host 192.168.1.10 -i 2
+
+legion -i 3                                    # Intensity: 3 = Service bruteforce only
+legion --host 192.168.1.10 -i 3
+
+legion -u admin                                # Username for bruteforce
+legion --host 192.168.1.10 -u admin
+
+legion -U users.txt                            # Usernames list for bruteforce
+legion --host 192.168.1.10 -U users.txt
+
+legion -k password123                          # Password to use (SMB, SNMP community, IKE groupid)
+legion --host 192.168.1.10 -k secret
+
+legion -P passwords.txt                        # Password list for bruteforce (default lists available)
+legion --host 192.168.1.10 -P rockyou.txt
+
+
+# Execution Control
+legion --execonly nmap                         # Run only a specific tool
+legion --host 192.168.1.10 --execonly nmap
+
+legion --notuse hydra,smbclient                # Exclude certain tools from execution
+legion --host 192.168.1.10 --notuse hydra,nmap
+
+
+# HTTP/HTTPS Specific
+legion --extensions html,php,asp               # Set valid web extensions (default: html,txt,php,asp,aspx)
+legion --host webserver.local --extensions php,aspx
+
+legion --path /login.php                       # Set URL path for HTTP/s testing
+legion --host webserver.local -p 443 --path /admin/login.php
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — Legion -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick default scan (auto analyze host with main + vuln checks)
+legion --host 192.168.1.10 -i 2                # Default intensity scan
+
+# Fast main checks only (skip bruteforce/vuln scans)
+legion --host 192.168.1.10 -i 1                # Lightweight probe
+
+# Bruteforce-focused run
+legion --host 192.168.1.10 -i 3 -u admin -P rockyou.txt
+                                               # Service bruteforce with username and password list
+
+# Web server enumeration with custom path and extensions
+legion --host web.local -p 80 --path /login.php --extensions php,asp
+                                               # HTTP enumeration of /login.php with PHP/ASP extensions
+
+# Run only one tool (Nmap)
+legion --host 192.168.1.10 --execonly nmap     # Execute Nmap only, skip others
+
+# Skip certain tools (exclude Hydra and smbclient)
+legion --host 192.168.1.10 --notuse hydra,smbclient
+                                               # Avoid slow tools or false positives
+
+# Domain + host combined enumeration
+legion --host 192.168.1.50 --domain corp.local # Domain context scanning
+
+# IPv6 target analysis
+legion --host 2001:db8::1 --ipv6 2001:db8::1   # Reverse DNS & scan with IPv6
+
+# Quick run (non-interactive, no GUI prompts)
+legion --host 192.168.1.10 -r                  # Auto-run analysis mode
+
+# Verbose output for debugging
+legion --host 192.168.1.10 -v                  # Show detailed logs
+
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/GoVanguard/legion" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Legion GitHub Repository
+      </a>
+    </li>
+    <li>
+      <a href="https://www.kali.org/tools/legion/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Kali Linux – Legion Tool Documentation
+      </a>
+    </li>
+    <li>A modern replacement for Sparta, with additional modules and Python3 support.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Legion -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Legion</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ legion --host 192.168.1.10 -i 2
+[*] Starting Legion v2.0
+[*] Working directory: /home/saide/.legion/
+[*] Target: 192.168.1.10
+[*] Intensity: 2 (main + vuln checks)
+
+[+] Running Nmap service detection...
+    - 22/tcp open  ssh     OpenSSH 8.2 (Ubuntu)
+    - 80/tcp open  http    Apache httpd 2.4.41
+    - 139/tcp open netbios-ssn Samba smbd 4.11.6
+
+[+] Running Hydra brute force (ssh)...
+    - Host: 192.168.1.10  Login: admin  Password: admin123  [SUCCESS]
+
+[+] Running Nikto web scan...
+    - /server-status accessible (Apache mod_status enabled)
+    - Outdated Apache version detected: 2.4.41
+
+[*] Analysis complete.
+[*] Results saved in: /home/saide/.legion/results/192.168.1.10/
+
+    </pre>
+  </details>
+</section>
