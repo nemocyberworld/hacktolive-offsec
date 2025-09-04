@@ -1,0 +1,140 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">ZMap</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Scanning</strong> • Focus: <strong>Internet-wide Port Scanning</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    ZMap is an open-source network scanner designed for Internet-wide studies. It enables researchers, penetration testers, 
+    and defenders to rapidly scan the entire IPv4 address space for open ports and services. Known for its extremely fast 
+    performance compared to traditional scanners like Nmap, ZMap supports selective scanning, rate limiting, blacklisting, 
+    and modular probes for protocols such as TCP SYN, UDP, ICMP, and custom probes. It is commonly used in security research, 
+    vulnerability assessments, and measurement of Internet services (e.g., HTTPS, SSH, DNS).
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Install ZMap from source or package manager (Linux recommended).</li>
+    <li>Select the probe module (e.g., TCP SYN) and define the port or service to scan.</li>
+    <li>Set scan parameters like rate limit, blacklist/whitelist, and output format.</li>
+    <li>Run the scan and save results to file (JSON/CSV compatible with analysis tools).</li>
+    <li>Analyze discovered hosts and services for research or penetration testing purposes.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Basic TCP SYN scan on port 80
+zmap -p 80 0.0.0.0/0 -o results.csv
+
+# Scan with rate limit (1000 packets per second)
+zmap -p 22 0.0.0.0/0 --rate=1000 -o ssh_hosts.csv
+
+# Scan a specific subnet only
+zmap -p 443 192.168.1.0/24 -o https_hosts.json -f json
+
+# Use blacklist to exclude sensitive IP ranges
+zmap -p 21 0.0.0.0/0 --blacklist-file=blacklist.conf -o ftp_hosts.csv
+
+# Run with ICMP echo probe instead of TCP SYN
+zmap --probe-module=icmp_echoscan -o icmp_alive.csv
+
+# Example Usage
+zmap -p 80 203.0.113.0/24 -o webscan.csv    # Scan /24 subnet for web servers
+zmap -p 25 0.0.0.0/0 --rate=5000 -o smtp.csv # Full IPv4 scan for SMTP (port 25)
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — ZMap -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Fast web server sweep across the Internet
+zmap -p 80 0.0.0.0/0 --rate=100000 -o web_servers.csv
+
+# SSH host discovery with reduced scan rate
+zmap -p 22 0.0.0.0/0 --rate=500 --cooldown-time=60 -o ssh_hosts.csv
+
+# Subnet-specific HTTPS scan with JSON output
+zmap -p 443 192.168.1.0/24 -o https.json -f json
+
+# Exclude sensitive IP ranges during scan
+zmap -p 25 0.0.0.0/0 --blacklist-file=blacklist.conf -o smtp_hosts.csv
+
+# ICMP ping sweep (alive hosts only)
+zmap --probe-module=icmp_echoscan --rate=20000 0.0.0.0/0 -o alive_hosts.csv
+
+# Custom source IP & MAC for evasion
+zmap -p 80 203.0.113.0/24 --source-ip=198.51.100.10 --source-mac=00:11:22:33:44:55 -o scan.csv
+
+# Service-specific scanning with whitelist
+zmap -p 21 --whitelist-file=targets.txt --rate=2000 -o ftp_results.csv
+
+# Multi-port scan with output filtering
+zmap -p 21,22,80,443 0.0.0.0/0 --rate=5000 -o multiport.csv
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://zmap.io" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Official ZMap Project
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com/zmap/zmap" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        ZMap GitHub Repository
+      </a>
+    </li>
+    <li>Research papers on Internet-wide scanning using ZMap</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — ZMap -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of ZMap</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ zmap -p 80 192.168.1.0/24 --rate=5000 -o results.csv
+
+Feb 15 10:32:45.123 [INFO] zmap: starting probe module: TCP SYN
+Feb 15 10:32:45.123 [INFO] zmap: output module: CSV
+Feb 15 10:32:45.123 [INFO] zmap: target port: 80
+Feb 15 10:32:45.123 [INFO] zmap: blocklist file loaded with 0 entries.
+Feb 15 10:32:45.123 [INFO] zmap: whitelisted 256 addresses.
+Feb 15 10:32:45.124 [INFO] zmap: send rate set to 5000 pps.
+Feb 15 10:32:46.456 [INFO] zmap: 192.168.1.10 is up
+Feb 15 10:32:46.457 [INFO] zmap: 192.168.1.20 is up
+Feb 15 10:32:46.458 [INFO] zmap: 192.168.1.25 is up
+Feb 15 10:32:46.460 [INFO] zmap: 192.168.1.50 is up
+Feb 15 10:32:46.461 [INFO] zmap: scan completed in 1.34 seconds
+Feb 15 10:32:46.461 [INFO] zmap: 4 results found.
+
+# Output in results.csv:
+192.168.1.10
+192.168.1.20
+192.168.1.25
+192.168.1.50
+
+    </pre>
+  </details>
+</section>

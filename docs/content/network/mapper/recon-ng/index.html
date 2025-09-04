@@ -1,0 +1,222 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">recon-ng</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Web / OSINT</strong> • Focus: <strong>Reconnaissance & Information Gathering</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Recon-ng is a full-featured open-source web reconnaissance framework written in Python. 
+    It provides a Metasploit-like command-line interface with modules that automate the 
+    collection of open-source intelligence (OSINT) about domains, hosts, people, and 
+    organizations. Recon-ng is particularly useful in the early stages of penetration 
+    testing, red team operations, and threat intelligence, as it consolidates many OSINT 
+    techniques and APIs into a single unified workflow.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Set up recon-ng in your environment (install via apt, pip, or source).</li>
+    <li>Create a new workspace and configure your target domain or scope.</li>
+    <li>Select and load modules relevant to your reconnaissance goals.</li>
+    <li>Run modules, gather intelligence, and export results for analysis.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# rpcbind Daemon Options
+rpcbind -a                                      # Enable address translation (IPv6 support)
+rpcbind -d                                      # Debug mode (foreground with logs)
+rpcbind -f                                      # Foreground mode (don’t daemonize)
+rpcbind -h                                      # Bind only to loopback (localhost only)
+rpcbind -i                                      # Insecure mode (accept unprivileged requests)
+rpcbind -l                                      # Enable TCP wrapper (hosts.allow / deny)
+rpcbind -s                                      # Secure mode (privileged ports only)
+rpcbind -v                                      # Verbose logging
+rpcbind -w                                      # Warm start (restore state from last shutdown)
+
+# rpcinfo Options (Interacting with rpcbind)
+
+rpcinfo -p 192.168.1.10                         # List all registered RPC programs on target host
+rpcinfo -s 192.168.1.10                         # Short list of RPC services with versions/protocols
+rpcinfo -m 192.168.1.10                         # Show mounted NFS file systems (if mountd is active)
+
+rpcinfo -T tcp 192.168.1.10 100003              # Use TCP to query program 100003 (NFS) on target
+rpcinfo -T udp 192.168.1.10 100005 3            # Use UDP to query program 100005 (mountd), version 3
+
+rpcinfo -l 192.168.1.10 100003 3                # List program details for NFS v3 on target
+
+rpcinfo -u 192.168.1.10 100003                  # UDP check if NFS is registered (default version)
+rpcinfo -t 192.168.1.10 100005 3                # TCP check if mountd v3 is registered
+rpcinfo -n 2049 -u 192.168.1.10 100003          # Query NFS (prognum 100003) bound to UDP port 2049
+
+rpcinfo -a 192.168.1.10 -T tcp 100003 3         # Query NFS v3 at explicit address using TCP
+
+rpcinfo -b 100003 3                             # Broadcast query for NFS v3 service on local subnet
+rpcinfo -d 100005 3                             # Delete program 100005 (mountd v3) registration from rpcbind
+rpcinfo -d -T tcp 100005 3                      # Delete mountd v3 registration for TCP transport
+
+# Nmap RPC Enumeration (Extra)
+nmap -sV -p 111 192.168.1.10                    # Service detection on rpcbind port
+nmap -sU -p 111 192.168.1.10                    # UDP scan for rpcbind
+nmap --script=rpcinfo 192.168.1.10              # Run rpcinfo NSE script to enumerate services
+nmap --script=rpc-grind -p 111 192.168.1.10     # Probe for RPC vulnerabilities
+
+# Example Usage
+rpcinfo -p 192.168.1.10                         # Enumerate all RPC services on host
+rpcinfo -u 192.168.1.10 100003                  # Check if NFS program is listening over UDP
+rpcinfo -b 100003 3                             # Broadcast query for NFS v3 service
+nmap --script=rpcinfo -p 111 192.168.1.10       # Automated RPC service discovery on target
+  </pre>
+</section>
+
+<!-- Best Flag Combinations (Cheat Ready) — recon-ng -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick start (new target workspace + scope)
+workspaces create acme                          # Create workspace
+workspaces load acme                            # Load workspace
+set TIMEOUT 15                                  # (Optional) faster module timeouts
+set VERBOSE true                                # (Optional) verbose output
+
+# Subdomain discovery combo (brute + OSINT)
+modules load recon/domains-hosts/brute_hosts    # Wordlist-based subdomain brute
+modules options set SOURCE acme.com             # Target domain
+modules run                                     # Execute brute
+modules load recon/domains-hosts/netcraft       # Netcraft enumeration
+modules options set SOURCE acme.com
+modules run
+show hosts                                      # Consolidated host list
+
+# SSL SAN harvesting → more hosts
+modules load recon/domains-hosts/ssl_san        # Pull SubjectAltNames from certs
+modules options set SOURCE acme.com
+modules run
+show hosts
+
+# Shodan enrichment (IPs / hostnames)
+keys add shodan_api <API_KEY>                   # Add Shodan key once
+modules load recon/hosts-ports/shodan_ip        # Get open ports by IP
+modules options set SOURCE hosts                # Use hosts table as input
+modules run
+show ports
+
+# Reverse & forward resolution loop (close gaps)
+modules load recon/hosts-hosts/resolve          # Hostnames → IPs
+modules options set SOURCE hosts
+modules run
+modules load recon/hosts-hosts/reverse_resolve  # IPs → Hostnames
+modules options set SOURCE hosts
+modules run
+show hosts; show ports
+
+# GeoIP context (infra localization)
+modules load recon/hosts-hosts/freegeoip        # Geolocate hosts
+modules options set SOURCE hosts
+modules run
+modules load recon/hosts-hosts/ipinfodb         # Alternate GeoIP provider
+modules options set SOURCE hosts
+modules run
+
+# Bing co-hosting sweep (shared IP neighbors)
+modules load recon/hosts-hosts/bing_ip          # Find other vhosts sharing IP
+modules options set SOURCE hosts
+modules run
+show hosts
+
+# Threat intel pivot (domain reputation / co-occur)
+modules load recon/domains-hosts/threatcrowd    # ThreatCrowd cross-domain intel
+modules options set SOURCE acme.com
+modules run
+
+# Export all findings
+db export /tmp/reconng_acme.csv                 # CSV dump of tables
+show hosts; show ports; show locations          # Quick review
+
+# Minimal “one-liner” flow (inside console)
+workspaces create foo; workspaces load foo; modules load recon/domains-hosts/brute_hosts; modules options set SOURCE example.com; modules run
+
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/lanmaster53/recon-ng" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Recon-ng GitHub Repository
+      </a>
+    </li>
+    <li>
+      <a href="https://www.kali.org/tools/recon-ng/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Recon-ng Kali Linux Documentation
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — recon-ng -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of recon-ng</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[recon-ng][default] > workspaces create acme
+[*] Workspace 'acme' created.
+[recon-ng][acme] > modules load recon/domains-hosts/brute_hosts
+[recon-ng][acme][brute_hosts] > options set SOURCE acme.com
+SOURCE => acme.com
+[recon-ng][acme][brute_hosts] > run
+
+-------------------------------
+BRUTE HOSTS RESULTS
+-------------------------------
+acme.com
+www.acme.com
+mail.acme.com
+vpn.acme.com
+
+[*] 4 hosts discovered.
+
+[recon-ng][acme] > modules load recon/hosts-ports/shodan_ip
+[recon-ng][acme][shodan_ip] > options set SOURCE hosts
+SOURCE => hosts
+[recon-ng][acme][shodan_ip] > run
+
+-------------------------------
+SHODAN RESULTS
+-------------------------------
+Host: 203.0.113.25
+Open Ports: 80, 443, 8080
+
+[*] 1 IP with ports discovered.
+
+[recon-ng][acme] > show hosts
++------------------+-------------+--------------+-------------------+
+|    Hostname      | IP Address  |   Module     |    Notes          |
++------------------+-------------+--------------+-------------------+
+| www.acme.com     | 203.0.113.25| brute_hosts  |                   |
+| mail.acme.com    | 203.0.113.26| brute_hosts  |                   |
+| vpn.acme.com     | 203.0.113.27| brute_hosts  |                   |
++------------------+-------------+--------------+-------------------+
+
+    </pre>
+  </details>
+</section>

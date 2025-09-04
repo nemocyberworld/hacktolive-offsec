@@ -1,0 +1,181 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">traceroute</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Enumeration</strong> • Focus: <strong>Path Mapping / Route Analysis</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    <code>traceroute</code> is a diagnostic and reconnaissance tool that traces the path packets take from a local host to a 
+    target destination. It reveals each hop along the route, showing intermediate routers and their response times. This is 
+    widely used in network troubleshooting, mapping network topology, identifying choke points, and reconnaissance to 
+    understand infrastructure layout. It works by sending packets with incrementing TTL (Time To Live) values and recording 
+    ICMP “Time Exceeded” responses returned by each hop.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify the target domain or IP address you want to trace.</li>
+    <li>Run <code>traceroute</code> with default or custom options.</li>
+    <li>Observe the list of intermediate hops, their IPs, hostnames, and latency values.</li>
+    <li>Analyze results to map the route, detect bottlenecks, or investigate network structure.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Address Family
+traceroute -4 example.com                      # Force IPv4
+traceroute -6 example.com                      # Force IPv6
+
+# Debug & Fragmentation
+traceroute -d example.com                      # Enable socket-level debugging
+traceroute -F example.com                      # Do not fragment packets
+
+# TTL / Hops Control
+traceroute -f 5 example.com                    # Start from 5th hop
+traceroute -m 20 example.com                   # Set max hops to 20
+traceroute -N 5 example.com                    # Send 5 probes simultaneously per hop
+
+# Gateways
+traceroute -g 192.168.1.1,10.0.0.1 example.com # Route through specified gateways
+
+# Protocol Selection
+traceroute -I example.com                      # Use ICMP ECHO
+traceroute -T example.com                      # Use TCP SYN (default port 80)
+traceroute -U example.com                      # Use UDP to fixed port (default 53)
+traceroute -UL example.com                     # Use UDPLITE (port 53)
+traceroute -D example.com                      # Use DCCP requests (default port 33434)
+traceroute -P 132 example.com                  # Use raw packets of custom protocol
+
+# Ports & Queries
+traceroute -p 443 example.com                  # Set destination port (TCP 443 here)
+traceroute -q 1 example.com                    # Send 1 probe per hop
+traceroute -w 3,10,5 example.com               # Set max/near/hop wait times
+traceroute --sport=50000 example.com           # Use custom source port (implies -N 1)
+
+# Interface & Source
+traceroute -i eth0 example.com                 # Specify interface
+traceroute -s 192.168.1.10 example.com         # Specify source IP address
+
+# Output Options
+traceroute -n example.com                      # Don’t resolve hostnames
+traceroute -e example.com                      # Show ICMP extensions (e.g., MPLS)
+traceroute -A example.com                      # Perform AS path lookups
+traceroute --back example.com                  # Guess hops in backward path
+traceroute --mtu example.com                   # Discover MTU along the path
+
+# Advanced / Modules
+traceroute -M icmp example.com                 # Use ICMP module (explicit)
+traceroute -O help example.com                 # Show module-specific options
+
+# Special Options
+traceroute --fwmark=5 example.com              # Set firewall mark for packets
+traceroute -l 12345 example.com                # Set IPv6 flow label
+traceroute -t 0x10 example.com                 # Set TOS/traffic class
+
+# Misc
+traceroute -r example.com                      # Bypass routing tables, send directly
+traceroute -z 0.5 example.com                  # Wait 0.5s between probes
+traceroute -V                                  # Print version
+traceroute --help                              # Show help
+
+# Example Usage
+traceroute example.com                         # Default UDP probes, port increments from 33434
+traceroute -T -p 443 example.com               # TCP SYN traceroute to HTTPS port
+traceroute -I 8.8.8.8                          # ICMP echo traceroute to Google DNS
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — traceroute -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Fast ICMP-based path discovery
+traceroute -I -q 1 -w 2 example.com             # ICMP echo, 1 probe per hop, 2s timeout
+
+# TCP SYN traceroute to bypass ICMP filtering (firewalls)
+traceroute -T -p 443 example.com                # TCP SYN probes to port 443 (HTTPS)
+
+# Quiet & numeric output (good for scripts/logging)
+traceroute -n -q 1 example.com                  # Numeric only, 1 probe per hop
+
+# Path bottleneck analysis (low wait times + multiple queries)
+traceroute -q 5 -w 1 example.com                # 5 probes per hop, fast timeout
+
+# MTU discovery along the route
+traceroute --mtu example.com                    # Discovers MTU sizes and path MTU issues
+
+# Multi-gateway route analysis
+traceroute -g 192.168.1.1,10.0.0.1 example.com  # Trace through specific gateways
+
+# AS number and MPLS-aware tracing
+traceroute -A -e example.com                    # Show AS lookups + ICMP extensions
+
+# IPv6 path tracing with custom flow label
+traceroute -6 -l 12345 ipv6.google.com          # IPv6 trace with flow label
+
+# Firewall-bypassing with source port manipulation
+traceroute -T --sport=44444 example.com         # Custom source port with TCP SYN
+
+# Debugging mode for troubleshooting
+traceroute -d -q 2 -w 3 example.com             # Enable debugging with custom probes
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://man7.org/linux/man-pages/man8/traceroute.8.html" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Linux man page — traceroute
+      </a>
+    </li>
+    <li>
+      <a href="https://www.cloudflare.com/learning/network-layer/what-is-traceroute/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Cloudflare — What is Traceroute?
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — traceroute -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of traceroute</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ traceroute example.com
+traceroute to example.com (93.184.216.34), 30 hops max, 60 byte packets
+ 1  192.168.1.1 (192.168.1.1)  1.023 ms  0.934 ms  0.901 ms
+ 2  10.0.0.1 (10.0.0.1)        3.112 ms  3.098 ms  3.084 ms
+ 3  isp-gw.local (203.0.113.1) 15.232 ms 15.210 ms 15.198 ms
+ 4  core1.isp.net (198.51.100.5) 27.412 ms 27.389 ms 27.376 ms
+ 5  transit.net (198.51.100.9)  39.581 ms 39.562 ms 39.548 ms
+ 6  ae-2.edge.example.net (93.184.216.1)  52.781 ms 52.766 ms 52.751 ms
+ 7  example.com (93.184.216.34)  55.031 ms 55.012 ms 55.001 ms
+
+[saide ~]$ traceroute -T -p 443 example.com
+traceroute to example.com (93.184.216.34), 30 hops max, 60 byte packets
+ 1  192.168.1.1 (192.168.1.1)  1.050 ms  1.030 ms  1.015 ms
+ 2  10.0.0.1 (10.0.0.1)        3.145 ms  3.131 ms  3.118 ms
+ 3  isp-gw.local (203.0.113.1) 15.321 ms 15.307 ms 15.293 ms
+ 4  core1.isp.net (198.51.100.5) 27.498 ms 27.485 ms 27.471 ms
+ 5  example.com (93.184.216.34)  54.201 ms 54.189 ms 54.176 ms
+    </pre>
+  </details>
+</section>

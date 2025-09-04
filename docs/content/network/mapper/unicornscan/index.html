@@ -1,0 +1,134 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Unicornscan</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>High-Performance Asynchronous Port Scanning</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Unicornscan is an advanced information gathering and port scanning tool designed for large-scale network reconnaissance. 
+    Unlike traditional scanners, it leverages asynchronous TCP and UDP scanning techniques to achieve higher performance 
+    and stealth. Unicornscan is often used in penetration testing, red teaming, and research to discover open services, 
+    analyze banners, and gather intelligence on large address spaces. It provides flexible packet crafting, fine-grained 
+    control over timing, and supports exporting results for further analysis.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify the target host(s) or network range you want to scan.</li>
+    <li>Select the scan type (TCP, UDP, service discovery) and set timing parameters.</li>
+    <li>Run Unicornscan with the chosen flags to perform reconnaissance.</li>
+    <li>Interpret results (open ports, service banners) and log or export findings for reporting or exploitation.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# TCP Scan
+unicornscan -Iv -p 80,443 192.168.1.10       # TCP SYN scan on ports 80,443
+
+# UDP Scan
+unicornscan -mU -Iv -p 53,161 192.168.1.10   # UDP scan on DNS and SNMP ports
+
+# Range Scan
+unicornscan -Iv -p 1-1000 10.0.0.0/24        # Scan first 1000 ports on /24 network
+
+# Service Detection
+unicornscan -mT -Iv -p 22,25,80 target.com   # Grab service banners on selected ports
+
+# Output to File
+unicornscan -mT -Iv -p 1-65535 192.168.1.5 -w results.txt   # Save full scan results
+
+# Example Usage
+unicornscan -Iv -p 80 192.168.1.1           # Fast single-port TCP scan
+unicornscan -mU -p 123 192.168.1.100        # NTP (UDP) scan on specific host
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — Unicornscan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick TCP scan (common web ports)
+unicornscan -mT -Iv -p 80,443 192.168.1.10        # Fast TCP SYN scan on web ports
+
+# Full range scan on subnet
+unicornscan -mT -Iv -p 1-65535 10.0.0.0/24        # Complete port sweep on /24 range
+
+# UDP service discovery
+unicornscan -mU -Iv -p 53,161,123 192.168.1.50    # Check for DNS, SNMP, NTP
+
+# Banner grabbing (fingerprint services)
+unicornscan -mT -Iv -p 21,22,25,80 target.com     # Collect banners from common services
+
+# Stealthier scan with low rate
+unicornscan -mT -r50 -Iv -p 1-1000 192.168.1.20   # Slow rate scan to avoid detection
+
+# Output to file for reporting
+unicornscan -mT -Iv -p 1-65535 192.168.1.30 -w report.txt   # Save results to file
+
+# Dual-stack (IPv6 scanning)
+unicornscan -mT -Iv -p 22,80,443 2001:db8::1               # Scan IPv6 host on key ports
+
+# Compare TCP vs UDP on same target
+unicornscan -mT -Iv -p 80,443 192.168.1.5                  # TCP SYN scan
+unicornscan -mU -Iv -p 80,443 192.168.1.5                  # UDP scan for service response
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://www.kali.org/tools/unicornscan/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Kali Linux - Unicornscan Documentation
+      </a>
+    </li>
+    <li>
+      <a href="https://tools.kali.org/information-gathering/unicornscan" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Official Tool Page
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Unicornscan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Unicornscan</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ unicornscan -mT -Iv -p 80,443 192.168.1.10
+TCP open  192.168.1.10:80    ttl 64  banner: Apache httpd 2.4.29
+TCP open  192.168.1.10:443   ttl 64  banner: nginx 1.14.0
+
+[saide ~]$ unicornscan -mU -Iv -p 53,161 192.168.1.50
+UDP open  192.168.1.50:53    ttl 128 banner: DNS Service
+UDP open  192.168.1.50:161   ttl 128 banner: SNMP v2c
+
+[saide ~]$ unicornscan -mT -Iv -p 1-1000 10.0.0.15
+TCP open  10.0.0.15:22       ttl 64  banner: OpenSSH 7.9p1 Debian
+TCP open  10.0.0.15:25       ttl 64  banner: Postfix smtpd
+TCP open  10.0.0.15:80       ttl 64  banner: Apache httpd
+
+--- Scan Summary ---
+Scanned 1024 ports in 15.23 seconds
+6 ports open, 1018 closed/filtered
+
+    </pre>
+  </details>
+</section>

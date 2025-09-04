@@ -1,0 +1,177 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">RustScan</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Scanning</strong> • Focus: <strong>Fast Port Scanning & Nmap Integration</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    RustScan is a modern, lightning-fast port scanner written in Rust. It is designed to scan targets extremely quickly by leveraging async 
+    operations, then hand over discovered open ports to Nmap for detailed service and vulnerability analysis. It reduces scan times 
+    drastically compared to traditional scanners, making it especially useful during penetration testing and reconnaissance.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify the target host(s) or IP ranges you want to scan.</li>
+    <li>Select RustScan flags for speed, scripting, or Nmap integration.</li>
+    <li>Run RustScan to enumerate open ports quickly.</li>
+    <li>Pipe results into Nmap for service enumeration or vulnerability scanning.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Target & Input
+rustscan -a 192.168.1.10                        # --addresses  Scan a host or IP
+rustscan -a 192.168.1.10,10.0.0.5,scanme.nmap.org # Multiple targets comma-separated
+rustscan -a targets.txt                         # Supply file with newline-separated hosts
+
+# Port Selection
+rustscan -p 80,443,8080 192.168.1.10            # --ports  Scan specific ports
+rustscan -r 1-1000 192.168.1.10                 # --range  Scan a range of ports
+rustscan --top -a 192.168.1.10                  # --top    Scan top 1000 ports
+rustscan -e 22,25,110 -a 192.168.1.10           # --exclude-ports  Skip selected ports
+
+# Address Exclusion
+rustscan -x 10.0.0.0/24 -a hosts.txt            # --exclude-addresses  Skip CIDR/IPs/hosts from scan
+
+# Output & Modes
+rustscan -g -a 192.168.1.10                     # --greppable  Output only open ports (grep-friendly)
+rustscan --no-banner -a 192.168.1.10            # Hide ASCII banner
+rustscan --accessible -a 192.168.1.10           # Accessible mode (better for screen readers)
+
+# Config & Resolver
+rustscan -n -a 192.168.1.10                     # --no-config Ignore config file
+rustscan -c /tmp/custom-config.toml -a 192.168.1.10  # Use custom config path
+rustscan --resolver 1.1.1.1,8.8.8.8 -a domain.com   # Custom DNS resolvers list or file
+
+# Speed & Performance
+rustscan -b 1000 -a 192.168.1.10                # --batch-size Adjust probes per second (default 4500)
+rustscan -t 2000 -a 192.168.1.10                # --timeout Timeout in ms (default 1500)
+rustscan --tries 3 -a 192.168.1.10              # --tries Number of attempts per port
+rustscan -u 65535 -a 192.168.1.10               # --ulimit Raise file descriptor limit
+rustscan --scan-order random -a 192.168.1.10    # --scan-order [serial|random] port scanning order
+
+# Scripts & Service Analysis
+rustscan --scripts none -a 192.168.1.10         # Disable extra scripts
+rustscan --scripts custom -a 192.168.1.10       # Use custom scripts if available
+rustscan -- -sV -A -O                           # Pass open ports directly to Nmap (service + OS detection)
+
+# Protocols
+rustscan --udp -a 192.168.1.10                  # UDP mode (detect UDP ports with responses)
+
+# Info & Help
+rustscan -h                                     # --help Print help
+rustscan -V                                     # --version Show RustScan version
+
+# Example Usage
+rustscan -a 192.168.1.10 -- -sV                 # Fast scan + service detection via Nmap
+rustscan -a scanme.nmap.org -r 1-5000 -- -A     # Scan first 5000 ports and run aggressive Nmap scan
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — RustScan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Fast all-ports sweep with Nmap service detection
+rustscan -a 192.168.1.10 -r 1-65535 -- -sV
+
+# Quick top 1000 ports + aggressive Nmap follow-up
+rustscan -a scanme.nmap.org --top -- -A
+
+# Multiple hosts with randomized scan order
+rustscan -a hosts.txt --scan-order random -b 2000 -- -sC -sV
+
+# UDP scan on common ports
+rustscan -a 192.168.1.20 --udp -p 53,123,161 -- -sU
+
+# Subnet-wide sweep with grep-friendly output
+rustscan -a 192.168.1.0/24 -g -b 1000
+
+# Exclude noisy ports (22,25,110) from scan
+rustscan -a 192.168.1.10 -r 1-1000 -e 22,25,110
+
+# Raise ulimit for massive scan & speed up
+rustscan -a 10.0.0.1 -r 1-65535 -u 65535 -b 5000 -- -sV
+
+# Passive mode to only print open ports
+rustscan -a example.com -g
+
+# Scan with custom DNS resolvers (Cloudflare + Google)
+rustscan -a domain.com --resolver 1.1.1.1,8.8.8.8 -- -sV
+
+# Save results with Nmap output to XML
+rustscan -a 192.168.1.15 -r 1-5000 -- -sV -oX results.xml
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/RustScan/RustScan" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        RustScan GitHub Repository
+      </a>
+    </li>
+    <li>
+      <a href="https://rustscan.github.io/RustScan/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Official Documentation
+      </a>
+    </li>
+    <li>Commonly paired with Nmap for detailed enumeration after port discovery.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — RustScan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of RustScan</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ rustscan -a 192.168.1.10 -r 1-1000 -- -sV
+[~] The config file is expected to be at "/home/saide/.rustscan.toml"
+[~] Automatically increasing ulimit value...
+[~] Starting Script(s)
+[>] Script to be run Some("nmap -vvv -p {{port}} 192.168.1.10")
+Open 192.168.1.10:22
+Open 192.168.1.10:80
+
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
+
+Nmap done: 1 IP address (1 host up) scanned in 5.37 seconds
+
+
+[saide ~]$ rustscan -a scanme.nmap.org --top -- -A
+Open scanme.nmap.org:22
+Open scanme.nmap.org:80
+
+Nmap scan report for scanme.nmap.org (45.33.32.156)
+Host is up (0.040s latency).
+Not shown: 998 filtered ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 6.6.1 (protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.7 ((Ubuntu))
+Aggressive OS guesses: Linux 3.10 - 4.11
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+    </pre>
+  </details>
+</section>

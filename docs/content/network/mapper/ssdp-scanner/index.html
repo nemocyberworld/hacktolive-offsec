@@ -1,0 +1,135 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">ssdp-scanner</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Enumeration</strong> • Focus: <strong>UPnP/SSDP Device Discovery</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    <code>ssdp-scanner</code> is a reconnaissance tool used to discover devices and services on a network that expose the 
+    Simple Service Discovery Protocol (SSDP), typically used by Universal Plug and Play (UPnP). It broadcasts M-SEARCH 
+    requests and parses responses to identify devices such as routers, IoT appliances, smart TVs, and printers. 
+    Security testers use it to uncover misconfigured or vulnerable UPnP services that can leak information about 
+    internal networks or allow exploitation via exposed control endpoints.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify the broadcast/multicast address for SSDP queries (default: 239.255.255.250:1900).</li>
+    <li>Run <code>ssdp-scanner</code> to send discovery requests on the local subnet.</li>
+    <li>Parse responses for device details such as <code>server type</code>, <code>location URL</code>, and <code>UPnP services</code>.</li>
+    <li>Investigate discovered endpoints for misconfigurations or vulnerabilities.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Basic Scan
+ssdp-scanner                                   # Discover devices via SSDP on default multicast
+
+# Custom Interface
+ssdp-scanner -i eth0                           # Specify network interface to use
+
+# Targeted Broadcast
+ssdp-scanner -t 192.168.1.255                  # Send queries to a specific broadcast address
+
+# Custom Timeout
+ssdp-scanner -T 10                             # Set timeout for responses to 10 seconds
+
+# Verbose Output
+ssdp-scanner -v                                # Enable verbose mode for detailed results
+
+# Example Usage
+ssdp-scanner                                   # Quick discovery of UPnP/SSDP devices
+ssdp-scanner -i wlan0 -T 5                     # Discover devices on Wi-Fi, 5s response timeout
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — ssdp-scanner -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick discovery on default multicast
+ssdp-scanner                                   # Fast scan for all SSDP devices
+
+# Wi-Fi interface scan with timeout
+ssdp-scanner -i wlan0 -T 5                     # Use wlan0, wait 5s for responses
+
+# Targeted broadcast scan
+ssdp-scanner -t 192.168.1.255 -T 8             # Send M-SEARCH to broadcast, 8s wait
+
+# Verbose enumeration
+ssdp-scanner -v                                # Print full SSDP/UPnP response details
+
+# Custom interface + verbose
+ssdp-scanner -i eth0 -v                        # Detailed results via eth0 interface
+
+# Focused discovery on IoT subnet
+ssdp-scanner -t 10.0.0.255 -i eth1             # Scan IoT VLAN with eth1
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://en.wikipedia.org/wiki/Simple_Service_Discovery_Protocol" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Wikipedia — Simple Service Discovery Protocol (SSDP)
+      </a>
+    </li>
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/1900-ssdp-simple-service-discovery-protocol"
+         target="_blank"
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks — SSDP / UPnP Pentesting
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — ssdp-scanner -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of ssdp-scanner</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ ssdp-scanner -i wlan0 -T 5
+
+[*] Sending SSDP M-SEARCH to 239.255.255.250:1900 ...
+[*] Waiting for responses (timeout: 5s)
+
+[+] Response from 192.168.1.10:1900
+    LOCATION: http://192.168.1.10:80/rootDesc.xml
+    SERVER: Linux/3.14.0 UPnP/1.0 miniupnpd/1.9
+    USN: uuid:550e8400-e29b-41d4-a716-446655440000::upnp:rootdevice
+    ST: upnp:rootdevice
+
+[+] Response from 192.168.1.20:1900
+    LOCATION: http://192.168.1.20:49152/device-desc.xml
+    SERVER: Microsoft-Windows/10.0 UPnP/1.0
+    USN: uuid:123e4567-e89b-12d3-a456-426614174000::upnp:rootdevice
+    ST: urn:schemas-upnp-org:device:MediaServer:1
+
+[+] Response from 192.168.1.25:1900
+    LOCATION: http://192.168.1.25:8080/setup.xml
+    SERVER: Roku/9.3 UPnP/1.0
+    USN: uuid:abcdefab-1234-5678-abcd-efabcdefabcd::upnp:rootdevice
+    ST: urn:roku-com:device:player:1
+
+[*] Scan complete. 3 devices discovered.
+
+    </pre>
+  </details>
+</section>

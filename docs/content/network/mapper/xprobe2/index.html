@@ -1,0 +1,152 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Xprobe2</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Reconnaissance</strong> • Focus: <strong>Active OS Fingerprinting</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Xprobe2 is an active OS fingerprinting tool that sends crafted probes (TCP, UDP, ICMP) to identify 
+    the operating system of a remote host. It works similarly to Nmap’s OS detection but is lighter and 
+    modular, offering customizable probes and analysis. Useful for penetration testing and reconnaissance, 
+    Xprobe2 helps security professionals validate target systems before exploitation or risk assessment.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Prepare the target host or network segment for fingerprinting.</li>
+    <li>Select probe type (TCP/UDP/ICMP) and relevant options.</li>
+    <li>Run Xprobe2 with chosen modules and capture responses.</li>
+    <li>Analyze the OS fingerprint results and document findings.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# General Options
+xprobe2 -v target                       # Be verbose in output
+xprobe2 -r target                       # Show traceroute to the target
+xprobe2 -h                              # Print help menu
+xprobe2 -o results.log target           # Save output to a logfile
+
+# Probes & Ports
+xprobe2 -p tcp:23:open target           # Probe TCP port 23 marked as open
+xprobe2 -p udp:53:closed target         # Probe UDP port 53 marked as closed
+xprobe2 -T21-23,53,110 target           # TCP port scan for multiple ports
+xprobe2 -U53,161 target                 # UDP port scan for ports 53 and 161
+
+# Configuration & Modules
+xprobe2 -c /path/to/config target       # Use a custom configuration file
+xprobe2 -D 2 target                     # Disable module number 2
+xprobe2 -M 3 target                     # Enable module number 3
+xprobe2 -L                              # List all available modules
+
+# Timing & Debugging
+xprobe2 -t 5 target                     # Set receive timeout to 5 seconds
+xprobe2 -s 200 target                   # Set packet send delay to 200 ms
+xprobe2 -d 2 target                     # Set debug level to 2
+xprobe2 -f target                       # Force fixed round-trip time
+
+# Fingerprint Generation
+xprobe2 -F -o sig.txt target            # Generate OS signature and save to file
+xprobe2 -X -o output.xml target         # Save results as XML to file
+xprobe2 -B target                       # Use TCP handshake module to guess open port
+
+# Advanced Analysis
+xprobe2 -A -T80,443 target              # Detect suspicious traffic (firewalls, proxies, NIDS)
+
+# Example Usage
+xprobe2 -v -p tcp:80 192.168.1.10       # Verbose fingerprint on TCP/80
+xprobe2 -T22-25,80,443 10.0.0.5         # TCP portscan on SSH, SMTP, HTTP, HTTPS
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — Xprobe2 -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick OS fingerprinting (default TCP probe)
+xprobe2 -v 192.168.1.10                  # Verbose fingerprinting on target
+
+# TCP fingerprint scan on common ports
+xprobe2 -T21-23,80,443 10.0.0.5          # Scan FTP, Telnet, HTTP, HTTPS for OS hints
+
+# UDP fingerprint scan for DNS & SNMP
+xprobe2 -U53,161 192.168.1.20            # Probe UDP 53 (DNS) and 161 (SNMP)
+
+# Save results in XML for automation
+xprobe2 -X -o results.xml 192.168.1.30   # XML report for later parsing
+
+# Generate OS signature for target
+xprobe2 -F -o sig.txt 192.168.1.15       # Create custom OS fingerprint signature
+
+# Traceroute + fingerprint in one go
+xprobe2 -r -v 192.168.1.40               # Show route + verbose OS detection
+
+# Aggressive analysis for suspicious traffic
+xprobe2 -A -T80,443 192.168.1.50         # Check proxies/firewalls on HTTP/HTTPS
+
+# Debugging OS detection
+xprobe2 -d 3 -p tcp:22:open 10.0.0.25    # Debug level 3, SSH port probe
+
+# Faster timing with fixed RTT
+xprobe2 -f -t 2 -s 100 192.168.1.100     # Force RTT=2s, 100ms send delay
+
+# Mixed scan with TCP + UDP probes
+xprobe2 -T80,443 -U53 192.168.1.200      # Combine TCP web ports + DNS probe
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://tools.kali.org/information-gathering/xprobe2" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Xprobe2 – Kali Linux Tools
+      </a>
+    </li>
+    <li>Xprobe2 GitHub and fingerprint database for updated OS signatures.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — Xprobe2 -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of Xprobe2</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ xprobe2 -v 192.168.1.10
+
+Xprobe2 v.0.3 Copyright (c) 2002-2005
+
+[*] Target: 192.168.1.10
+[*] Attempting to fingerprint...
+[*] Using TCP port 80 for probing
+[*] Received 12 replies to 12 probes
+
+Fingerprint results:
+  [01] Possible OS: Microsoft Windows 7 Professional (85%)
+  [02] Possible OS: Microsoft Windows Server 2008 R2 (80%)
+
+Traceroute (enabled with -r):
+  1  192.168.1.1 (router.local)  1 ms
+  2  203.0.113.1 (isp.gateway)   8 ms
+  3  192.168.1.10 (target.host)  15 ms
+
+[*] Scan completed in 9.43 seconds.
+
+    </pre>
+  </details>
+</section>

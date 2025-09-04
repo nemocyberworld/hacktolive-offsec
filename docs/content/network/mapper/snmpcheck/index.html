@@ -1,0 +1,151 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">snmpcheck</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Enumeration</strong> • Focus: <strong>SNMP Information Gathering</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    <code>snmpcheck</code> is a network reconnaissance tool used to query SNMP-enabled devices and extract valuable information 
+    such as system details, network configuration, routing tables, processes, installed software, and more. 
+    It is particularly useful during penetration tests for enumerating hosts that expose SNMP services (UDP/161). 
+    By leveraging community strings (e.g., "public"), attackers and defenders can quickly assess SNMP exposure and 
+    understand device posture without authentication beyond the SNMP protocol.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify the target host(s) running SNMP (commonly port 161/udp).</li>
+    <li>Test with common community strings like <code>public</code> or <code>private</code>.</li>
+    <li>Run <code>snmpcheck</code> with appropriate flags to extract system, network, or user details.</li>
+    <li>Analyze results for misconfigurations, sensitive data, or pivot opportunities in the network.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# General Options
+snmpcheck -h                                  # Show help message
+snmpcheck -a host1                            # Check error log file AND host(s)
+snmpcheck -p host1                            # Skip ping-echo before checking host
+snmpcheck -f host1                            # Only check for fixable problems
+snmpcheck host1 host2                         # Run checks against multiple hosts
+
+# X Window Options
+snmpcheck -x host1                            # Force ASCII mode if $DISPLAY set (no Tk GUI)
+snmpcheck -H host1                            # Start in hidden mode (hide user interface)
+snmpcheck -V 3 host1                          # Set initial verbosity level (default: 1)
+snmpcheck -L host1                            # Show log window at startup
+snmpcheck -d host1                            # Start interface without checking anything
+
+# ASCII Mode Options
+snmpcheck -n host1                            # Never fix problems automatically, just list them
+snmpcheck -y host1                            # Always attempt to fix problems found
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — snmpcheck -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick health check (default run)
+snmpcheck 192.168.1.10                         # Scan host for SNMP problems
+
+# Check host + error logs
+snmpcheck -a 192.168.1.10                      # Include error log analysis
+
+# Skip ping (useful on filtered/blocked ICMP)
+snmpcheck -p 192.168.1.10                      # Don’t ping before scan
+
+# Only show fixable problems
+snmpcheck -f 192.168.1.10                      # Display only actionable findings
+
+# Always auto-fix detected issues
+snmpcheck -y 192.168.1.10                      # Apply fixes automatically
+
+# Report-only mode (never fix)
+snmpcheck -n 192.168.1.10                      # Just list problems, no fixing
+
+# Hidden interface + verbose
+snmpcheck -H -V 3 192.168.1.10                 # Hidden UI, verbosity=3
+
+# ASCII-only mode (headless environments)
+snmpcheck -x 192.168.1.10                      # Force ASCII mode, no GUI
+
+# Verbose logging with GUI log window
+snmpcheck -V 2 -L 192.168.1.10                 # Start with verbosity=2, show log window
+
+# Diagnostic interface startup
+snmpcheck -d 192.168.1.10                      # Bring up interface without scanning
+
+  </pre>
+</section>
+
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://www.kali.org/tools/snmpcheck/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Kali Linux — snmpcheck
+      </a>
+    </li>
+    <li>
+      <a href="https://nmap.org/nsedoc/scripts/snmp-*"
+         target="_blank"
+         class="text-blue-400 underline hover:text-blue-300">
+        Related SNMP Enumeration with Nmap Scripts
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — snmpcheck -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of snmpcheck</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ snmpcheck -a 192.168.1.10
+
+------------------------------------------------------
+ SNMPCHECK v1.0 - SNMP Health & Problem Scanner
+------------------------------------------------------
+Target Host     : 192.168.1.10
+Ping-Check      : Skipped (error log included)
+Verbosity Level : 2
+------------------------------------------------------
+
+[+] System Description: Linux ubuntu-server 5.15.0-78-generic
+[+] Contact: admin@example.com
+[+] Location: DataCenter-1 / Rack-3
+[+] Uptime: 15 days, 03:45:22
+
+[!] Warning: Community string 'public' is still enabled.
+[!] Warning: SNMP v1 responses allowed (less secure).
+[!] Error: Weak permissions detected on OID .1.3.6.1.2.1.1.5 (hostname).
+
+[*] Recommendations:
+    - Disable default community strings.
+    - Restrict SNMP to trusted IP ranges.
+    - Enforce SNMPv3 with authentication & encryption.
+
+------------------------------------------------------
+ Scan Completed: Issues found = 3
+------------------------------------------------------
+
+    </pre>
+  </details>
+</section>

