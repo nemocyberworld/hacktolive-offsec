@@ -57,12 +57,6 @@
       ]
     },
     {
-      "name": "Tools",
-      "children": [
-        { "name": "Nmap", "content": true }
-      ]
-    },
-    {
       "name": "Web",
       "children": [
         {
