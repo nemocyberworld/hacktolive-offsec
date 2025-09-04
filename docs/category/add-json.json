@@ -1,0 +1,36 @@
+{
+  "name": "Category Name",
+  "children": [
+    {
+      "name": "Subcategory A",
+      "content": true
+    },
+    {
+      "name": "Subcategory B",
+      "children": [
+        { "name": "Nested 1", "content": true },
+        { "name": "Nested 2", "content": true }
+      ]
+    },
+    {
+      "name": "Subcategory C",
+      "content": true
+    }
+  ]
+}
+
+// Example 
+{
+  "name": "Forensics",
+  "children": [
+    { "name": "Disk Analysis", "content": true },
+    { "name": "Memory Analysis", "content": true },
+    {
+      "name": "Network",
+      "children": [
+        { "name": "PCAP Analysis", "content": true },
+        { "name": "Traffic Reconstruction", "content": true }
+      ]
+    }
+  ]
+}
