@@ -1,0 +1,192 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">arp-scan — ARP Network Scanner</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Host Discovery & ARP Enumeration</strong> • Last Updated: <strong>2025-09-03</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    <code>arp-scan</code> is a fast ARP-based discovery tool for local networks.  
+    It identifies live hosts by sending ARP requests and analyzing responses.  
+    Supports custom MAC addresses, vendor lookups, VLAN tags, pcap saving, and scripting-friendly output.  
+    Essential for offensive security when you need to enumerate devices in a LAN without relying on higher-level protocols.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Install on Linux: <code>sudo apt install arp-scan</code> (Debian/Ubuntu) or build from source.</li>
+    <li>Choose an interface with <code>-I</code> (e.g., eth0, wlan0).</li>
+    <li>Scan target IP, CIDR range, or use <code>--localnet</code> for full LAN.</li>
+    <li>Tune options: timing, retries, bandwidth, VLANs, vendor lookups.</li>
+    <li>Output to file (TXT/CSV/pcap) for later parsing or reporting.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# General
+arp-scan --help                                # Show help
+arp-scan --version                             # Show version, license, libpcap info
+arp-scan -I eth0 192.168.1.0/24                # Scan subnet on eth0
+
+# Host Selection
+arp-scan -f hosts.txt                          # Read targets from file
+arp-scan --localnet                            # Scan full LAN from interface/netmask
+arp-scan 10.0.0.1-10.0.0.50                    # Scan range of IPs
+arp-scan 192.168.0.0:255.255.255.0             # Network:mask format
+
+# MAC/Vendor Mapping
+arp-scan -O ieee-oui.txt 192.168.1.0/24        # Use custom OUI vendor mapping
+arp-scan -m my-mac-vendor.txt 192.168.1.0/24   # Use custom vendor file
+
+# Output Control
+arp-scan -q 192.168.1.0/24                     # Quiet mode (IP + MAC only)
+arp-scan -x 192.168.1.0/24                     # Plain mode (suppress headers/footers)
+arp-scan -g 192.168.1.0/24                     # Ignore duplicate responses
+arp-scan -D 192.168.1.0/24                     # Show RTT for responses
+arp-scan -F '${ip}\t${mac}\t${vendor}' 192.168.1.0/24  # Custom output format
+
+# Randomization
+arp-scan -R 192.168.1.0/24                     # Randomize target list
+arp-scan --randomseed=42 192.168.1.0/24        # Reproducible random order
+
+# Timing / Retries
+arp-scan -r 3 192.168.1.0/24                   # Retries per host
+arp-scan -b 2.0 192.168.1.0/24                 # Backoff factor
+arp-scan -t 1000 192.168.1.0/24                # Initial timeout (ms)
+arp-scan -i 10 192.168.1.0/24                  # Interval between packets
+arp-scan -B 1M 192.168.1.0/24                  # Limit bandwidth to 1Mbps
+
+# DNS
+arp-scan -N 192.168.1.0/24                     # Numeric mode (no DNS)
+arp-scan -d 192.168.1.0/24                     # Resolve hostnames
+
+# ARP Packet Tweaks
+arp-scan -u 00:11:22:33:44:55 192.168.1.0/24   # Custom ARP source MAC
+arp-scan -w 00:aa:bb:cc:dd:ee 192.168.1.0/24   # Custom ARP target MAC
+arp-scan -H 6 192.168.1.0/24                   # Set ARP hardware type
+arp-scan -p 0x0800 192.168.1.0/24              # Set ARP protocol type
+arp-scan -a 8 192.168.1.0/24                   # Set hardware address length
+arp-scan -P 4 192.168.1.0/24                   # Set protocol address length
+arp-scan -o 1 192.168.1.0/24                   # Set ARP operation (request)
+arp-scan -s 192.168.1.50 192.168.1.0/24        # Custom ARP source IP
+
+# Ethernet Header Tweaks
+arp-scan -S 00:11:22:33:44:55 192.168.1.0/24   # Custom Ethernet source MAC
+arp-scan -T ff:ff:ff:ff:ff:ff 192.168.1.0/24   # Custom Ethernet dest MAC
+arp-scan -y 0x0806 192.168.1.0/24              # Custom Ethernet proto type
+arp-scan -L 192.168.1.0/24                     # Use 802.2 LLC/SNAP encapsulation
+arp-scan -Q 10 192.168.1.0/24                  # Add VLAN ID tag (802.1Q)
+
+# Misc
+arp-scan -M 5 192.168.1.0/24                   # Exit after 5 hosts found
+arp-scan -W results.pcap 192.168.1.0/24        # Save packets to pcap file
+arp-scan -n 128 192.168.1.0/24                 # Snap length for packet capture
+arp-scan -Y 10 192.168.1.0/24                  # Retry send attempts
+arp-scan -E 50 192.168.1.0/24                  # Interval between retries (ms)
+arp-scan -A ff 192.168.1.0/24                  # Add padding in hex
+
+# Example Best Practices
+arp-scan --localnet -I eth0 -q -D              # Quick LAN discovery with RTT
+arp-scan -I wlan0 --localnet -F '${ip} ${mac}' # Custom output for scripting
+arp-scan -I eth0 192.168.1.0/24 -W scan.pcap   # Save packets for Wireshark
+  </pre>
+</section>
+<!-- Best Flag Combinations (Cheat Ready) -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick LAN sweep with RTT (clean, fast)
+arp-scan --localnet -I eth0 -q -D
+
+# Script-friendly output (CSV-style, no headers/footers)
+arp-scan --localnet -I eth0 -x -F '${ip},${mac},${vendor}' > lan.csv
+
+# Large network sweep (no DNS, minimal output)
+arp-scan -I eth0 -N -q 192.168.0.0/16
+
+# Through, resilient scan (extra retries + backoff + longer timeout)
+arp-scan --localnet -I eth0 -r 4 -b 2.0 -t 1000 -D
+
+# Bandwidth-capped scan (keep link usable)
+arp-scan --localnet -I eth0 -B 1M
+
+# Reproducible randomized order (shuffle targets deterministically)
+arp-scan --localnet -I eth0 -R --randomseed=1337
+
+# Save packets for later analysis (Wireshark)
+arp-scan -I eth0 --localnet -W arp-scan.pcap
+
+# VLAN-tagged discovery (802.1Q)
+arp-scan -I eth0 --localnet -Q 10
+
+# Spoof ARP/Ethernet addresses (lab/testing; be careful)
+arp-scan -I eth0 192.168.1.0/24 -S 66:77:88:99:aa:bb -u 66:77:88:99:aa:bb
+
+# Custom source IP in ARP payload (stimulate responses on some hosts)
+arp-scan -I eth0 192.168.1.0/24 -s 192.168.1.50
+
+# Quiet + RTT for quick headcount
+arp-scan -I eth0 --localnet -q -D
+
+# CI/CD or monitoring threshold (fail if fewer than N hosts respond)
+arp-scan -I eth0 --localnet -M 10
+
+# Range + pcap + CSV format in one go
+arp-scan -I eth0 10.0.10.1-10.0.10.254 -W range.pcap -x -F '${ip}\t${mac}\t${vendor}' > range.tsv
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://github.com/royhills/arp-scan" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        arp-scan GitHub (official source)
+      </a>
+    </li>
+    <li>
+      <a href="https://linux.die.net/man/1/arp-scan" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        arp-scan Man Page
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (toggle) — arp-scan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer font-semibold text-lg mb-2 
+                    text-gray-200 hover:text-purple-400 transition">
+      📄 Example Result (arp-scan)
+    </summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto mt-2">
+
+[saide ~]$ sudo arp-scan --localnet -I eth0
+
+Interface: eth0, datalink type: EN10MB (Ethernet)
+Starting arp-scan 1.9.7 with 256 hosts (http://www.royhills.co.uk/)
+
+192.168.1.1     00:11:22:33:44:55    Netgear, Inc
+192.168.1.10    08:00:27:aa:bb:cc    PCS Systemtechnik GmbH
+192.168.1.20    dc:a6:32:12:34:56    Apple, Inc
+192.168.1.30    00:25:90:65:43:21    Hewlett Packard
+192.168.1.50    3c:07:54:98:76:54    Dell Inc.
+
+5 packets received by filter, 0 packets dropped by kernel
+Ending arp-scan 1.9.7: 256 hosts scanned in 2.014 seconds (127.08 hosts/sec).
+5 responded
+
+    </pre>
+  </details>
+</section>

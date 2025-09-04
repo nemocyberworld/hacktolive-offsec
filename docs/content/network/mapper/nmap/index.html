@@ -438,44 +438,82 @@ nmap -sV -p- --version-all --reason 10.0.0.5   # Full port scan with deep versio
 nmap -A -T4 -oA corp_scan 192.168.10.0/24      # Aggressive scan with timing, save all outputs
    → Example: nmap -A -T4 -oA corp_scan 192.168.10.0/24
 
+  </pre>
+</section>
 
-# Best Flag Combinations (Cheat Ready)
+<!-- Best Flag Combinations (Cheat Ready) — Nmap -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
 
-# Local Network (fast, noisy, full discovery)
-nmap -A -T4 -p- 192.168.1.0/24
-   → Aggressive mode, all ports, fast timing on LAN
+# Fast LAN sweep (common ports, service detect)
+nmap -T4 --top-ports 1000 -sV --reason 192.168.1.0/24
+  → Quick visibility on a local /24 with common ports and versions
 
-# Local Network (stealthy / IDS evasion)
-nmap -sS -T2 -Pn -f --data-length 50 192.168.1.0/24
-   → SYN stealth scan, no ping, fragmentation + random padding
+# Full LAN audit (all TCP ports + NSE defaults)
+nmap -T4 -p- -A -oA lan_full 192.168.1.0/24
+  → All ports, OS+version+scripts+traceroute, save all outputs
 
-# Remote Host (safe, basic info)
-nmap -sS -sV -T3 -p- scanme.nmap.org
-   → SYN scan with version detection, full port range, normal timing
+# Stealthy external scan (reduce noise)
+nmap -sS -Pn -T2 --scan-delay 100ms --max-retries 2 target.com
+  → Half-open SYN, skip ping, slower pacing to avoid alarms
 
-# Remote Host (deep enumeration)
-nmap -A -sS -p- -T4 --script vuln scanme.nmap.org
-   → Aggressive mode with vuln scripts, full port sweep
+# Firewall/IDS evasion (use responsibly)
+nmap -sS -Pn -f -D RND:10,ME -g 53 --data-length 50 target.com
+  → Fragmentation, decoys, DNS source port, padding
 
-# Firewall/IDS Evasion
-nmap -sS -Pn -f -D RND:10,ME -g 53 192.168.1.100
-   → SYN stealth, skip ping, fragmentation, decoys, source port 53 (DNS)
+# Deep single host enumeration (TCP full + UDP top)
+nmap -sS -sV -p- --version-all --reason -oA tcp_full target
+nmap -sU --top-ports 200 -sV --reason -oA udp_top target
+  → Thorough TCP; focused UDP follow-up
 
-# Quick Service Enumeration
-nmap -sV --top-ports 1000 -T4 192.168.1.1
-   → Detect services on top 1000 ports, fast timing
+# Web app recon (HTTP/HTTPS focused)
+nmap -p80,443,8080,8443 -sV --script http-title,http-headers,http-enum,http-methods target
+  → Identify web services and enumerate endpoints/features
 
-# Vulnerability Testing
-nmap -sV --script vuln 10.0.0.5
-   → Run vulnerability detection scripts
+# SMB/Windows discovery
+nmap -p135,139,445,3389 -sV --script smb-os-discovery,smb2-security-mode,smb2-time,smb-enum-shares target
+  → OS info, domain/workgroup, shares, SMB security mode
 
-# OS Fingerprinting
-nmap -O --osscan-guess 192.168.1.100
-   → Attempt OS detection with aggressive guessing
+# Quick service snapshot (top ports + fast timing)
+nmap -sV --top-ports 1000 -T4 --min-rate 2000 target
+  → Rapid banner/version intel on most common ports
 
-# Save Everything
-nmap -A -T4 -p- -oA full_audit 10.0.0.0/24
-   → Aggressive full port scan, save in all output formats
+# OS fingerprint with higher accuracy
+nmap -O --osscan-limit --osscan-guess --reason target
+  → Restrict OS detect to promising hosts, enable guessing
+
+# Resume a long scan
+nmap -sS -p- -T3 -oA long_scan target && nmap --resume long_scan.nmap
+  → Save and resume without starting over
+
+# IPv6 reconnaissance
+nmap -6 -sS -sV --top-ports 200 2001:db8::/64
+  → Common-port sweep over IPv6 subnet with service detect
+
+# Rate-limited environments (be nice)
+nmap -sS -T2 --max-rate 200 --scan-delay 50ms --max-retries 1 target
+  → Bound probe rate and delays for fragile links
+
+# UDP discovery for common services
+nmap -sU --top-ports 200 -sV --defeat-icmp-ratelimit target
+  → Focused UDP with version probes and ICMP throttling workaround
+
+# Vulnerability scripts (safe subset)
+nmap -sV --script vuln --script-args=unsafe=0 -oN vuln.txt target
+  → Run NSE vuln category while avoiding scripts marked unsafe
+
+# Multiple hosts & exclusions
+nmap -sS -sV -p- --exclude 192.168.1.10,192.168.1.11 192.168.1.0/24
+  → Sweep a subnet while skipping sensitive IPs
+
+# Greppable + machine-readable outputs together
+nmap -sV -oA project_scan -oG project_scan.grep target/24
+  → XML/normal/scripts + grepable for quick parsing
+
+# No DNS (faster, cleaner when DNS is noisy)
+nmap -n -sS -sV --top-ports 1000 target/24
+  → Skip DNS to speed up and avoid PTR lookups
 
   </pre>
 </section>
@@ -507,4 +545,66 @@ nmap -A -T4 -p- -oA full_audit 10.0.0.0/24
       </a>
     </li>
   </ul>
+</section>
+
+
+<!-- Example Results (Toggle) -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Show Example Nmap Output
+    </summary>
+    <pre class="text-sm mt-2 text-gray-200">
+
+# Example 1: Simple SYN scan
+[saide ~]$ nmap -sS -p 22,80 192.168.1.1
+Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for 192.168.1.1
+Host is up (0.0020s latency).
+
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http
+
+# Example 2: Service & Version Detection
+[saide ~]$ nmap -sV -p 21,22,80 192.168.1.1
+Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for 192.168.1.1
+Host is up (0.0012s latency).
+
+PORT   STATE SERVICE VERSION
+21/tcp open  ftp     vsftpd 3.0.3
+22/tcp open  ssh     OpenSSH 8.4p1 Debian 5
+80/tcp open  http    Apache httpd 2.4.54
+
+# Example 3: Aggressive Scan (-A)
+[saide ~]$ nmap -A 192.168.1.1
+Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for 192.168.1.1
+Host is up (0.0015s latency).
+Not shown: 997 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.4p1 Debian 5
+80/tcp open  http    Apache httpd 2.4.54
+443/tcp open https   OpenSSL 1.1.1
+
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+OS details: Linux 5.4 - 5.10
+Network Distance: 1 hop
+NSE: Script results
+| http-title: Example Web Server
+| ssl-cert: Subject: commonName=example.com
+
+# Example 4: OS Detection Only
+[saide ~]$ nmap -O 192.168.1.1
+Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for 192.168.1.1
+Host is up.
+OS details: Linux 5.4 - 5.10
+Network Distance: 1 hop
+
+    </pre>
+  </details>
 </section>

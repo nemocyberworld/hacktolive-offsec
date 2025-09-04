@@ -1,0 +1,152 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">arping — ARP Ping Utility</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>ARP Probing, Host Discovery & Duplicate IP Detection</strong> • Last Updated: <strong>2025-09-04</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    <code>arping</code> is a lightweight utility used to send ARP requests to a host and listen for replies. 
+    It is primarily used for host discovery, detecting duplicate IP addresses, and updating neighbor ARP tables. 
+    Unlike ICMP ping, <code>arping</code> operates at the data link layer, making it effective even when ICMP is blocked. 
+    It is often used in offensive security for stealthy host discovery, local network reconnaissance, and verification of IP/MAC mappings.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Select the network interface to use (e.g., eth0, wlan0).</li>
+    <li>Choose the mode (normal ARP ping, duplicate detection, unsolicited update).</li>
+    <li>Run the <code>arping</code> command with appropriate flags for timing, packet count, or source spoofing.</li>
+    <li>Analyze responses to confirm host availability, detect conflicts, or validate ARP table updates.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# General Options
+arping -f 192.168.1.1                          # Quit after first reply
+arping -q 192.168.1.1                          # Quiet mode, suppress output
+arping -b 192.168.1.1                          # Keep broadcasting, no unicast
+arping -D 192.168.1.50                         # Duplicate address detection (DAD)
+arping -U 192.168.1.50                         # Unsolicited ARP: update neighbors (gratuitous ARP)
+arping -A 192.168.1.50                         # ARP answer mode: reply update
+arping -V                                      # Print version and exit
+
+# Packet Control
+arping -c 5 192.168.1.1                        # Send 5 ARP packets then stop
+arping -w 3 192.168.1.1                        # Wait max 3 seconds for replies
+arping -i 0.5 192.168.1.1                      # Interval of 0.5s between packets
+
+# Interface and Addressing
+arping -I eth0 192.168.1.1                     # Use eth0 interface
+arping -s 192.168.1.50 192.168.1.1             # Spoof source IP in ARP request
+
+# Example Usage
+arping -I eth0 -c 3 192.168.1.1                # Quick 3 ARP probes on eth0
+arping -D -I eth0 192.168.1.50                 # Check if 192.168.1.50 is already in use
+arping -U -I eth0 192.168.1.50                 # Announce IP change to LAN
+arping -A -I eth0 -s 192.168.1.50 192.168.1.1  # ARP reply with spoofed source IP
+arping -q -c 1 192.168.1.1                     # Quiet single probe for scripting
+
+  </pre>
+</section>
+
+<!-- Best Flag Combinations (Cheat Ready) -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready)</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Quick Host Discovery
+arping -I eth0 -c 3 192.168.1.1
+   → Send 3 ARP requests, fast availability check
+
+# Stealthy Probe (quiet + single packet)
+arping -q -c 1 -I eth0 192.168.1.1
+   → Silent one-shot ARP probe (for scripting / automation)
+
+# Detect Duplicate IP (DAD mode)
+arping -D -I eth0 192.168.1.50
+   → Verify if IP 192.168.1.50 is already taken in the LAN
+
+# Gratuitous ARP Update (announce yourself)
+arping -U -I eth0 192.168.1.50
+   → Inform neighbors that 192.168.1.50 belongs to your MAC
+
+# ARP Spoof Test (fake source IP)
+arping -A -I eth0 -s 192.168.1.50 192.168.1.1
+   → Send forged ARP reply to poison/update neighbor cache
+
+# Continuous Broadcast Mode
+arping -b -I eth0 192.168.1.1
+   → Keep broadcasting ARP requests instead of unicast
+
+# Faster Timing
+arping -i 0.2 -c 10 -I eth0 192.168.1.1
+   → Send 10 ARP packets at 200ms intervals for reliability
+
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://linux.die.net/man/8/arping" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        arping(8) — Linux man page
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com/ThomasHabets/arping" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        arping GitHub Repository
+      </a>
+    </li>
+    <li>Useful for network troubleshooting, host discovery, duplicate IP detection, and ARP spoofing research.</li>
+  </ul>
+</section>
+<br>
+<!-- Example Results (Toggle) -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Show Example Output
+    </summary>
+    <pre class="text-sm mt-2 text-gray-200">
+
+# Example 1: Standard arping run
+[saide ~]$ arping -I eth0 -c 3 192.168.1.1
+ARPING 192.168.1.1 from 192.168.1.50 eth0
+Unicast reply from 192.168.1.1 [00:11:22:33:44:55]  0.876ms
+Unicast reply from 192.168.1.1 [00:11:22:33:44:55]  0.912ms
+Unicast reply from 192.168.1.1 [00:11:22:33:44:55]  0.899ms
+Sent 3 probes (3 broadcast(s))
+Received 3 response(s)
+
+# Example 2: Duplicate Address Detection
+[saide ~]$ arping -D -I eth0 192.168.1.50
+ARPING 192.168.1.50 from 192.168.1.50 eth0
+Unicast reply from 192.168.1.50 [66:77:88:99:AA:BB]  0.512ms
+Sent 1 probe, received 1 duplicate address reply
+
+# Example 3: Gratuitous ARP Update
+[saide ~]$ arping -U -I eth0 192.168.1.50
+ARPING 192.168.1.50 from 192.168.1.50 eth0
+Sent 1 probes (1 broadcast(s))
+Received 0 response(s)
+
+    </pre>
+  </details>
+</section>

@@ -1,0 +1,106 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Angry IP Scanner — ipscan</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network</strong> • Focus: <strong>Host Discovery & Quick Recon</strong> • Last Updated: <strong>2025-09-03</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Angry IP Scanner (ipscan) is a lightweight, open-source, cross-platform GUI network scanner. It allows rapid detection of live hosts, open ports, hostnames, MAC addresses, and NetBIOS data and provides export options like TXT, CSV, and XML. Ideal for quick net recon in pentesting or sysadmin workflows.
+  </p>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Download Linux package from the official site:  
+      <a href="https://angryip.org/download/#linux" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        Linux Downloads (DEB, RPM, JAR)
+      </a>.
+    </li>
+    <li>Install via your package method (DEB/RPM) or run the JAR directly (requires Java 17+).</li>
+    <li>Launch with <code>ipscan</code> from terminal or app menu.</li>
+    <li>Drag your mouse to enter an IP, hostname, or range (e.g. <code>192.168.1.0–255</code>).</li>
+    <li>Select scan options (ping, ports, NetBIOS, hostname resolution, MAC).</li>
+    <li>Click **Start** → review results in the GUI table.</li>
+    <li>Export results via **File → Save As** to TXT, CSV, or XML.</li>
+  </ol>
+</section>
+
+<!-- Example Usage -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Usage</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Download for Linux
+Visit: https://angryip.org/download/#linux
+
+# Install example (Debian-based)
+sudo dpkg -i ipscan_3.9.2_amd64.deb
+sudo apt --fix-broken install
+
+# Launch GUI
+ipscan
+
+# Inside GUI:
+# - Scan a single IP  → 192.168.1.10
+# - Scan a subnet      → 192.168.1.0–255
+# - Enable ping, port scan, hostname, MAC
+# - Export results     → File → Save As → CSV/XML
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://angryip.org" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        Angry IP Scanner Official Site
+      </a>
+    </li>
+    <li>
+      <a href="https://aur.archlinux.org/packages/ipscan" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        AUR Package (ipscan) for Arch Linux
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com/angryip/ipscan" target="_blank" class="text-blue-400 underline hover:text-blue-300">
+        GitHub Repository & Source (GPL-2)
+      </a>
+    </li>
+  </ul>
+</section>
+<br>
+<!-- Example Result (toggle) — ipscan -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer font-semibold text-lg mb-2 
+                    text-gray-200 hover:text-purple-400 transition">
+      📄 Example Result (ipscan)
+    </summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto mt-2">
+
+[saide ~]$ ipscan 192.168.1.0/24
+
+Scanned 256 hosts in 12.45 seconds
+
+Host             Ping     Hostname           Ports
+-------------------------------------------------------------
+192.168.1.1      Alive    router.local       80 (HTTP), 443 (HTTPS)
+192.168.1.10     Alive    printer.local      515 (Printer), 9100 (JetDirect)
+192.168.1.20     Alive    desktop.local      22 (SSH), 139 (NetBIOS), 445 (SMB)
+192.168.1.50     Alive    laptop.local       22 (SSH), 3389 (RDP)
+192.168.1.100    Alive    server.local       21 (FTP), 80 (HTTP), 443 (HTTPS)
+
+Summary:
+- 5 hosts alive out of 256 scanned.
+- Detected common services (FTP, SSH, SMB, HTTP, RDP).
+- Results can be exported to CSV, TXT, or XML via GUI/CLI.
+
+    </pre>
+  </details>
+</section>

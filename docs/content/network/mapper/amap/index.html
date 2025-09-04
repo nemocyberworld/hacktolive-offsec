@@ -21,45 +21,96 @@
 
 # Modes
 amap -A 192.168.1.100 21 22 80                 # Map applications (default, active triggers)
-amap -B 192.168.1.100 8080                     # Banner grab only (no triggers)
-amap -P 192.168.1.100 1-1024                   # Full connect() port scanner
-amap -W 192.168.1.100 443                      # Map apps (same as -A, kept for compatibility)
+amap -B 192.168.1.100 8080                     # Banner grab only (no triggers sent)
+amap -P 192.168.1.100 1-1024                   # Full connect() port scanner (no app detection)
+amap -W 192.168.1.100 443                      # Same as -A (legacy compatibility)
 
 # Core Options
-amap -1 192.168.1.100 80                       # Stop after first identification (faster)
-amap -6 [IPv6-Address] 80                      # Use IPv6 instead of IPv4
+amap -1 192.168.1.100 80                       # Stop after first ID on a port (fast scan)
+amap -6 fe80::1 80                             # Use IPv6 target instead of IPv4
 amap -b 192.168.1.100 22                       # Print ASCII banner of responses
-amap -i scan.xml                               # Read Nmap output (XML/machine-readable)
-amap -u 192.168.1.100 161                      # Use UDP instead of TCP
-amap -R 192.168.1.100 111                      # Do not identify RPC services
-amap -S 192.168.1.100 443                      # Do not identify SSL services
+amap -i nmap.xml                               # Import open ports from Nmap XML file
+amap -u 192.168.1.100 161                      # Treat command-line ports as UDP
+amap -R 192.168.1.100 111                      # Skip identifying RPC services
+amap -S 192.168.1.100 443                      # Skip identifying SSL services
 amap -H 192.168.1.100 25                       # Skip potentially harmful triggers
-amap -U 192.168.1.100 1-65535                  # Suppress unrecognised responses
+amap -U 192.168.1.100 1-65535                  # Suppress unrecognized responses
 amap -d 192.168.1.100 80                       # Dump all responses (debugging/scripting)
 amap -v 192.168.1.100 80                       # Verbose output
-amap -vv 192.168.1.100 80                      # Extra verbose (debug mode)
-amap -q 192.168.1.100 1-1024                   # Quiet mode (skip closed/unidentified)
+amap -vv 192.168.1.100 80                      # Extra verbose (debug-level output)
+amap -q 192.168.1.100 1-1024                   # Quiet mode, no closed/unidentified reporting
 
 # Output
-amap -o results.txt 192.168.1.100 80           # Save output to file
-amap -m -o results.mach 192.168.1.100 1-1024   # Save machine-readable output
-amap -D debug.txt 192.168.1.100 80             # Write raw dump file for responses
+amap -o results.txt 192.168.1.100 80           # Save results to a file
+amap -m -o results.mach 192.168.1.100 1-1024   # Machine-readable output format
+amap -D debug.txt 192.168.1.100 80             # Write raw dump responses to file
 
 # Performance
-amap -c 64 192.168.1.100 1-1024                # Set parallel connections (default 32, max 256)
-amap -C 5 192.168.1.100 22                     # Retries per port (default 3)
-amap -T 3 192.168.1.100 22                     # Connect timeout in seconds (default 5)
-amap -t 10 192.168.1.100 22                    # Response wait timeout in seconds (default 5)
+amap -c 64 192.168.1.100 1-1024                # Parallel connections (default 32, max 256)
+amap -C 5 192.168.1.100 22                     # Retries per connection (default 3)
+amap -T 3 192.168.1.100 22                     # Connection timeout (default 5s)
+amap -t 10 192.168.1.100 22                    # Response wait timeout (default 5s)
 
 # Protocol-specific
-amap -p ftp 192.168.1.100 21                   # Only send FTP triggers
-amap -p http 192.168.1.100 8080                # Only send HTTP triggers
+amap -p ftp 192.168.1.100 21                   # Only send triggers for FTP
+amap -p http 192.168.1.100 8080                # Only send triggers for HTTP
 
 # Example Best Practices
-amap -bqv -1 192.168.1.100 1-65535             # Recommended: banner+quiet+verbose, fast mode
-amap -i scan.xml -bqv -o amap_results.txt      # Parse Nmap XML, run amap, save results
+amap -bqv -1 192.168.1.100 1-65535             # Recommended scan: banner+quiet+verbose, stop after first ID
+amap -i nmap.xml -bqv -o amap_results.txt      # Combine with Nmap XML, run amap, save results
   </pre>
 </section>
+
+<!-- Best Flag Combinations (Cheat Ready) — amap -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Best Flag Combinations (Cheat Ready) — amap</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# Fast Full Identify (safe default)
+amap -A -bqv -1 192.168.1.100 1-1024           # Active triggers + banner, quiet output, stop after first match
+
+# Quick LAN Sweep (TCP)
+amap -A -bqv -1 -c 128 -T 3 -t 3 192.168.1.0 1-1024  # Higher concurrency & shorter timeouts for speed
+
+# Parse From Nmap (reuse discovered open ports)
+amap -A -bqv -i nmap.gnmap -o amap.txt        # Read Nmap machine-readable, identify apps, write text out
+
+# UDP Services Probe
+amap -A -u -bqv -1 192.168.1.100 53 67 123    # Active triggers over UDP for common UDP services
+
+# Banner-Only (no triggers)
+amap -B -bqv 203.0.113.5 21 22 80 443         # Safe banner grab without sending triggers
+
+# Conservative / Low-Impact
+amap -A -bqv -1 -H -U 198.51.100.25 1-1024    # Skip harmful triggers, suppress unrecognized output
+
+# Ignore SSL / RPC Fingerprints
+amap -A -bqv -R -S 192.168.1.50 111 135 443   # Do not identify RPC/SSL; useful when they confuse matches
+
+# Protocol-Focused
+amap -A -bqv -p http 192.168.1.80 80 8080     # Only send HTTP triggers to speed up focused checks
+
+# High-Fidelity Dump (triage / scripting)
+amap -A -d -m -o dump.mach 192.168.1.100 1-65535  # Dump all responses + machine-readable output
+
+# Port Scanner Mode (fallback)
+amap -P -q 192.168.1.0 1-65535                 # Quick connect() port scan when only reachability matters
+
+# IPv6 Targets
+amap -A -6 -bqv -1 2001:db8::10 22 80 443     # Same fast identify workflow over IPv6
+
+# Resilient Over Latency
+amap -A -bqv -1 -C 5 -T 7 -t 7 203.0.113.9 1-1024  # More retries & longer timeouts for high-latency links
+
+# Quiet Scripting Output
+amap -A -q -m -o results.mach 192.168.1.100 1-1024  # Minimal stdout + machine format for parsers
+
+# Thorough Target Audit
+amap -A -b -v -c 64 -C 4 -T 5 -t 5 -o audit.txt 192.168.1.200 1-65535  # Balanced depth vs performance
+
+  </pre>
+</section>
+
 
 <!-- References -->
 <section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
@@ -80,4 +131,30 @@ amap -i scan.xml -bqv -o amap_results.txt      # Parse Nmap XML, run amap, save 
       </a>
     </li>
   </ul>
+</section>
+<br>
+
+<!-- Example Result (toggle) — amap -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <details class="group">
+    <summary class="cursor-pointer font-semibold text-lg mb-2 
+                    text-gray-200 hover:text-purple-400 transition">
+      📄 Example Result (amap)
+    </summary>
+    <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto mt-2">
+
+[saide ~]$ amap -A -bqv -1 192.168.1.100 21 22 80 443
+
+port 21/tcp  open   ftp     vsFTPd 2.3.4
+port 22/tcp  open   ssh     OpenSSH 7.9p1 Debian-10+deb10u2
+port 80/tcp  open   http    Apache httpd 2.4.38 ((Debian))
+port 443/tcp open   https   nginx 1.14.2
+
+# Notes:
+- Active triggers sent to ports, responses analyzed.
+- Services identified with banners and protocol fingerprints.
+- Quiet mode suppresses extra noise, keeping only relevant matches.
+
+    </pre>
+  </details>
 </section>
