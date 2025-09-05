@@ -1,0 +1,61 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Red Teaming Labs</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Red Teaming</strong> • Focus: <strong>Adversary Emulation, Active Directory, & Attack Simulation</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    This collection focuses on hands-on red teaming resources: adversary emulation frameworks, 
+    Active Directory attack labs, and realistic environments for practicing lateral movement, 
+    persistence, and detection evasion. Use these labs ethically, in isolated environments, and 
+    with explicit authorization.
+  </p>
+</section>
+
+<!-- Red Teaming Labs -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Available Labs</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <!-- Provided -->
+    <li><a href="https://github.com/clong/DetectionLab" target="_blank" class="text-blue-400 underline hover:text-blue-300">DetectionLab</a> – Turn-key Windows/AD lab to generate telemetry and test detections.</li>
+    <li><a href="https://github.com/WazeHell/vulnerable-AD" target="_blank" class="text-blue-400 underline hover:text-blue-300">Vulnerable Active Directory</a> – Intentionally insecure AD for practicing common attack paths.</li>
+    <li><a href="https://www.vulnlab.com/" target="_blank" class="text-blue-400 underline hover:text-blue-300">Vulnlab</a> – Realistic red team style boxes and scenarios (freemium).</li>
+    <li><a href="https://github.com/mandiant/flare-vm" target="_blank" class="text-blue-400 underline hover:text-blue-300">FLARE VM</a> – Windows RE/analysis toolkit VM useful for payload dev & analysis.</li>
+    <li><a href="https://github.com/mandiant/commando-vm" target="_blank" class="text-blue-400 underline hover:text-blue-300">Commando VM</a> – Windows pentest/red team VM preloaded with offensive tooling.</li>
+    <li><a href="https://github.com/hacksysteam/HackSysExtremeVulnerableDriver" target="_blank" class="text-blue-400 underline hover:text-blue-300">HackSys Extreme Vulnerable Driver</a> – Kernel exploit dev playground (Windows).</li>
+    <li><a href="https://underthewire.tech/" target="_blank" class="text-blue-400 underline hover:text-blue-300">UnderTheWire</a> – Windows/PowerShell CTFs to sharpen operator fundamentals.</li>
+    <li><a href="https://hstrike.com" target="_blank" class="text-blue-400 underline hover:text-blue-300">HStrike</a> – Red team training scenarios and exercises (freemium).</li>
+
+    <!-- Added (free / freemium) -->
+    <li><a href="https://caldera.mitre.org/" target="_blank" class="text-blue-400 underline hover:text-blue-300">MITRE CALDERA</a> – Open-source adversary emulation platform mapped to ATT&CK.</li>
+    <li><a href="https://github.com/redcanaryco/atomic-red-team" target="_blank" class="text-blue-400 underline hover:text-blue-300">Atomic Red Team</a> – Small, testable ATT&CK-mapped techniques for validation.</li>
+    <li><a href="https://github.com/redcanaryco/invoke-atomicredteam" target="_blank" class="text-blue-400 underline hover:text-blue-300">Invoke-AtomicRedTeam</a> – PowerShell runner for Atomic tests (great for Windows/AD).</li>
+    <li><a href="https://github.com/DataDog/stratus-red-team" target="_blank" class="text-blue-400 underline hover:text-blue-300">Stratus Red Team</a> – Cloud (AWS/GCP/Azure) adversary emulation of real techniques.</li>
+    <li><a href="https://github.com/guardicore/monkey" target="_blank" class="text-blue-400 underline hover:text-blue-300">Infection Monkey</a> – Open-source breach & attack simulation across networks and clouds.</li>
+    <li><a href="https://github.com/mvelazc0/PurpleSharp" target="_blank" class="text-blue-400 underline hover:text-blue-300">PurpleSharp</a> – Adversary simulation for Windows/AD using .NET (purple teaming).</li>
+    <li><a href="https://github.com/Orange-Cyberdefense/GOAD" target="_blank" class="text-blue-400 underline hover:text-blue-300">GOAD (Game of Active Directory)</a> – Automated multi-forest AD attack lab with Terraform/Ansible.</li>
+    <li><a href="https://github.com/davidprowe/BadBlood" target="_blank" class="text-blue-400 underline hover:text-blue-300">BadBlood</a> – Quickly seeds AD with users, groups, and objects for realistic attack paths.</li>
+    <li><a href="https://github.com/splunk/attack_range" target="_blank" class="text-blue-400 underline hover:text-blue-300">Splunk Attack Range</a> – Build an attackable lab + detections for purple teaming (IaC).</li>
+    <li><a href="https://github.com/RhinoSecurityLabs/cloudgoat" target="_blank" class="text-blue-400 underline hover:text-blue-300">CloudGoat</a> – Vulnerable-by-design AWS scenarios for red team practice.</li>
+    <li><a href="https://github.com/bridgecrewio/azuregoat" target="_blank" class="text-blue-400 underline hover:text-blue-300">AzureGoat</a> – Intentionally vulnerable Azure environment for attack simulation.</li>
+    <li><a href="https://github.com/bridgecrewio/gcpgoat" target="_blank" class="text-blue-400 underline hover:text-blue-300">GCPGoat</a> – Deliberately insecure GCP project for cloud red teaming.</li>
+    <li><a href="https://github.com/endgameinc/RTA" target="_blank" class="text-blue-400 underline hover:text-blue-300">Red Team Automation (RTA)</a> – Minimal ATT&CK-mapped behaviors for detection validation.</li>
+  </ul>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>DetectionLab & Splunk Attack Range – IaC-driven, instrumented labs for red/purple teaming.</li>
+    <li>Vulnerable-AD, GOAD, BadBlood – Purpose-built Active Directory attack environments.</li>
+    <li>CALDERA, Atomic Red Team/Invoke-Atomic, PurpleSharp, RTA – Adversary emulation & technique validation.</li>
+    <li>Infection Monkey – Open-source breach & attack simulation across hybrid networks.</li>
+    <li>CloudGoat / AzureGoat / GCPGoat / Stratus Red Team – Cloud-focused red team practice.</li>
+    <li>Commando VM / FLARE VM / HEVD – Operator workstations & exploit-dev targets supporting lab work.</li>
+    <li>UnderTheWire & HStrike – Scenario-based training and PowerShell/Windows practice.</li>
+  </ul>
+</section>
