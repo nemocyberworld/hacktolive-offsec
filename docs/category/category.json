@@ -1,6 +1,24 @@
 {
   "name": "root",
   "children": [
+    {"name": "Labs",
+    "children": [
+      {"name":"Network", "content": true},
+      {"name":"Web", "content": true},
+      {"name":"Mobile", "content": true},
+      {"name":"Cloud", "content": true},
+      {"name":"Container", "content": true},
+      {"name":"Red Teaming", "content": true},
+      {"name":"Automation", "content": true},
+      {"name":"Cryptography", "content": true},
+      {"name":"Reverse", "content": true},
+      {"name":"Malware Dev", "content": true},
+      {"name":"Exploit Dev", "content": true},
+      {"name":"CTF", "content": true},
+      {"name":"Social Engineering", "content": true},
+      {"name":"OSINT", "content": true}
+    ]
+  },
     {
       "name": "Network",
       "children": [
