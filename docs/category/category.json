@@ -41,7 +41,1826 @@
             { "name": "zmap", "content": true }
           ]
         },
-        { "name": "Standard Ports", "content": true }
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Web",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mobile",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cloud",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Container",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Red Teaming",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Automation",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cryptography",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reverse",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Malware Dev",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Exploit Dev",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CTF",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Social Engineering",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OSINT",
+      "children": [
+        {
+          "name": "Mapper",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true },
+            { "name": "arp-scan", "content": true },
+            { "name": "autorecon", "content": true },
+            { "name": "cdpsnarf", "content": true },
+            { "name": "enum4linux", "content": true },
+            { "name": "fping", "content": true },
+            { "name": "hping3", "content": true },
+            { "name": "ike-scan", "content": true },
+            { "name": "legion", "content": true },
+            { "name": "masscan", "content": true },
+            { "name": "metasploit-framework", "content": true },
+            { "name": "naabu", "content": true },
+            { "name": "netcat", "content": true },
+            { "name": "netdiscover", "content": true },
+            { "name": "nmap", "content": true },
+            { "name": "nping", "content": true },
+            { "name": "onesixtyone", "content": true },
+            { "name": "p0f", "content": true },
+            { "name": "pscan", "content": true },
+            { "name": "recon-ng", "content": true },
+            { "name": "rpcbind", "content": true },
+            { "name": "rtp-scanner", "content": true },
+            { "name": "rustscan", "content": true },
+            { "name": "smbmap", "content": true },
+            { "name": "snmpcheck", "content": true },
+            { "name": "ssdp-scanner", "content": true },
+            { "name": "traceroute", "content": true },
+            { "name": "unicornscan", "content": true },
+            { "name": "xprobe2", "content": true },
+            { "name": "zmap", "content": true }
+          ]
+        },
+        { "name": "Exploitation",
+      "children": [
+            { "name": "Core Network Service", 
+          "children": [
+             { "name": "Echo Chargen", "content": true },
+            { "name": "FTP", "content": true },
+            { "name": "SSH", "content": true },
+            { "name": "Telnet", "content": true },
+            { "name": "SMTP", "content": true },
+            { "name": "TACACS", "content": true },
+            { "name": "DNS", "content": true },
+            { "name": "DHCP", "content": true },
+            { "name": "MS RPC", "content": true },
+            { "name": "SNMP", "content": true },
+            { "name": "Syslog", "content": true },
+            { "name": "RIP", "content": true },
+            { "name": "IPP", "content": true },
+            { "name": "UPnP", "content": true }
+          ]
+          },
+          { "name": "Authentication Directory", 
+          "children": [
+             { "name": "Kerberos", "content": true },
+            { "name": "LDAP", "content": true },
+            { "name": "iSCSI", "content": true }
+          ]
+          },
+          { "name": "Email Protocols", 
+          "children": [
+             { "name": "POP3", "content": true },
+            { "name": "IMAP", "content": true },
+            { "name": "NNTP", "content": true }
+          ]
+          },
+          { "name": "Remote Access Management", 
+          "children": [
+             { "name": "rexec rlogin rsh", "content": true },
+            { "name": "rsync", "content": true },
+            { "name": "MSSQL", "content": true },
+            { "name": "Oracle DB", "content": true },
+            { "name": "NFS", "content": true },
+            { "name": "Docker Remote API", "content": true },
+            { "name": "MySQL", "content": true },
+            { "name": "RDP", "content": true },
+            { "name": "Subversion", "content": true },
+            { "name": "mSQL", "content": true },
+            { "name": "PostgreSQL", "content": true },
+            { "name": "Android Debug Bridge", "content": true },
+            { "name": "VNC", "content": true },
+            { "name": "WinRM", "content": true },
+            { "name": "Webmin", "content": true }
+          ]
+          },
+          { "name": "File Sharing Storage", 
+          "children": [
+             { "name": "NetBIOS", "content": true },
+            { "name": "Microsoft DS", "content": true },
+            { "name": "AFP", "content": true },
+            { "name": "Redis", "content": true },
+            { "name": "Memcached", "content": true },
+            { "name": "MongoDB", "content": true }
+          ]
+          },
+          { "name": "Web Application Services", 
+          "children": [
+             { "name": "CouchDB", "content": true },
+            { "name": "WebLogic", "content": true },
+            { "name": "Admin Panels", "content": true },
+            { "name": "Splunk", "content": true },
+            { "name": "SonarQube", "content": true },
+            { "name": "Elasticsearch", "content": true }
+          ]
+          }
+          ]
+      },
+      {
+          "name": "Active Directory",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Wireless",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        }
       ]
     }
   ]
