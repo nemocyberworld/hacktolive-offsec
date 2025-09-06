@@ -1460,6 +1460,66 @@
         }
       ]
     },
-    {"name": "OSINT Investigation", "content":true  }
+    {"name": "OSINT Investigation", "content":true  },
+    {
+      "name": "AI Security (Offensive)",
+      "children": [
+        {
+          "name": "Adversarial Machine Learning Attacks",
+          "children": [
+            { "name": "Evasion Attacks (Adversarial Examples)", "content": true },
+            { "name": "Poisoning Attacks (Training Data Manipulation)", "content": true },
+            { "name": "Backdoor Insertion in Models", "content": true },
+            { "name": "Model Inversion & Privacy Leakage", "content": true }
+          ]
+        },
+        {
+          "name": "Model Exploitation",
+          "children": [
+            { "name": "Model Extraction (Stealing Weights/API Abuse)", "content": true },
+            { "name": "Membership Inference Attacks", "content": true },
+            { "name": "Prompt Injection & Jailbreaks (LLMs)", "content": true },
+            { "name": "Bypassing Safety Filters", "content": true }
+          ]
+        },
+        {
+          "name": "Data Targeting",
+          "children": [
+            { "name": "Training Data Reconstruction", "content": true },
+            { "name": "Data Poisoning with Malicious Inputs", "content": true },
+            { "name": "Exfiltration via Model Queries", "content": true },
+            { "name": "Shadow Models & Model Replication", "content": true }
+          ]
+        },
+        {
+          "name": "AI-Augmented Social Engineering",
+          "children": [
+            { "name": "Deepfake Generation (Voice/Video)", "content": true },
+            { "name": "AI-Powered Phishing Campaigns", "content": true },
+            { "name": "Automated Pretext Generation", "content": true },
+            { "name": "Multi-Language Lure Scaling", "content": true }
+          ]
+        },
+        {
+          "name": "Offensive Tooling",
+          "children": [
+            { "name": "Adversarial Example Generators", "content": true },
+            { "name": "Poisoning Frameworks (BadNets, TrojAI)", "content": true },
+            { "name": "Model Extraction Tools (KnockoffNets)", "content": true },
+            { "name": "Red Team AI Simulators", "content": true }
+          ]
+        },
+        {
+          "name": "Advanced Attack Scenarios",
+          "children": [
+            { "name": "Supply Chain Compromise (ML Pipeline)", "content": true },
+            { "name": "Malicious AI Agents (Autonomous Exploiters)", "content": true },
+            { "name": "Weaponized Generative AI (Malware/Exploits)", "content": true },
+            { "name": "Adversarial Attacks in Cyber-Physical Systems (IoT/Robotics)", "content": true }
+          ]
+        }
+      ]
+    }
+
   ]
 }
