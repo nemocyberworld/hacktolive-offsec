@@ -148,6 +148,30 @@
             { "name": "angry-ip-scanner", "content": true },
             { "name": "arping", "content": true }
           ]
+        },
+        {
+          "name": "Router",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "Switch",
+          "children": [
+            { "name": "amap", "content": true },
+            { "name": "angry-ip-scanner", "content": true },
+            { "name": "arping", "content": true }
+          ]
+        },
+        {
+          "name": "System",
+          "children": [
+            { "name": "Linux", "content": true },
+            { "name": "Windows", "content": true },
+            { "name": "Mac", "content": true }
+          ]
         }
       ]
     },
