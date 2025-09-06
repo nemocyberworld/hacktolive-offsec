@@ -60,9 +60,9 @@
         },
         { "name": "Exploitation",
       "children": [
-            { "name": "Core Network Service", 
+            { "name": "Core Services", 
           "children": [
-             { "name": "Echo Chargen", "content": true },
+            { "name": "Echo Chargen", "content": true },
             { "name": "FTP", "content": true },
             { "name": "SSH", "content": true },
             { "name": "Telnet", "content": true },
